@@ -11,21 +11,21 @@ heroImage: 'https://damassets.autodesk.net/content/dam/autodesk/www/products/aut
 
 ## 一、CAD保存、另存为时，不出现对话框，出现路径
 
-![image](assets/image-20251117165659-8ygu85p.png)
+![](https://gh-proxy.org/https://github.com/RaycornM/person-picture-bed/blob/main/img/20251117190755722.png)
 
-输入命令“[FILEDIA](https://zhida.zhihu.com/search?content_id=173772473&content_type=Article&match_order=1&q=FILEDIA&zd_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aGlkYV9zZXJ2ZXIiLCJleHAiOjE3NjM1NDI0NDEsInEiOiJGSUxFRElBIiwiemhpZGFfc291cmNlIjoiZW50aXR5IiwiY29udGVudF9pZCI6MTczNzcyNDczLCJjb250ZW50X3R5cGUiOiJBcnRpY2xlIiwibWF0Y2hfb3JkZXIiOjEsInpkX3Rva2VuIjpudWxsfQ.wCiH2zicxAWFaBPbwS_SLSOgweqRX4n32u-6ub5Zxw8&zhida_source=entity) ”将其值改为“1”
+输入命令“FILEDIA”将其值改为“1”
 
 ## 二、修复**AutoCAD图纸损坏**
 
 1. **使用RECOVER命令**：在AutoCAD中输入RECOVER命令，选择要恢复的文件，系统会自动进行修复。
 
-    ![image](assets/image-20251117165920-09hw4k6.png)
+    ![](https://gh-proxy.org/https://github.com/RaycornM/person-picture-bed/blob/main/img/20251117190916567.png)
 2. **使用修复工具**：在“文件”菜单下找到“修复”选项，尝试修复已损坏的文件。
 3. **采用RECOVERALL命令进行修复**：RECOVERALL与RECOVER类似，只不过它还将对所有嵌套的外部参照进行连同查找和修复，修复后的结果将显示在"图形修复日志"窗口中。
 4. **插入块的方式**：如果文件无法恢复，可以尝试将损坏的文件作为块插入到新的图纸中。点击插入"块"，找到"其他图形中的块"，弹出如图所示对话框，找到需要修复文件，打开后看能否插入进来，如果可以，将图形插入后保存一下就可以了。
 
-    ![image](assets/image-20251117170205-mz7lov0.png)
-5. [](https://gofarlic.com/techArticleDetail?noticeId=340034)​**从备份中恢复**：如果有备份文件，可以直接从备份中恢复图纸。
+    ![](https://gh-proxy.org/https://github.com/RaycornM/person-picture-bed/blob/main/img/20251117190950410.png)
+5. **从备份中恢复**：如果有备份文件，可以直接从备份中恢复图纸。
 
 ## 三、按住**鼠标中键弹出菜单而不是平移**
 
@@ -103,19 +103,19 @@ AutoCAD将自动保存的图形存放到AUTO.SV\$或AUTO?.SV\$文件中，找到
 
 ## 九、高版本CAD设置经典模式（如2007版本界面）
 
-![image](assets/image-20251117173947-hemxxwq.png)
+![](https://gh-proxy.org/https://github.com/RaycornM/person-picture-bed/blob/main/img/20251117191455179.png)
 
 1.运行CAD软件后，找到工具栏旁边的【倒三角】，并点击它，然后点击【显示菜单栏】。
 
-![image](assets/image-20251117173646-n9ozv7l.png)
+![](https://gh-proxy.org/https://github.com/RaycornM/person-picture-bed/blob/main/img/20251117191515926.png)
 
 2.在菜单栏中，找到【工具】选项卡。
 
-![image](assets/image-20251117173701-resc63m.png)
+![](https://gh-proxy.org/https://github.com/RaycornM/person-picture-bed/blob/main/img/20251117191537390.png)
 
 3.点击【工具】选项卡后，在弹出的窗口里依次点击【选项板】和【功能区】。
 
-![image](assets/image-20251117173717-k8zrnyj.png)
+![](https://gh-proxy.org/https://github.com/RaycornM/person-picture-bed/blob/main/img/20251117191555899.png)
 
 4.在菜单栏里，点击【工具】选项卡。
 
@@ -127,9 +127,9 @@ AutoCAD将自动保存的图形存放到AUTO.SV\$或AUTO?.SV\$文件中，找到
 
 6、点击【齿轮】图标，以打开【设置】选项，然后点击【将当前工作空间另存为】，把刚才创建的工作空间保存好，方便以后可以直接调用。
 
-![image](assets/image-20251117173828-jolhhwx.png)
+![](https://gh-proxy.org/https://github.com/RaycornM/person-picture-bed/blob/main/img/20251117191641670.png)
 
-![image](assets/image-20251117173817-krt11z5.png)
+![](https://gh-proxy.org/https://github.com/RaycornM/person-picture-bed/blob/main/img/20251117191658556.png)
 
 ## 十、对象捕捉设置
 
@@ -145,7 +145,7 @@ AutoCAD将自动保存的图形存放到AUTO.SV\$或AUTO?.SV\$文件中，找到
 
 ![](https://gh-proxy.org/https://github.com/RaycornM/person-picture-bed/blob/main/img/20251117174747238.png)
 
-![image](assets/image-20251117174710-or2nrj3.png)
+![](https://gh-proxy.org/https://github.com/RaycornM/person-picture-bed/blob/main/img/20251117191747873.png)
 
 ## 十二、十字光标大小调整
 
