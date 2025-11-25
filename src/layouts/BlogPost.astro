@@ -1,24 +1,135 @@
 ---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 
-type Props = CollectionEntry<'blog'>['data'];
+type BlogData = CollectionEntry<'blog'>['data'];
+type PhotoData = CollectionEntry<'photo'>['data'];
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+interface Props {
+	title: string;
+	description: string;
+	pubDate: Date;
+	updatedDate?: Date;
+	heroImage?: any;
+	id?: string;
+	collection?: string;
+}
+
+const { title, description, pubDate, updatedDate, heroImage, id = '', collection = 'blog' } = Astro.props as Props;
+
+// Get all posts from the collection
+const allPosts = (await getCollection(collection as 'blog' | 'photo')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+// find index of current post
+const currentIndex = allPosts.findIndex((p) => p.id === id);
+
+// Since allPosts is sorted from newest to oldest, next index = currentIndex - 1, previous = currentIndex + 1
+const newerPost = currentIndex > 0 ? allPosts[currentIndex - 1] : allPosts[allPosts.length - 1];
+const olderPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : allPosts[0];
+
+const backLink = collection === 'photo' ? '/photo' : '/blog';
 ---
 
 <html lang="en">
 	<head>
 		<BaseHead title={title} description={description} />
 		<style>
-			main {
-				width: calc(100% - 2em);
-				max-width: 100%;
-				margin: 0;
+			.blog-container {
+				display: flex;
+				gap: 2em;
+				max-width: 1400px;
+				margin: 0 auto;
+			}
+			.sidebar {
+				width: 120px;
+				position: fixed;
+				left: 0;
+				top: 0;
+				bottom: 0;
+				display: flex;
+				flex-direction: column;
+				padding: 1em 0.75em;
+				gap: 1em;
+				background: transparent; /* full-height left sidebar, no card */
+				border-radius: 0;
+				box-shadow: none;
+				overflow: visible; /* allow indicator to overflow */
+			}
+			.thumbnail-group {
+				display: flex;
+				flex-direction: column;
+				gap: 0.6em;
+				margin-top: auto; /* push thumbnails to bottom */
+				align-items: center; /* center thumbnails horizontally */
+			}
+			.thumbnail-item {
+				position: relative;
+				width: 83px; /* ~75px * 1.1 */
+				height: 50px; /* ~45px * 1.1 */
+				overflow: hidden;
+				border-radius: 4px;
+				display: block;
+				cursor: pointer;
+				transition: transform 0.12s ease;
+			}
+			.thumbnail-item:hover {
+				transform: scale(0.98);
+			}
+			.thumbnail-item img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+			}
+			.thumbnail-item.current {
+				cursor: default;
+				overflow: visible; /* allow the indicator to overflow outside the thumbnail box */
+				z-index: 50; /* keep current thumbnail above neighbors */
+			}
+			.thumbnail-item.current:hover {
+				transform: scale(1);
+			}
+			.indicator {
+				position: absolute;
+				right: -24px; /* move a bit further out so it's fully visible */
+				top: 50%;
+				transform: translateY(-50%);
+				font-size: 18px;
+				color: #60739F; /* use the same color as other icons */
+				font-weight: 700;
+				z-index: 1000; /* ensure it sits above page content */
+				pointer-events: none;
+			}
+			.thumbnail-item .indicator {
+				display: none;
+			}
+			.thumbnail-item.current .indicator {
+				display: block;
+			}
+			.back-button {
+				display: block;
+				text-align: center;
+				padding: 0.5em 0.4em;
+				background: transparent;
+				color: rgb(var(--gray-dark));
+				text-decoration: underline;
+				border-radius: 0;
+				transition: color 0.12s ease;
+				font-size: 12px;
+				white-space: nowrap;
+				align-self: center; /* center the back button under thumbnails */
+			}
+			.article-content {
+				flex: 1;
+				padding: 2em 0;
+				min-width: 0;
+				margin-left: calc(120px + 1.5em); /* leave space for the fixed left sidebar */
 			}
 			.hero-image {
 				width: 100%;
@@ -28,6 +139,7 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 				margin: 0 auto;
 				border-radius: 12px;
 				box-shadow: var(--box-shadow);
+				max-width: 100%;
 			}
 			.prose {
 				width: 720px;
@@ -52,34 +164,132 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 			.last-updated-on {
 				font-style: italic;
 			}
+			@media (max-width: 1024px) {
+				.blog-container {
+					flex-direction: column;
+					gap: 1em;
+				}
+				.sidebar {
+					width: 100%;
+					position: static;
+					flex-direction: row;
+					justify-content: flex-start;
+					gap: 1em;
+					padding: 1em;
+					overflow-x: auto;
+					border-bottom: 1px solid rgb(var(--gray-light));
+				}
+				.thumbnail-group {
+					display: flex;
+					flex-direction: row;
+					gap: 1em;
+				}
+				.thumbnail-item {
+					width: 150px;
+					height: 150px;
+					flex-shrink: 0;
+				}
+				.back-button {
+					display: none;
+				}
+			}
+
+			/* Default (non-photo) theme - blog pages use light gray background */
+			body:not(.photo-theme) {
+				background: #f5f5f5 !important;
+				color: rgb(var(--gray-dark)) !important;
+			}
+
+			/* Photo theme overrides */
+			body.photo-theme {
+				background: #0f1724 !important;
+				color: #ffffff !important;
+				--header-backdrop: blur(8px);
+				--header-bg: rgba(15,23,36,0.6);
+				--header-text: #ffffff;
+				--social-icon-filter: invert(1) brightness(2) saturate(0);
+			}
+			/* also force html background to avoid global html styles overriding body */
+			html, body.photo-theme {
+				background: #0f1724 !important;
+			}
+			/* ensure article title and h1 are white and take precedence */
+			body.photo-theme .title,
+			body.photo-theme .title h1,
+			body.photo-theme .prose,
+			body.photo-theme .prose h1 {
+				color: #ffffff !important;
+			}
+			body.photo-theme .prose,
+			body.photo-theme .title,
+			body.photo-theme .date,
+			body.photo-theme .last-updated-on,
+			body.photo-theme p,
+			body.photo-theme .article-content {
+				color: #ffffff;
+			}
+			body.photo-theme .back-button {
+				color: #ffffff;
+			}
+			body.photo-theme header {
+				background: rgba(15,23,36,0.6);
+				backdrop-filter: blur(8px);
+				-webkit-backdrop-filter: blur(8px);
+				box-shadow: none;
+			}
+			body.photo-theme nav a {
+				color: rgba(255,255,255,0.95);
+			}
+			body.photo-theme nav a.active {
+				border-bottom-color: rgba(255,255,255,0.12);
+			}
 		</style>
 	</head>
 
-	<body>
+	<body class={collection === 'photo' ? 'photo-theme' : ''}>
 		<Header />
 		<main>
-			<article>
-				<div class="hero-image">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
-				</div>
-				<div class="prose">
-					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
+			<div class="blog-container">
+				<aside class="sidebar">
+					<div class="thumbnail-group">
+						<a href={`/${collection}/${newerPost.id}/`} class="thumbnail-item">
+							{newerPost?.data?.heroImage && (
+								<Image width={200} height={200} src={newerPost.data.heroImage} alt={newerPost.data.title} />
+							)}
+						</a>
+						<div class="thumbnail-item current">
+							{heroImage && <Image width={200} height={200} src={heroImage} alt={title} />}
+							<span class="indicator">◂</span>
+						</div>
+						<a href={`/${collection}/${olderPost.id}/`} class="thumbnail-item">
+							{olderPost?.data?.heroImage && (
+								<Image width={200} height={200} src={olderPost.data.heroImage} alt={olderPost.data.title} />
+							)}
+						</a>
+					</div>
+					<a href={backLink} class="back-button">Back to {collection === 'photo' ? 'Photos' : 'Works'}</a>
+				</aside>
+				<article class="article-content">
+					<div class="hero-image">
+						{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
+					</div>
+					<div class="prose">
+						<div class="title">
+							<div class="date">
+								<FormattedDate date={pubDate} />
+								{updatedDate && (
 									<div class="last-updated-on">
 										Last updated on <FormattedDate date={updatedDate} />
 									</div>
-								)
-							}
+								)}
+							</div>
+							<h1>{title}</h1>
+							<hr />
 						</div>
-						<h1>{title}</h1>
-						<hr />
+						<slot />
 					</div>
-					<slot />
-				</div>
-			</article>
+				</article>
+			</div>
 		</main>
 		<Footer />
 	</body>

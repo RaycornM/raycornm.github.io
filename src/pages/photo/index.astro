@@ -1,0 +1,134 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import Header from '../../components/Header.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+
+const photos = (await getCollection('photo')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<style>
+			/* Photo theme: dark background, white text, frosted header */
+			body.photo-theme {
+				background: #0f1724;
+				color: #ffffff;
+				--header-bg: rgba(15,23,36,0.6);
+				--header-text: #ffffff;
+				--social-icon-filter: invert(1) brightness(2) saturate(0);
+				--header-backdrop: blur(8px);
+			}
+			body.photo-theme header {
+				box-shadow: none;
+			}
+			body.photo-theme nav a { color: rgba(255,255,255,0.95); }
+			body.photo-theme nav a.active { border-bottom-color: rgba(255,255,255,0.12); }
+			/* Ensure page titles and dates become readable on dark background */
+			body.photo-theme .title { color: #ffffff; }
+			body.photo-theme .date { color: rgba(255,255,255,0.85); }
+		</style>
+		<style>
+			main {
+				width: 960px;
+			}
+			ul {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 2rem;
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+			}
+			ul li {
+				width: calc(50% - 1rem);
+			}
+			ul li * {
+				text-decoration: none;
+				transition: 0.2s ease;
+			}
+			ul li:first-child {
+				width: 100%;
+				margin-bottom: 1rem;
+				text-align: center;
+			}
+			ul li:first-child img {
+				width: 100%;
+			}
+			ul li:first-child .title {
+				font-size: 2.369rem;
+			}
+			ul li img {
+				margin-bottom: 0.5rem;
+				border-radius: 12px;
+			}
+			ul li a {
+				display: block;
+			}
+			.title {
+				font-family: "SmileySans-Oblique";
+				margin: 0;
+				color: rgb(var(--black));
+				line-height: 1;
+			}
+			.date {
+				margin: 0;
+				color: rgb(var(--gray));
+			}
+			ul li a:hover h4,
+			ul li a:hover .date {
+				color: rgb(var(--accent));
+			}
+			ul a:hover img {
+				box-shadow: var(--box-shadow);
+			}
+			@media (max-width: 720px) {
+				ul {
+					gap: 0.5em;
+				}
+				ul li {
+					width: 100%;
+					text-align: center;
+				}
+				ul li:first-child {
+					margin-bottom: 0;
+				}
+				ul li:first-child .title {
+					font-size: 1.563em;
+				}
+			}
+		</style>
+	</head>
+	<body class="photo-theme">
+		<Header />
+		<main>
+			<section>
+				<ul>
+					{
+						photos.map((photo) => (
+							<li>
+								<a href={`/photo/${photo.id}/`}>
+									{photo.data.heroImage && (
+										<Image width={720} height={360} src={photo.data.heroImage} alt="" />
+									)}
+									<h4 class="title">{photo.data.title}</h4>
+									<p class="date">
+										<FormattedDate date={photo.data.pubDate} />
+									</p>
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>

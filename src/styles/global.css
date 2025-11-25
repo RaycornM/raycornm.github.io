@@ -175,3 +175,26 @@ hr {
 .latest-post {
 	font-family: "SmileySans-Oblique";
 }
+
+/* Ensure pages that are NOT photo keep the default light theme */
+body:not(.photo-theme),
+html body:not(.photo-theme) {
+  color: rgb(var(--gray-dark)) !important;
+
+  /* header defaults for non-photo pages */
+  --header-bg: rgba(255,255,255,0.95);
+  --header-text: rgb(var(--black));
+  --header-backdrop: none;
+  --social-icon-filter: none;
+}
+
+/* Ensure the site title in header sticks to header-text on non-photo pages */
+body:not(.photo-theme) header h2 a {
+  color: var(--header-text) !important;
+}
+
+/* Ensure footer uses its normal gradient on non-photo pages */
+body:not(.photo-theme) footer {
+  background: linear-gradient(var(--gray-gradient)) no-repeat;
+  color: rgb(var(--gray-dark));
+}

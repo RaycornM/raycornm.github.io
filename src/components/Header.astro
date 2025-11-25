@@ -9,6 +9,7 @@ import HeaderLink from './HeaderLink.astro';
 		<div class="internal-links">
 			<HeaderLink href="/">Home</HeaderLink>
 			<HeaderLink href="/blog">Blog</HeaderLink>
+			<HeaderLink href="/photo">Album</HeaderLink>
 			<HeaderLink href="/about">About</HeaderLink>
 		</div>
 		<div class="social-links">
@@ -48,36 +49,65 @@ import HeaderLink from './HeaderLink.astro';
 	header {
 		margin: 0;
 		padding: 0 1em;
-		background: white;
-		box-shadow: 0 2px 8px rgba(var(--black), 5%);
+		background: var(--header-bg, rgba(255,255,255,0.95));
+		color: var(--header-text, var(--black));
+		box-shadow: var(--header-shadow, 0 2px 8px rgba(var(--black), 5%));
+		position: sticky; /* keep nav visible */
+		top: 0;
+		left: 0;
+		right: 0;
+		z-index: 60; /* sit above page content */
+		-webkit-backdrop-filter: var(--header-backdrop, none);
+		backdrop-filter: var(--header-backdrop, none);
+		transition: background 0.18s ease, color 0.12s ease, box-shadow 0.18s ease;
 	}
+
 	h2 {
-		margin: 0;
-		font-size: 1em;
-	}
+ 		margin: 0;
+ 		font-size: 1em;
+ 	}
 
 	h2 a,
 	h2 a.active {
 		text-decoration: none;
+		color: var(--header-text, var(--black)); /* ensure site title link follows header text color */
 	}
+
+	/* Stronger rule for the site title to override other global styles */
+	header h2 a {
+		color: var(--header-text, var(--black)) !important;
+	}
+
 	nav {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 	}
+
 	nav a {
 		padding: 1em 0.5em;
-		color: var(--black);
+		color: inherit;
 		border-bottom: 4px solid transparent;
 		text-decoration: none;
 	}
+
 	nav a.active {
 		text-decoration: none;
 		border-bottom-color: var(--accent);
 	}
+
 	.social-links,
 	.social-links a {
 		display: flex;
+	}
+
+	/* allow controlling raster social icons via CSS var */
+	.social-links img {
+		width: 32px;
+		height: 32px;
+		object-fit: contain;
+		filter: var(--social-icon-filter, none);
+		transition: filter 0.12s ease, opacity 0.12s ease;
 	}
 	@media (max-width: 720px) {
 		.social-links {

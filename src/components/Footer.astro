@@ -87,4 +87,23 @@ const today = new Date();
         display: block;
     }
 
+    /* Photo-theme adjustments for footer */
+    body.photo-theme footer {
+        color: #ffffff;
+        background: #0f1724; /* force dark footer background in photo theme */
+    }
+    body.photo-theme .social-links a {
+        color: #ffffff;
+    }
+    /* ensure svg icons in footer follow currentColor; hide raster hover images on dark theme */
+    body.photo-theme .bilibili-img,
+    body.photo-theme .instagram-img {
+        display: none;
+    }
+    body.photo-theme .bilibili-svg,
+    body.photo-theme .instagram-svg {
+        display: block;
+        color: currentColor;
+    }
+
 </style>
