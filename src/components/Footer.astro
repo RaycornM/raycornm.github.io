@@ -10,24 +10,35 @@ const today = new Date();
             </p>
 	&copy; {today.getFullYear()} RaycornM. All rights reserved.
 	<div class="social-links">
-    <a href="https://space.bilibili.com/4572890?spm_id_from=333.1007.0.0" target="_blank">
+    <!-- Bilibili -->
+    <a href="https://space.bilibili.com/4572890?spm_id_from=333.1007.0.0" target="_blank" class="bilibili-link">
         <span class="sr-only">Follow me on Bilibili</span>
-        <img 
+        <svg class="bilibili-svg" viewBox="0 0 24 24" aria-hidden="true" width="32" height="32" astro-icon="social/bilibili">
+            <path fill="currentColor" d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5zm2 0v12h14V5H5zm2 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm4 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+        </svg>
+        <img class="bilibili-img" 
             src="https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/light/bilibili.png" 
-            class="social-icon"
+            width="32" 
+            height="32"
             aria-hidden="true" 
             alt="Bilibili icon"
         />
     </a>
-    <a href="https://www.instagram.com/denkyraymond/" target="_blank">
+    <!-- Instagram -->
+    <a href="https://www.instagram.com/denkyraymond/" target="_blank" class="instagram-link">
         <span class="sr-only">Follow me on Instagram</span>
-        <img 
+        <svg class="instagram-svg" viewBox="0 0 24 24" aria-hidden="true" width="32" height="32" astro-icon="social/instagram">
+            <path fill="currentColor" d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4c0 3.2-2.6 5.8-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8C2 4.6 4.6 2 7.8 2m-.6 2c-1.8 0-3.2 1.4-3.2 3.2v8.4c0 1.8 1.4 3.2 3.2 3.2h8.4c1.8 0 3.2-1.4 3.2-3.2V7.2c0-1.8-1.4-3.2-3.2-3.2H7.2m9.1 1.5c.6 0 1.1.5 1.1 1.1s-.5 1.1-1.1 1.1-1.1-.5-1.1-1.1.5-1.1 1.1-1.1M12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10m0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+        </svg>
+        <img class="instagram-img" 
             src="https://www.svgrepo.com/show/83715/instagram-logo.svg" 
-            class="social-icon"
+            width="32" 
+            height="32"
             aria-hidden="true" 
             alt="Instagram icon"
         />
     </a>
+    <!-- GitHub（保持原样，颜色基准：#60739F） -->
     <a href="https://github.com/RaycornM" target="_blank">
         <span class="sr-only">Go to my GitHub repo</span>
         <svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32" astro-icon="social/github">
@@ -40,7 +51,7 @@ const today = new Date();
     footer {
         padding: 2em 1em 6em 1em;
         background: linear-gradient(var(--gray-gradient)) no-repeat;
-        color: rgb(var(--gray));
+        color: #60739F;
         text-align: center;
     }
     .social-links {
@@ -51,32 +62,29 @@ const today = new Date();
     }
     .social-links a {
         text-decoration: none;
-        color: rgb(var(--gray)); /* 默认色：rgb(96, 115, 159) */
+        color: #60739F; /* GitHub的currentColor来源 */
         display: inline-flex;
         align-items: center;
         justify-content: center;
     }
     .social-links a:hover {
-        color: rgb(var(--gray-dark)); /* hover色：rgb(34, 41, 57) */
+        color: #222939; /* hover时对齐GitHub颜色 */
     }
-    .social-icon {
-        width: 32px;
-        height: 32px;
-        filter: 
-            invert(41%)        
-            sepia(17%)        
-            saturate(150%)     
-            hue-rotate(210deg) 
-            brightness(90%)    
-            contrast(85%);    
+    .bilibili-svg,
+    .instagram-svg {
+        display: block;
     }
-    .social-links a:hover .social-icon {
-        filter: 
-            invert(16%)       
-            sepia(20%)        
-            saturate(120%)     
-            hue-rotate(210deg) 
-            brightness(85%)   
-            contrast(90%);
+    .bilibili-img,
+    .instagram-img {
+        display: none;
     }
+    .bilibili-link:hover .bilibili-svg,
+    .instagram-link:hover .instagram-svg {
+        display: none;
+    }
+    .bilibili-link:hover .bilibili-img,
+    .instagram-link:hover .instagram-img {
+        display: block;
+    }
+
 </style>
