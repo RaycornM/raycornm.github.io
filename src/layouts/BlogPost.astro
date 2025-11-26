@@ -129,10 +129,20 @@ const backLink = collection === 'photo' ? '/photo' : '/blog';
 				flex: 1;
 				padding: 2em 0;
 				min-width: 0;
-				margin-left: calc(120px + 1.5em); /* leave space for the fixed left sidebar */
+				/* Remove desktop left offset so article can be centered in viewport.
+				   Sidebar is fixed at left; it may visually overlap the left gutter but
+				   the article itself will be centered. */
+				margin-left: 0;
+				/* stack hero-image above prose and center both */
+				display: flex;
+				flex-direction: column;
+				align-items: center;
 			}
 			.hero-image {
-				width: 100%;
+				/* constrain hero width to match prose so they share same centerline */
+				width: 720px;
+				max-width: calc(100% - 2em);
+				margin: 0 auto 1em auto;
 			}
 			.hero-image img {
 				display: block;
@@ -144,10 +154,19 @@ const backLink = collection === 'photo' ? '/photo' : '/blog';
 			.prose {
 				width: 720px;
 				max-width: calc(100% - 2em);
-				margin: auto;
+				margin: 0 auto;
 				padding: 1em;
 				color: rgb(var(--gray-dark));
+				font-size: 15px; /* increased by 3px from 10px, per request */
 			}
+
+			/* Keep titles at their original visual sizes (original base was 20px):
+			   h1: ~61px, h2: ~49px, h3: ~39px, h4: ~31px, h5: 25px */
+			.prose h1 { font-size: 39px; }
+			.prose h2 { font-size: 33px; }
+			.prose h3 { font-size: 28px; }
+			.prose h4 { font-size: 21px; }
+			.prose h5 { font-size: 18px; }
 			.title {
 				margin-bottom: 1em;
 				padding: 1em 0;
@@ -179,6 +198,22 @@ const backLink = collection === 'photo' ? '/photo' : '/blog';
 					overflow-x: auto;
 					border-bottom: 1px solid rgb(var(--gray-light));
 				}
+
+				/* When sidebar moves to the top on mobile/tablet, remove left offset
+				   so article sits centered beneath it instead of being pushed right. */
+				.article-content {
+					margin-left: 0; /* remove desktop left offset */
+					margin-right: 0;
+					padding: 1em 0.75em;
+				}
+
+				/* Make prose fluid and centered on smaller screens */
+				.prose {
+					width: 100%;
+					max-width: 720px;
+					margin: 0 auto;
+					padding: 0.5em 0.5em;
+				}
 				.thumbnail-group {
 					display: flex;
 					flex-direction: row;
@@ -192,6 +227,37 @@ const backLink = collection === 'photo' ? '/photo' : '/blog';
 				.back-button {
 					display: none;
 				}
+			}
+
+			/* Header/nav adjustments to avoid nav links wrapping on smaller screens.
+			   Allow horizontal scroll if there isn't enough space. */
+			@media (max-width: 1024px) {
+				header {
+					display: flex;
+					align-items: center;
+					gap: 0.5rem;
+				}
+				header nav {
+					white-space: nowrap;
+					overflow-x: auto;
+					-webkit-overflow-scrolling: touch;
+				}
+				header nav a {
+					display: inline-block;
+					padding: 0 0.6rem;
+				}
+			}
+
+			@media (max-width: 720px) {
+				.prose {
+					font-size: 11px; /* increased by 3px from 8px for mobile */
+				}
+				/* keep mobile titles readable but not excessively large */
+				.prose h1 { font-size: 39px; }
+				.prose h2 { font-size: 31px; }
+				.prose h3 { font-size: 25px; }
+				.prose h4 { font-size: 19px; }
+				.prose h5 { font-size: 15px; }
 			}
 
 			/* Default (non-photo) theme - blog pages use light gray background */
