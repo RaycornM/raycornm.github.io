@@ -3,12 +3,12 @@ const today = new Date();
 ---
 
 <footer>
-	<p style="text-align: center;">
+    <p class="welcome">
                 🍵欢迎来到日暮茶会...
                 <br />
                 要先来一杯红茶吗？
             </p>
-	&copy; {today.getFullYear()} RaycornM. All rights reserved.
+    <p class="copyright">&copy; {today.getFullYear()} RaycornM. All rights reserved.</p>
 	<div class="social-links">
     <!-- Bilibili -->
     <a href="https://space.bilibili.com/4572890?spm_id_from=333.1007.0.0" target="_blank" class="bilibili-link">
@@ -59,6 +59,17 @@ const today = new Date();
         justify-content: center;
         gap: 1em;
         margin-top: 1em;
+    }
+
+    /* welcome paragraph color */
+    .welcome {
+        text-align: center;
+        color: #60739F;
+    }
+    .copyright {
+        text-align: center;
+        color: #60739F;
+        margin-top: 0.5em;
     }
     .social-links a {
         text-decoration: none;
