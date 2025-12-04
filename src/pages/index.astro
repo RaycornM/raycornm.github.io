@@ -32,6 +32,13 @@ const posts = await getCollection('blog');
 const sortedPosts = posts
   .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
 const [latestPost, ...otherPosts] = sortedPosts.slice(0, 3);
+
+// 新增相册数据获取
+// NOTE: the collection is named `photo` in `src/content.config.ts`, not `photos`.
+const photoAlbum = await getCollection('photo');
+const sortedPhotos = photoAlbum
+  .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
+const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
 ---
 
 <!doctype html>
@@ -124,6 +131,59 @@ const [latestPost, ...otherPosts] = sortedPosts.slice(0, 3);
                                 <h3 style="margin-top: 0;font-family: 'SmileySans-Oblique';">{post.data.title}</h3>
                                 <p style="color: #888;">{new Date(post.data.pubDate).toLocaleDateString()}</p>
                                 <p>{post.data.description}</p>
+                            </div>
+                        </a>
+                    ))}
+                </div>
+            </section>
+
+            <div style="height: 100px;"></div>
+            
+            <!-- 新增相册部分：最新相册为置顶展示，下面并排显示两篇 -->
+            <section>
+                <h2 class="latest-post">最新相册</h2>
+                </br>
+                {latestPhoto && (
+                    <a href={`/photo/${latestPhoto.id}/`} class="post-card featured">
+                        <img
+                            src={
+                                latestPhoto.data.heroImage
+                                    ? typeof latestPhoto.data.heroImage === 'string'
+                                        ? latestPhoto.data.heroImage
+                                        : latestPhoto.data.heroImage.src
+                                    : '/assets/blog-placeholder-about.jpg'
+                            }
+                            alt={latestPhoto.data.title}
+                            style="width: 100%; height: 220px; object-fit: cover; display: block; border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
+                            class="post-image"
+                        />
+                        <div style="padding: 2rem;">
+                            <h3 style="margin-top: 0;font-family: 'SmileySans-Oblique';">{latestPhoto.data.title}</h3>
+                            <p style="color: #888;">{new Date(latestPhoto.data.pubDate).toLocaleDateString()}</p>
+                            <p>{latestPhoto.data.description}</p>
+                        </div>
+                    </a>
+                )}
+
+                <div class="post-row">
+                    {otherPhotos.map(photo => (
+                        <a href={`/photo/${photo.id}/`} class="post-card">
+                            <img
+                                src={
+                                    photo.data.heroImage
+                                        ? typeof photo.data.heroImage === 'string'
+                                            ? photo.data.heroImage
+                                            : photo.data.heroImage.src
+                                        : '/assets/blog-placeholder-about.jpg'
+                                }
+                                alt={photo.data.title}
+                                style="width: 100%; height: 140px; object-fit: cover; display: block; border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
+                                class="post-image"
+                            />
+                            <div style="padding: 1.5rem;">
+                                <h3 style="margin-top: 0;font-family: 'SmileySans-Oblique';">{photo.data.title}</h3>
+                                <p style="color: #888;">{new Date(photo.data.pubDate).toLocaleDateString()}</p>
+                                <p>{photo.data.description}</p>
                             </div>
                         </a>
                     ))}
