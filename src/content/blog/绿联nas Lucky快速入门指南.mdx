@@ -1,0 +1,264 @@
+---
+title: '绿联nas Lucky快速入门指南'
+description: 'Lucky 是一款功能强大的家用软硬路由工具，适合管理和优化家庭网络环境'
+pubDate: 'Nov 25 2025'
+heroImage: 'https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/507b2d6538d84b6cb841c7abe15b8e7b.webp'
+---
+import InfoBox from '/src/components/InfoBox.astro';
+
+<InfoBox title="">
+本文摘自绿联NAS官方教程中心，用作备份记录，方便查找
+</InfoBox>
+<p></p>
+
+### 应用简介
+
+Lucky 是一款功能强大的家用软硬路由工具，适合管理和优化家庭网络环境。其主要功能包括：
+
+● IPv6/IPv4 端口转发
+
+● Web 服务管理
+
+● 动态域名解析（DDNS）
+
+● 网络唤醒
+
+● IPv4 内网穿透
+
+● 计划任务
+
+● 自动证书申请与管理
+
+**默认账号：666**  
+**默认密码：666**
+
+**默认访问端口：16601**
+
+在局域网中，通过浏览器在地址栏输入 NAS\_IP:16601（例如 172.17.20.102:16601），即可访问 Lucky 的 Web 管理界面。
+
+​**注意**：
+
+1. 请勿修改 WebUI 的端口，修改后会导致管理员点击 Lucky 应用图标跳转失效。
+2. 首次登录后，请务必修改默认账号和密码以确保安全性（详见《修改账号和密码》章节）。
+
+**开发者链接**：[https://lucky666.cn/](https://support.ugnas.com/knowledgecenter/%20)
+
+**开发者使用指南：**​[https://lucky666.cn/docs/intro](https://support.ugnas.com/knowledgecenter/%20)
+
+### 安装指南
+
+在 UGOS Pro 系统中安装 Lucky 应用，请按照以下步骤操作：
+
+1. 打开“应用中心”，找到 Lucky 应用，点击“安装”。
+2. 默认情况下，应用会安装在“存储空间 1”，如果有特殊需求，可在安装过程中选择其他存储空间。建议为长期使用的单独设置专用存储空间，方便统一管理资源和下载文件。
+
+### 访问 Lucky
+
+在 UGOS Pro 系统中，管理员和普通用户可以通过以下方法访问 Lucky 应用：
+
+#### 方法一：通过应用中心（仅限管理员）
+
+1. 进入 UGOS Pro 系统的应用中心。
+2. 找到并点击 Lucky 应用图标，系统将跳转至登录界面。
+
+#### 方法二：通过局域网访问（管理员和普通用户）
+
+1. 在局域网内，管理员和普通用户可以使用 NAS 的 IP 地址加上端口号16601来访问 Lucky。例如，在浏览器中输入192.168.22.158:16601进行访问。
+
+#### 方法三：非局域网通过 Firefox 访问（仅限管理员）
+
+管理员可以通过以下方法在非局域网环境中访问容器应用：
+
+1. 在非局域网环境中，系统可能提示“请在局域网下通过IP连接设备后打开”。通过Firefox浏览器可以轻松解决这一问题。Firefox浏览器支持非局域网环境下使用UGREEN Link登录NAS进行访问。
+2. 登录Firefox后，管理员和普通用户可以使用NAS的IP地址加上端口号16601来访问Lucky。例如，在浏览器中输入192.168.22.158:16601进行访问。
+
+​**注意**：在不受信任的设备上登录时，建议及时清理浏览器的访问记录以确保数据安全。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/76a01697751248bd995cd48d67e4dd52.webp)
+
+#### 使用提示
+
+1. 在局域网访问时，建议使用兼容性较好的浏览器（如 Chrome 或 Edge）进行访问，以获得最佳体验。
+2. 在公共网络环境下访问 NAS 时，请注意数据安全，避免泄露敏感信息。
+3. 管理员请妥善管理访问密码，确保密码的安全性。
+4. 如果多人共用 Firefox 浏览器访问容器应用，建议关闭自动记住密码功能，并定期清理历史记录。
+
+#### 登录 Lucky
+
+在 Web 登录界面输入默认账号 666 和默认密码 666 登录。为保证安全性，**建议在首次登录后及时修改默认账号和密码（具体方法见后文《修改账号和密码》章节）。**
+
+如果遗忘登录密码，需重新安装应用。**请注意：** 重新安装后，应用数据将不会保留，需重新配置参数。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/507b2d6538d84b6cb841c7abe15b8e7b.webp) ，
+
+### 使用指南
+
+在首次使用 Lucky 应用前，需要完成以下初始化设置：
+
+#### 修改账号和密码
+
+为确保应用安全，请及时修改默认账号和密码：
+
+1. 点击左侧菜单栏中的【设置】，进入设置页面。
+2. 滚动页面至“登录验证设置”区域。
+3. 输入新的管理账号和管理密码。
+4. 点击页面底部的【保存配置】。
+5. 下次登录时，需使用新的账号和密码完成验证。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/aa30b48aa32f40e79de86053353c725e.webp)
+
+#### 设置动态域名解析（DDNS）
+
+动态域名解析可实现通过固定域名访问家庭网络设备：
+
+1. 在左侧菜单中选择【动态域名】，点击“添加任务”。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/98aa8ebc65e441caa6b849a0632e112b.webp)
+
+2. 填写以下信息：
+3. **任务名称：**  自定义，如“家庭网络”。
+4. **操作模式：**  简易模式。
+5. **托管服务商：**  选择你的域名注册服务商（如阿里云）。
+6. **AccessKey ID 和 Secret：**  填写服务商提供的密钥。
+7. **类型：**  根据公网类型选择 IPv4 或 IPv6。
+8. **获取公网 IP 方式：**  选择“通过接口获取”。
+9. **域名列表：** 第一行填写主域名（如 20241218.xyz），第二行填写二级域名（如 \*.20241218.xyz）。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/0092c615e45f4cb8965b9ca43194f58b.webp)
+
+3. 点击【添加任务】，稍等片刻，显示“DNS 记录一致”即表示设置成功。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/b98982bc1d9243aa9b4195fc8578cacc.webp)
+
+#### 申请 SSL 证书
+
+SSL 证书可确保外网访问的安全性：
+
+1. 在左侧菜单中选择【SSL/TLS 证书】，点击“添加证书”。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/82c68dbd6e224ae78c62d50d5bd68532.webp)
+
+2. 填写以下信息：
+3. **备注：**  自定义填写。
+4. **添加方式：**  ACME。
+5. **证书颁发机构：**  Let's Encrypt。
+6. **验证方式：**  选择与前文相同的服务商。
+7. **ID 和 Secret：**  填入**AccessKey** 的 ID 和密钥。
+8. **域名列表：**  填写主域名和二级域名。
+9. **邮箱：**  可使用系统临时邮箱或你的个人邮箱。
+10. **算法：**  默认选择 RSA2048。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/4ef1d03ad277475f91d4be7bbee2f219.webp)
+
+3. 提交后，等待几分钟，成功颁发证书后会显示 ACME 信息和有效期。SSL 证书有效期为 3 个月，Lucky 支持自动续签，无需手动操作。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/d42ce7ac14dd4ff1a65ffc3f503954fc.webp)
+
+#### 设置反向代理与 HTTPS 访问
+
+通过反向代理功能实现 HTTPS 访问：
+
+1. 转到左侧菜单的【Web 服务】，点击“添加 Web 规则”。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/1da7d1726602474b852af2679db3f4d9.webp)
+
+2. 填写以下信息：
+3. **规则名称： 自定义。**
+4. **操作模式：**  简易模式。
+5. **监听类型：**  根据公网 IP 类型选择 IPv4 或 IPv6。
+6. **监听端口：**  默认 16666，可自定义（避免与其他服务端口冲突）。
+7. **防火墙自动放行：**  开启。
+8. **TLS：**  必须开启以支持 HTTPS。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/8c12b429598846cb876bb1b6aed377db.webp)
+
+3. 点击【添加子规则】，设置具体服务：
+
+● **子规则名称：**  自定义，如“nas”。
+
+● **服务类型：**  选择反向代理。
+
+● **前端域名/地址：**  填写二级域名（如ugreen.20241218.xyz ）。
+
+● **后端地址：**  填写内网设备 IP 和端口（如 192.168.31.70:9999）。
+
+● **其他选项：**  保持默认。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/a79dd6be8c214849b0b825f00a311996.webp)
+
+4. 完成后点击【添加子规则】生效。
+
+**注意：** 你可为多个服务添加不同的子规则，但需确保二级域名前缀不冲突。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/53323d540d424ceaa73dec846f0aff1f.webp)
+
+#### BasicAuth 认证
+
+在子规则的“安全设置”项中，有一个名为 BasicAuth 认证的基础加密功能。启用后，从外网访问时，用户需要先输入账号和密码，这相当于增加了一道安全防线。对于已经有密码登录界面的服务，是否启用 BasicAuth 认证可以根据个人需求决定。但对于没有密码登录界面的服务（例如某些网页服务），启用 BasicAuth 认证是非常必要的。
+
+**扩展内容：**
+
+1. **什么是 BasicAuth 认证？**
+
+BasicAuth 认证是一种简单的 HTTP 认证机制，通过在请求头中包含用户名和密码来验证用户身份。虽然这种方法相对简单，但它提供了一层基本的安全保护，尤其是在没有其他认证机制的情况下。
+
+2. **为什么需要 BasicAuth 认证？**
+3. **额外的安全层**：即使服务本身已经有密码登录界面，启用 BasicAuth 认证可以提供额外的安全保障，防止未经授权的访问。
+4. **保护敏感数据**：对于没有内置认证机制的服务，BasicAuth 认证可以有效防止敏感数据被未经授权的用户访问。
+5. **简便易用**：BasicAuth 认证实现简单，易于配置和使用。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/0fc2bb74c5664b1b8cea9b8273585723.webp)
+
+#### 自动跳转到 HTTPS
+
+为了实现自动跳转 HTTPS 你可以按以下步骤操作：
+
+1. 在 Web 服务中添加一条新规则。
+2. **操作模式：**  定制模式。
+3. **监听端口：**  与前文的监听端口一致。
+4. **TLS：**  禁用。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/0ad7c4ec38294e17b1cc514e52176887.webp)
+
+2. 点击“默认子规则”，设置：
+3. **服务类型：**  选择重定向。
+4. **默认目标地址：**  填写 https://{host}:{port}。
+5. **万事大吉开关：**  开启（自动添加请求头）。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/e85308b896ea4d6f83806fb0df0bda6f.webp)
+
+3. 完成后保存，设置完成后，用户仅需输入域名，无需手动输入 https://。
+
+### 使用 Lucky Web 服务
+
+**在完成所有设置后，我们需要通过路由器将反向代理的端口映射出去，以便能够从外网正常访问。** 通过 lucky 的反向代理，现在我们只需映射一个反向代理端口，而不需要将每个服务的内网端口单独映射出去。请注意，内网端口和外网端口号应保持一致。这里我们将刚才设置的监听端口映射出去。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/483146a671af46dd8cfa5de8b87d09ae.webp)
+
+端口映射完成后，如果所有设置都正常，就可以从外网访问了。例如，当我输入 nas.20241218.xyz:9876 时，就可以访问到 NAS 的设置页面。此外，你会注意到域名前面有一把锁，说明已经启用了 SSL 安全访问。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/6ea0eb788d8d4cc1a14cbbbaeabb9019.webp)
+
+### 开启远程访问功能
+
+绿联 NAS 支持将容器化应用开放为远程访问服务。用户可以通过 **Web 浏览器、PC 客户端或移动端设备**远程控制和管理这些应用，获得无缝的跨设备体验。
+
+● **Lucky 应用**支持通过 Web 端和 PC 客户端进行远程访问；
+
+● 请务必确保你的 **UGOS Pro 系统**和**容器应用已更新**到最新版本。旧版本不支持远程访问功能；
+
+● 远程访问功能 **仅在使用 UGREENlink ID 登录系统时可用**；
+
+● **使用 DDNS 或其他方式登录的用户将无法使用该功能**；
+
+#### 远程访问容器应用
+
+登录后，点击【容器应用】的图标，系统会自动跳转至其远程访问界面。
+
+#### 为什么远程访问失败？
+
+如果远程访问失败，请检查是否关闭了 Lucky 应用的【强制使用 HTTPS】与【安全入口】设置；
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-06-25/dd68440b6f0a443faf25ee31155a8775.webp)
+
+通过浏览器访问时，请不要使用第三方插件或广告拦截功能。
