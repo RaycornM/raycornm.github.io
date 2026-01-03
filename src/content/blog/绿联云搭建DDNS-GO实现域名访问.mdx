@@ -1,0 +1,115 @@
+---
+title: '绿联云搭建DDNS-GO实现域名访问'
+description: 'DDNS-GO 是一个支持 Docker 容器部署的动态域名解析服务（Dynamic DNS）工具。'
+pubDate: 'Nov 25 2025'
+heroImage: 'https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/1483b37eb2e24ba98a7bbe687cbcca7f.webp'
+---
+import InfoBox from '/src/components/InfoBox.astro';
+
+<InfoBox title="">
+本文摘自绿联NAS官方教程中心，用作备份记录，方便查找
+</InfoBox>
+<p></p>
+
+###### 
+
+DDNS-GO 是一个支持 Docker 容器部署的动态域名解析服务（Dynamic DNS）工具。它的主要功能是将本地网络的动态公网 IP 地址自动更新到域名解析服务提供商，使得用户可以通过固定的域名访问内部网络设备和服务。
+
+**请注意：** 该容器和 lucky 容器不可共用。
+
+### 使用方法
+
+以下是通过 Docker 部署 DDNS-GO 的基本步骤：
+
+#### 拉取镜像
+
+前往“Docker”＞“镜像”＞“镜像仓库”，搜索jeessy/ddns-go，版本号使用默认的最新版本（latest），点击“确定”开始拉取。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/1483b37eb2e24ba98a7bbe687cbcca7f.webp)
+
+#### 创建配置文件存放目录
+
+进入文件管理器，在共享文件夹中创建 docker 共享文件夹，建议将 docker 共享文件夹放置在 SSD 的存储空间内，这个目录是用来存储以后部署的docker配置文件的，然后在docker共享文件夹下创建ddnsgo文件夹，用来存储此次部署的ddnsgo配置文件。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/679b81983fed4724a9dc9027c72e6e72.webp)
+
+#### 购买域名
+
+阿里云：[https://wanwang.aliyun.com/](https://wanwang.aliyun.com/)
+
+腾讯云：[https://dnspod.cloud.tencent.com/](https://dnspod.cloud.tencent.com/)
+
+1. 域名购买推荐从阿里云或者腾讯云购买，这里演示使用的是阿里云。登陆阿里云后，输入自己喜欢的域名，选择需要域名后缀点击“查询域名”。这里推荐选择 XYZ 的纯数字域名，选择好以后点击域名栏的加入清单，点击立即购买。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/7a545c6a87904f0e8599d16a0b7aacfc.webp)
+
+2. 选择年限，按照要求填写信息模板完成实名认证后点击“立即购买”跳转支付。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/cc01c5a4ffba401d8de323ada471729f.webp)
+
+3. 购买成功以后点击右上角的头像，进入 AccessKey 管理。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/50a1da125edf48e7ada07178495e019b.webp)
+
+4. 点击创建 AccessKey,保存好 key 的 ID 和密钥，接下来会用到。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/93c562be5dd5453184517a11abff5228.webp)
+
+5. 添加解析记录，点击[云解析DNS ](https://dns.console.aliyun.com/#/)/[域名解析 ](https://dns.console.aliyun.com/#/dns/domainList)跳转进入域名解析，随后选择自己的域名点击”解析设置“。在解析设置中添加记录。
+6. 如果使用主域名访问的话，例如申请的域名是 20240709.xyz，那么这个就是主域名，只需要在主机记录中填写“@”即可，如果要使用二级域名可以在主机记录中填写，例如这里添加 “ugreen”作为二级域名。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/aea32237fe0841b7828a930cb3574751.webp)
+
+#### 创建并配置容器
+
+1. 镜像下载完成后我们开始创建容器，在本地镜像列表中选择刚下载的jeessy/ddns-go镜像。点击+创建容器，配置容器参数。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/4f00bf1b2ae64f17a2e6fc410e2bee99.webp)
+
+2. 打开“自动重启”。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/4f3504bc34f1458689bb7c151059a81a.webp)
+
+3. 在存储空间中添加NAS目录，设置为我们刚才创建的 ddnsgo 目录，容器目录填写/root， 容器权限设置为读写。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/66ce632480494a0a91ddcbc7a4a0bda6.webp)
+
+4. 网络模式选择 bridge，端口映射这里的 NAS 端口可以自定义， 注意端口不要和其他容器有重复造成冲突。如果你需要使用 IPV6 网络，请将网络模式改为 host。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/c8c224d1c40d43b482c7fa1e7decb1a7.webp)
+
+5. 其它保持默认即可，确认配置无误后点击“完成”创建容器。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/a760ec5d2b20472e96a87e6fb26a3498.webp)
+
+6. 容器创建成功后可以在容器管理页面管理已创建的容器。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/d5207244ab72414b9c8ac165292bb5ac.webp)
+
+#### 初始化配置
+
+1. 容器启动后，可以通过浏览器访问DDNS-GO的Web UI，访问URLhttp://\<NAS\_IP\>:9876，将 NAS 的 IP 替换成您的 NAS IP 地址。如下图所示，输入 http://192.168.31.70:9876 访问。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/df750c29f6814ae4bf74e9208a945a71.webp)
+
+2. 服务商选择阿里云，然后将前期准备中获取到的阿里云 AccessKey ID 和密钥 填写到相应输入框中。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/04d66c401c4742198ac2f6d4c7e88bca.webp)
+
+3. 接下来按照自己公网ip类型设置解析，例如您是 IPV4 公网，那么在Domains中输入已经在阿里云设置好的域名，如果是 IPV6，获取 IP 方式需要改为通过网卡获取，NAS 的网卡也需要开启 IPV6 网络，Domains 内的域名和 IPV4 的域名可以保持一致。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/13b067fcaf9040629b65631b3122766b.webp)
+
+4. 确认配置无误后，点击页面下方或者左上角的【保存】按钮，稍等会便可以看到在右侧列表中的日志，提示已经解析成功。
+
+#### 使用域名访问容器
+
+若要使用域名访问容器，请先在路由器中将容器的 WebUI 端口设置转发，不同路由器设置不相同，具体操作说明可以查询您购买路由器厂商的产品使用说明。本截图为小米路由器的端口转发示例：
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/47ad7e507ec64475bee3908384bf38fe.webp)
+
+#### 开启公网访问
+
+若要开启公网访问 DDNS-GO，请关闭【禁止公网访问】，配置好账号密码，然后将9876端口在路由器中做端口转发。
+
+![](https://ugreen-ugos-pro.oss-cn-shenzhen.aliyuncs.com/admin/article/2025-07-22/85c28208f5c0462f895c93da1bfdfc02.webp)
