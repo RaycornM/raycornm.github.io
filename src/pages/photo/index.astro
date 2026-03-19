@@ -116,8 +116,15 @@ const photos = (await getCollection('photo')).sort(
 							<li>
 								<a href={`/photo/${photo.id}/`}>
 									{photo.data.heroImage && (
-										<Image width={720} height={360} src={photo.data.heroImage} alt="" />
-									)}
+										<Image 
+											width={720} 
+											height={360} 
+											src={photo.data.heroImage} 
+											alt="" 
+											loading="lazy"
+											decoding="async"
+										/>
+									)
 									<h4 class="title">{photo.data.title}</h4>
 									<p class="date">
 										<FormattedDate date={photo.data.pubDate} />

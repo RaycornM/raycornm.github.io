@@ -123,6 +123,27 @@ img {
 	height: auto;
 	border-radius: 8px;
 }
+
+/* 图片加载优化 - 占位背景 */
+img[src] {
+	background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+}
+
+/* 懒加载图片淡入效果 */
+img[loading="lazy"] {
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+img[loading="lazy"].loaded,
+img[loading="lazy"]:not([src=""]) {
+	opacity: 1;
+}
+
+/* 确保加载完成的图片显示正常 */
+img:not([loading="lazy"]) {
+	opacity: 1;
+}
 code {
 	padding: 2px 5px;
 	background-color: rgb(var(--gray-light));

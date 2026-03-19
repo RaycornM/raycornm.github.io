@@ -46,26 +46,69 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
     <head>
         <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
         <!-- 添加客户端JavaScript以在浏览器中随机选择图片 -->
-        <!-- 修改这部分JavaScript代码 -->
+        <!-- 图片预加载和随机选择脚本 -->
         <script>
+            // 图片数组 - 与服务器端保持一致
+            const themeImages = [
+                '/assets/1d442f5857f54f17818bcb2bf6b53730.png',
+                '/assets/2025-10-17_183005_789.png',
+                '/assets/2025-10-17_185645_393.png',
+                '/assets/2025-10-17_185917_944.png'
+            ];
+            
+            // 预加载函数
+            function preloadImage(src: string): Promise<void> {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => resolve();
+                    img.onerror = reject;
+                    img.src = src;
+                });
+            }
+            
+            // 懒加载图片淡入效果
+            if ('IntersectionObserver' in window) {
+                const imageObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            img.classList.add('loaded');
+                            observer.unobserve(img);
+                        }
+                    });
+                }, {
+                    rootMargin: '50px 0px',
+                    threshold: 0.01
+                });
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+                    lazyImages.forEach(img => imageObserver.observe(img));
+                });
+            }
+            
             // 等待DOM加载完成后执行
             document.addEventListener('DOMContentLoaded', () => {
-                // 图片数组 - 与服务器端保持一致
-                const themeImages = [
-                    '/assets/1d442f5857f54f17818bcb2bf6b53730.png',
-                    '/assets/2025-10-17_183005_789.png',
-                    '/assets/2025-10-17_185645_393.png',
-                    '/assets/2025-10-17_185917_944.png'
-                ];
-                
                 // 在客户端随机选择一张图片
                 const randomIndex = Math.floor(Math.random() * themeImages.length);
                 const randomImage = themeImages[randomIndex];
                 
-                // 设置图片src - 添加类型断言
+                // 预加载并设置图片
                 const carouselImage = document.querySelector('.carousel-image');
                 if (carouselImage instanceof HTMLImageElement) {
-                    carouselImage.src = randomImage;
+                    // 如果选择的图片与当前不同，则切换
+                    if (carouselImage.src !== randomImage) {
+                        preloadImage(randomImage).then(() => {
+                            carouselImage.style.opacity = '0';
+                            setTimeout(() => {
+                                carouselImage.src = randomImage;
+                                carouselImage.style.opacity = '1';
+                            }, 150);
+                        }).catch(() => {
+                            // 加载失败时保持原图
+                            console.warn('Failed to load carousel image:', randomImage);
+                        });
+                    }
                 }
             });
         </script>
@@ -79,6 +122,9 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
                     src={themeImages[0]} 
                     alt="网站主题图片" 
                     class="carousel-image"
+                    loading="eager"
+                    decoding="async"
+                    fetchpriority="high"
                 />
             </div>
 
@@ -104,6 +150,9 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
                             alt={latestPost.data.title} 
                             style="width: 100%; height: 220px; object-fit: cover; display: block; border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
                             class="post-image"
+                            loading="eager"
+                            decoding="async"
+                            fetchpriority="high"
                         />
                         <div style="padding: 2rem;">
                             <h3 style="margin-top: 0;font-family: 'SmileySans-Oblique';">{latestPost.data.title}</h3>
@@ -126,6 +175,8 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
                               alt={post.data.title}
                               style="width: 100%; height: 140px; object-fit: cover; display: block; border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
                               class="post-image"
+                              loading="lazy"
+                              decoding="async"
                             />
                             <div style="padding: 1.5rem;">
                                 <h3 style="margin-top: 0;font-family: 'SmileySans-Oblique';">{post.data.title}</h3>
@@ -156,6 +207,8 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
                             alt={latestPhoto.data.title}
                             style="width: 100%; height: 220px; object-fit: cover; display: block; border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
                             class="post-image"
+                            loading="lazy"
+                            decoding="async"
                         />
                         <div style="padding: 2rem;">
                             <h3 style="margin-top: 0;font-family: 'SmileySans-Oblique';">{latestPhoto.data.title}</h3>
@@ -179,6 +232,8 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
                                 alt={photo.data.title}
                                 style="width: 100%; height: 140px; object-fit: cover; display: block; border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
                                 class="post-image"
+                                loading="lazy"
+                                decoding="async"
                             />
                             <div style="padding: 1.5rem;">
                                 <h3 style="margin-top: 0;font-family: 'SmileySans-Oblique';">{photo.data.title}</h3>
@@ -315,11 +370,27 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
     height: 350px; /* 设置适当的高度，可以根据需要调整 */
     object-fit: cover; /* 保持图片比例并覆盖整个容器 */
     display: block;
-    transition: transform 0.5s ease;
+    transition: transform 0.5s ease, opacity 0.3s ease;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%); /* 占位背景 */
 }
 
 .carousel-image:hover {
     transform: scale(1.03); /* 鼠标悬停时轻微放大效果 */
+}
+
+/* 文章图片懒加载淡入效果 */
+.post-image {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%); /* 占位背景 */
+}
+
+.post-image[loading="lazy"] {
+    opacity: 0;
+}
+
+.post-image[loading="lazy"].loaded,
+.post-image:not([loading="lazy"]) {
+    opacity: 1;
 }
 
 /* 响应式设计 */
