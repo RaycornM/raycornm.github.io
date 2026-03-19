@@ -124,7 +124,7 @@ const photos = (await getCollection('photo')).sort(
 											loading="lazy"
 											decoding="async"
 										/>
-									)
+									)}
 									<h4 class="title">{photo.data.title}</h4>
 									<p class="date">
 										<FormattedDate date={photo.data.pubDate} />
