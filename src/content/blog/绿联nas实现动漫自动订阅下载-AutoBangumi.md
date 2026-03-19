@@ -2,7 +2,7 @@
 title: '绿联nas实现动漫自动订阅下载-AutoBangumi'
 description: 'AutoBangumi是基于 RSS 的全自动追番整理下载工具。只需要在Mikan Project等网站上订阅番剧，就可以全自动追番。'
 pubDate: 'Oct 25 2025'
-heroImage: 'https://www.autobangumi.org/assets/light-icon.077a4063.svg'
+heroImage: 'https://www.autobangumi.org/image/icons/light-icon.svg'
 ---
 
 ### 项目说明
