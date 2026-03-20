@@ -1,0 +1,577 @@
+---
+// 可拖拽、可调整尺寸的组件
+interface Props {
+  id: string;
+  title?: string;
+  initialX?: number;
+  initialY?: number;
+  initialWidth?: number;
+  initialHeight?: number;
+  minWidth?: number;
+  minHeight?: number;
+  magnifierScale?: number;
+  transparent?: boolean;
+  noResize?: boolean;
+}
+
+const {
+  id,
+  title = '窗口',
+  initialX = 100,
+  initialY = 100,
+  initialWidth = 300,
+  initialHeight = 200,
+  minWidth = 100,
+  minHeight = 80,
+  magnifierScale = 2,
+  transparent = false,
+  noResize = false
+} = Astro.props;
+---
+
+<div
+  class:list={['draggable-widget', { 'is-transparent': transparent }]}
+  id={id}
+  data-magnifier-scale={magnifierScale}
+  data-min-width={minWidth}
+  data-min-height={minHeight}
+  data-no-resize={noResize}
+  style={`
+    left: ${initialX}px;
+    top: ${initialY}px;
+    width: ${initialWidth}px;
+    height: ${initialHeight}px;
+  `}
+>
+  <!-- 标题栏 -->
+  <div class="widget-header">
+    <span class="widget-title">{title}</span>
+    <button class="widget-close" aria-label="关闭">×</button>
+  </div>
+  
+  <!-- 内容区域 -->
+  <div class="widget-content">
+    <div class="widget-slot-content">
+      <slot />
+    </div>
+    <div class="magnifier-viewport">
+      <div class="magnifier-content"></div>
+    </div>
+  </div>
+  
+  <!-- 调整尺寸的手柄 -->
+  {!noResize && (
+    <>
+      <div class="resize-handle top" data-dir="top"></div>
+      <div class="resize-handle right" data-dir="right"></div>
+      <div class="resize-handle bottom" data-dir="bottom"></div>
+      <div class="resize-handle left" data-dir="left"></div>
+      <div class="resize-handle top-left" data-dir="top-left"></div>
+      <div class="resize-handle top-right" data-dir="top-right"></div>
+      <div class="resize-handle bottom-left" data-dir="bottom-left"></div>
+      <div class="resize-handle bottom-right" data-dir="bottom-right"></div>
+    </>
+  )}
+</div>
+
+<script is:inline>
+  // 全局 Widget 管理器 - 只初始化一次
+  if (!window.__widgetManager) {
+    window.__widgetManager = {
+      widgets: new Map(),
+      activeWidget: null,
+      isDragging: false,
+      isResizing: false,
+      resizeDir: '',
+      startX: 0,
+      startY: 0,
+      startLeft: 0,
+      startTop: 0,
+      startWidth: 0,
+      startHeight: 0,
+      zIndexCounter: 50,
+      
+      init: function() {
+        // 全局事件只绑定一次
+        document.addEventListener('mousemove', this.onMouseMove.bind(this));
+        document.addEventListener('mouseup', this.onMouseUp.bind(this));
+        
+        // 初始化所有 widget
+        this.initAllWidgets();
+        
+        // 监听新 widget 的添加（通过 MutationObserver）
+        this.observeNewWidgets();
+      },
+      
+      initAllWidgets: function() {
+        var widgets = document.querySelectorAll('.draggable-widget');
+        var self = this;
+        widgets.forEach(function(widget) {
+          self.registerWidget(widget);
+        });
+      },
+      
+      observeNewWidgets: function() {
+        var self = this;
+        var observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            mutation.addedNodes.forEach(function(node) {
+              if (node.nodeType === 1 && node.classList.contains('draggable-widget')) {
+                self.registerWidget(node);
+              }
+              if (node.nodeType === 1) {
+                var nestedWidgets = node.querySelectorAll('.draggable-widget');
+                nestedWidgets.forEach(function(w) {
+                  self.registerWidget(w);
+                });
+              }
+            });
+          });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+      },
+      
+      registerWidget: function(widget) {
+        if (this.widgets.has(widget.id)) return;
+        
+        var self = this;
+        var header = widget.querySelector('.widget-header');
+        var closeBtn = widget.querySelector('.widget-close');
+        var resizeHandles = widget.querySelectorAll('.resize-handle');
+        
+        // 关闭功能
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function() {
+            widget.remove();
+            self.widgets.delete(widget.id);
+          });
+        }
+        
+        // 拖拽开始
+        if (header) {
+          header.addEventListener('mousedown', function(e) {
+            if (e.target.classList.contains('widget-close')) return;
+            
+            self.activeWidget = widget;
+            self.isDragging = true;
+            self.startX = e.clientX;
+            self.startY = e.clientY;
+            self.startLeft = widget.offsetLeft;
+            self.startTop = widget.offsetTop;
+            
+            self.bringToFront(widget);
+            document.body.style.cursor = 'grabbing';
+            e.preventDefault();
+          });
+        }
+        
+        // Resize 开始
+        resizeHandles.forEach(function(handle) {
+          handle.addEventListener('mousedown', function(e) {
+            self.activeWidget = widget;
+            self.isResizing = true;
+            self.resizeDir = handle.dataset.dir || '';
+            self.startX = e.clientX;
+            self.startY = e.clientY;
+            self.startLeft = widget.offsetLeft;
+            self.startTop = widget.offsetTop;
+            self.startWidth = widget.offsetWidth;
+            self.startHeight = widget.offsetHeight;
+            
+            self.bringToFront(widget);
+            
+            var cursors = {
+              'top': 'n-resize', 'bottom': 's-resize',
+              'left': 'w-resize', 'right': 'e-resize',
+              'top-left': 'nw-resize', 'top-right': 'ne-resize',
+              'bottom-left': 'sw-resize', 'bottom-right': 'se-resize'
+            };
+            document.body.style.cursor = cursors[self.resizeDir] || 'default';
+            
+            e.preventDefault();
+            e.stopPropagation();
+          });
+        });
+        
+        // 点击置顶
+        widget.addEventListener('mousedown', function() {
+          self.bringToFront(widget);
+        });
+        
+        // 存储 widget 数据
+        this.widgets.set(widget.id, {
+          element: widget,
+          magnifierScale: parseFloat(widget.dataset.magnifierScale || '2'),
+          minWidth: parseFloat(widget.dataset.minWidth || '100'),
+          minHeight: parseFloat(widget.dataset.minHeight || '80'),
+          magnifierContent: widget.querySelector('.magnifier-content')
+        });
+        
+        // 初始化放大镜
+        this.updateMagnifier(widget);
+      },
+      
+      onMouseMove: function(e) {
+        if (!this.activeWidget) return;
+        
+        var widgetData = this.widgets.get(this.activeWidget.id);
+        if (!widgetData) return;
+        
+        if (this.isDragging) {
+          var dx = e.clientX - this.startX;
+          var dy = e.clientY - this.startY;
+          
+          this.activeWidget.style.left = (this.startLeft + dx) + 'px';
+          this.activeWidget.style.top = (this.startTop + dy) + 'px';
+          
+          this.updateMagnifier(this.activeWidget);
+        }
+        
+        if (this.isResizing) {
+          var dx = e.clientX - this.startX;
+          var dy = e.clientY - this.startY;
+          
+          var newLeft = this.startLeft;
+          var newTop = this.startTop;
+          var newWidth = this.startWidth;
+          var newHeight = this.startHeight;
+          
+          if (this.resizeDir.indexOf('right') !== -1) {
+            newWidth = Math.max(widgetData.minWidth, this.startWidth + dx);
+          }
+          if (this.resizeDir.indexOf('left') !== -1) {
+            newWidth = Math.max(widgetData.minWidth, this.startWidth - dx);
+            newLeft = this.startLeft + dx;
+          }
+          if (this.resizeDir.indexOf('bottom') !== -1) {
+            newHeight = Math.max(widgetData.minHeight, this.startHeight + dy);
+          }
+          if (this.resizeDir.indexOf('top') !== -1) {
+            newHeight = Math.max(widgetData.minHeight, this.startHeight - dy);
+            newTop = this.startTop + dy;
+          }
+          
+          this.activeWidget.style.left = newLeft + 'px';
+          this.activeWidget.style.top = newTop + 'px';
+          this.activeWidget.style.width = newWidth + 'px';
+          this.activeWidget.style.height = newHeight + 'px';
+          
+          this.updateMagnifier(this.activeWidget);
+        }
+      },
+      
+      onMouseUp: function() {
+        this.isDragging = false;
+        this.isResizing = false;
+        this.activeWidget = null;
+        document.body.style.cursor = '';
+      },
+      
+      bringToFront: function(widget) {
+        this.zIndexCounter++;
+        widget.style.zIndex = String(this.zIndexCounter);
+      },
+      
+      updateMagnifier: function(widget) {
+        var widgetData = this.widgets.get(widget.id);
+        if (!widgetData) return;
+        
+        var magnifierContent = widgetData.magnifierContent;
+        if (!magnifierContent) return;
+        
+        // 获取角色图片
+        var heroSection = document.getElementById('hero-section');
+        var characterImg = heroSection ? heroSection.querySelector('.hero-character img') : null;
+        if (!characterImg) {
+          magnifierContent.classList.remove('active');
+          return;
+        }
+        
+        var widgetRect = widget.getBoundingClientRect();
+        var charRect = characterImg.getBoundingClientRect();
+        
+        // 计算重叠区域
+        var overlapLeft = Math.max(widgetRect.left, charRect.left);
+        var overlapTop = Math.max(widgetRect.top, charRect.top);
+        var overlapRight = Math.min(widgetRect.right, charRect.right);
+        var overlapBottom = Math.min(widgetRect.bottom, charRect.bottom);
+        
+        var overlapWidth = overlapRight - overlapLeft;
+        var overlapHeight = overlapBottom - overlapTop;
+        
+        if (overlapWidth > 0 && overlapHeight > 0) {
+          var relativeX = overlapLeft - charRect.left;
+          var relativeY = overlapTop - charRect.top;
+          
+          var magnifierLeft = overlapLeft - widgetRect.left;
+          var magnifierTop = overlapTop - widgetRect.top;
+          
+          magnifierContent.style.left = magnifierLeft + 'px';
+          magnifierContent.style.top = magnifierTop + 'px';
+          magnifierContent.style.width = overlapWidth + 'px';
+          magnifierContent.style.height = overlapHeight + 'px';
+          
+          magnifierContent.style.backgroundImage = 'url(' + characterImg.src + ')';
+          magnifierContent.style.backgroundSize = (charRect.width * widgetData.magnifierScale) + 'px ' + (charRect.height * widgetData.magnifierScale) + 'px';
+          
+          var bgX = -relativeX * widgetData.magnifierScale;
+          var bgY = -relativeY * widgetData.magnifierScale;
+          
+          magnifierContent.style.backgroundPosition = bgX + 'px ' + bgY + 'px';
+          magnifierContent.classList.add('active');
+        } else {
+          magnifierContent.classList.remove('active');
+        }
+      }
+    };
+    
+    // 页面加载完成后初始化
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        window.__widgetManager.init();
+      });
+    } else {
+      window.__widgetManager.init();
+    }
+  }
+</script>
+
+<style>
+  .draggable-widget {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+    z-index: 50;
+  }
+
+  .draggable-widget:hover {
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  /* 透明模式 */
+  .draggable-widget.is-transparent {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+
+  .draggable-widget.is-transparent .widget-header {
+    background: rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+  }
+
+  .draggable-widget.is-transparent .widget-title {
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .draggable-widget.is-transparent .widget-content {
+    background: transparent;
+  }
+
+  .draggable-widget.is-transparent .widget-slot-content img {
+    border-radius: 4px;
+  }
+
+  /* 标题栏 */
+  .widget-header {
+    height: 32px;
+    background: linear-gradient(180deg, #f5f5f5 0%, #e8e8e8 100%);
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    cursor: grab;
+  }
+
+  .widget-header:active {
+    cursor: grabbing;
+  }
+
+  .widget-title {
+    font-size: 13px;
+    color: #333;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+  }
+
+  .widget-close {
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    color: #666;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .widget-close:hover {
+    background: #e81123;
+    color: white;
+  }
+
+  /* 内容区域 */
+  .widget-content {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #f9f9f9;
+  }
+
+  .widget-slot-content {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .widget-slot-content img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .magnifier-viewport {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 5;
+  }
+
+  .magnifier-content {
+    position: absolute;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    border-radius: 4px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+
+  .magnifier-content.active {
+    opacity: 1;
+  }
+
+  /* 调整尺寸的手柄 */
+  .resize-handle {
+    position: absolute;
+    background: transparent;
+    z-index: 10;
+  }
+
+  /* 边 */
+  .resize-handle.top {
+    top: -3px;
+    left: 8px;
+    right: 8px;
+    height: 6px;
+    cursor: n-resize;
+  }
+
+  .resize-handle.bottom {
+    bottom: -3px;
+    left: 8px;
+    right: 8px;
+    height: 6px;
+    cursor: s-resize;
+  }
+
+  .resize-handle.left {
+    left: -3px;
+    top: 8px;
+    bottom: 8px;
+    width: 6px;
+    cursor: w-resize;
+  }
+
+  .resize-handle.right {
+    right: -3px;
+    top: 8px;
+    bottom: 8px;
+    width: 6px;
+    cursor: e-resize;
+  }
+
+  /* 角 */
+  .resize-handle.top-left {
+    top: -3px;
+    left: -3px;
+    width: 12px;
+    height: 12px;
+    cursor: nw-resize;
+  }
+
+  .resize-handle.top-right {
+    top: -3px;
+    right: -3px;
+    width: 12px;
+    height: 12px;
+    cursor: ne-resize;
+  }
+
+  .resize-handle.bottom-left {
+    bottom: -3px;
+    left: -3px;
+    width: 12px;
+    height: 12px;
+    cursor: sw-resize;
+  }
+
+  .resize-handle.bottom-right {
+    bottom: -3px;
+    right: -3px;
+    width: 12px;
+    height: 12px;
+    cursor: se-resize;
+  }
+
+  /* 手柄悬停效果 */
+  .resize-handle:hover::after {
+    content: '';
+    position: absolute;
+    background: rgba(0, 120, 255, 0.3);
+    border-radius: 2px;
+  }
+
+  .resize-handle.top:hover::after,
+  .resize-handle.bottom:hover::after {
+    left: 0;
+    right: 0;
+    height: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .resize-handle.left:hover::after,
+  .resize-handle.right:hover::after {
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .resize-handle.top-left:hover::after,
+  .resize-handle.top-right:hover::after,
+  .resize-handle.bottom-left:hover::after,
+  .resize-handle.bottom-right:hover::after {
+    inset: 2px;
+  }
+</style>

@@ -4,6 +4,7 @@ import CursorShadow from '../components/CursorShadow.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import IntroCard from '../components/IntroCard.astro';
+import DraggableWidget from '../components/DraggableWidget.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 import { getCollection } from 'astro:content';
 
@@ -44,254 +45,607 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
 
 <!doctype html>
 <html lang="en">
-    <head>
-        <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-        <!-- 添加客户端JavaScript以在浏览器中随机选择图片 -->
-        <!-- 图片预加载和随机选择脚本 -->
-        <script>
-            // 图片数组 - 与服务器端保持一致
-            const themeImages = [
-                '/assets/1d442f5857f54f17818bcb2bf6b53730.png',
-                '/assets/2025-10-17_183005_789.png',
-                '/assets/2025-10-17_185645_393.png',
-                '/assets/2025-10-17_185917_944.png'
-            ];
-            
-            // 预加载函数
-            function preloadImage(src: string): Promise<void> {
-                return new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.onload = () => resolve();
-                    img.onerror = reject;
-                    img.src = src;
-                });
-            }
-            
-            // 懒加载图片淡入效果
-            if ('IntersectionObserver' in window) {
-                const imageObserver = new IntersectionObserver((entries, observer) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const img = entry.target;
-                            img.classList.add('loaded');
-                            observer.unobserve(img);
-                        }
-                    });
-                }, {
-                    rootMargin: '50px 0px',
-                    threshold: 0.01
-                });
+<head>
+  <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+</head>
+<body>
+  <CursorShadow />
+  <Header />
+  <main>
+    <!-- ===== 1:09风格Hero区域 ===== -->
+    <section class="hero-section" id="hero-section">
+      <!-- 外层圆角框 -->
+      <div class="hero-outer-frame">
+        <!-- 波浪网格背景容器 -->
+        <div class="wave-grid-container">
+          <canvas id="wave-grid" class="wave-grid"></canvas>
+        </div>
+        
+        <!-- 可拖拽组件 -->
+        <DraggableWidget 
+          id="widget-1"
+          title="CORN.exe"
+          initialX={350}
+          initialY={180}
+          initialWidth={400}
+          initialHeight={400}
+          magnifierScale={2}
+        >
+          <img src="/assets/meme-thumb.png" alt="meme" style="width: 400px; height: 400px; object-fit: contain;" />
+        </DraggableWidget>
+        <DraggableWidget 
+          id="widget-2"
+          title="CORN.bat"
+          initialX={100}
+          initialY={100}
+          initialWidth={200}
+          initialHeight={150}
+          magnifierScale={1.5}
+        />
+        <DraggableWidget 
+          id="widget-3"
+          title="CORN.dll"
+          initialX={700}
+          initialY={250}
+          initialWidth={180}
+          initialHeight={140}
+          magnifierScale={3}
+        />
+        
+        <!-- 动漫角色 -->
+        <div class="hero-character">
+          <img src="/assets/hero-character.png" alt="Hero Character" class="character-img" />
+        </div>
+        
+        <!-- 左侧内容 -->
+        <div class="hero-content">
+          <h1 class="hero-title" id="beijing-time"></h1>
+          <p class="hero-subtitle">Welcome</p>
+          <p class="hero-subtitle">Have a tea？</p>
+          <div class="barcode"></div>
+        </div>
+        
+      </div>
+    </section>
+    
+    <!-- 原有内容 -->
+    <div class="theme-carousel">
+      <img 
+        src={themeImages[0]} 
+        alt="网站主题图片" 
+        class="carousel-image"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+      />
+    </div>
 
-                document.addEventListener('DOMContentLoaded', () => {
-                    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
-                    lazyImages.forEach(img => imageObserver.observe(img));
-                });
-            }
-            
-            // 等待DOM加载完成后执行
-            document.addEventListener('DOMContentLoaded', () => {
-                // 在客户端随机选择一张图片
-                const randomIndex = Math.floor(Math.random() * themeImages.length);
-                const randomImage = themeImages[randomIndex];
-                
-                // 预加载并设置图片
-                const carouselImage = document.querySelector('.carousel-image');
-                if (carouselImage instanceof HTMLImageElement) {
-                    // 如果选择的图片与当前不同，则切换
-                    if (carouselImage.src !== randomImage) {
-                        preloadImage(randomImage).then(() => {
-                            carouselImage.style.opacity = '0';
-                            setTimeout(() => {
-                                carouselImage.src = randomImage;
-                                carouselImage.style.opacity = '1';
-                            }, 150);
-                        }).catch(() => {
-                            // 加载失败时保持原图
-                            console.warn('Failed to load carousel image:', randomImage);
-                        });
-                    }
-                }
-            });
-        </script>
-    </head>
-    <body>
-        <CursorShadow />
-        <Header />
-        <main>
-            <!-- 随机轮播图 - 初始设置第一张图片作为占位符 -->
-            <div class="theme-carousel">
-                <img 
-                    src={themeImages[0]} 
-                    alt="网站主题图片" 
-                    class="carousel-image"
-                    loading="eager"
-                    decoding="async"
-                    fetchpriority="high"
-                />
+    <div class="intro-card" role="note" aria-label="intro">
+      <p class="intro-desc">…ようこそ。新日暮里の<ruby>世界へ<rt>マスカレード</rt></ruby></p>
+    </div>
+
+    <section>
+      <br />
+      <h2 class="latest-post">最新文章</h2>
+      <br />
+      {latestPost && (
+        <a href={`/blog/${latestPost.id}/`} class="post-card featured">
+          <img 
+            src={latestPost.data.heroImage ? (typeof latestPost.data.heroImage === 'string' ? latestPost.data.heroImage : latestPost.data.heroImage.src) : '/assets/blog-placeholder-about.jpg'}
+            alt={latestPost.data.title} 
+            class="post-image"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+          />
+          <div class="post-content">
+            <h3>{latestPost.data.title}</h3>
+            <p class="post-date">{new Date(latestPost.data.pubDate).toLocaleDateString()}</p>
+            <p>{latestPost.data.description}</p>
+          </div>
+        </a>
+      )}
+      <div class="post-row">
+        {otherPosts.map(post => (
+          <a href={`/blog/${post.id}/`} class="post-card">
+            <img
+              src={post.data.heroImage ? (typeof post.data.heroImage === 'string' ? post.data.heroImage : post.data.heroImage.src) : '/assets/blog-placeholder-about.jpg'}
+              alt={post.data.title}
+              class="post-image"
+              loading="lazy"
+              decoding="async"
+            />
+            <div class="post-content">
+              <h3>{post.data.title}</h3>
+              <p class="post-date">{new Date(post.data.pubDate).toLocaleDateString()}</p>
+              <p>{post.data.description}</p>
             </div>
+          </a>
+        ))}
+      </div>
+    </section>
 
-            <!-- 替换原有 IntroCard 调用：让「世界へ」为主体，并在上方以注音 / 上标显示「マスカレード」 -->
-            <div class="intro-card" role="note" aria-label="intro">
-                <p class="intro-desc">…ようこそ。新日暮里の<ruby>世界へ<rt>マスカレード</rt></ruby></p>
+    <div style="height: 100px;"></div>
+    
+    <section>
+      <h2 class="latest-post">最新相册</h2>
+      <br />
+      {latestPhoto && (
+        <a href={`/photo/${latestPhoto.id}/`} class="post-card featured">
+          <img
+            src={latestPhoto.data.heroImage ? (typeof latestPhoto.data.heroImage === 'string' ? latestPhoto.data.heroImage : latestPhoto.data.heroImage.src) : '/assets/blog-placeholder-about.jpg'}
+            alt={latestPhoto.data.title}
+            class="post-image"
+            loading="lazy"
+            decoding="async"
+          />
+          <div class="post-content">
+            <h3>{latestPhoto.data.title}</h3>
+            <p class="post-date">{new Date(latestPhoto.data.pubDate).toLocaleDateString()}</p>
+            <p>{latestPhoto.data.description}</p>
+          </div>
+        </a>
+      )}
+
+      <div class="post-row">
+        {otherPhotos.map(photo => (
+          <a href={`/photo/${photo.id}/`} class="post-card">
+            <img
+              src={photo.data.heroImage ? (typeof photo.data.heroImage === 'string' ? photo.data.heroImage : photo.data.heroImage.src) : '/assets/blog-placeholder-about.jpg'}
+              alt={photo.data.title}
+              class="post-image"
+              loading="lazy"
+              decoding="async"
+            />
+            <div class="post-content">
+              <h3>{photo.data.title}</h3>
+              <p class="post-date">{new Date(photo.data.pubDate).toLocaleDateString()}</p>
+              <p>{photo.data.description}</p>
             </div>
-
-            <section>
-                </br>
-                <h2 class="latest-post">最新文章</h2>
-                </br>
-                {latestPost && (
-                    <a href={`/blog/${latestPost.id}/`} class="post-card featured">
-                        <img 
-                            src={
-                                latestPost.data.heroImage
-                                    ? typeof latestPost.data.heroImage === 'string'
-                                        ? latestPost.data.heroImage
-                                        : latestPost.data.heroImage.src
-                                    : '/assets/blog-placeholder-about.jpg'
-                            }
-                            alt={latestPost.data.title} 
-                            style="width: 100%; height: 220px; object-fit: cover; display: block; border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
-                            class="post-image"
-                            loading="eager"
-                            decoding="async"
-                            fetchpriority="high"
-                        />
-                        <div style="padding: 2rem;">
-                            <h3 style="margin-top: 0;font-family: 'SmileySans-Oblique';">{latestPost.data.title}</h3>
-                            <p style="color: #888;">{new Date(latestPost.data.pubDate).toLocaleDateString()}</p>
-                            <p>{latestPost.data.description}</p>
-                        </div>
-                    </a>
-                )}
-                <div class="post-row">
-                    {otherPosts.map(post => (
-                        <a href={`/blog/${post.id}/`} class="post-card">
-                            <img
-                              src={
-                                post.data.heroImage
-                                  ? typeof post.data.heroImage === 'string'
-                                    ? post.data.heroImage
-                                    : post.data.heroImage.src
-                                  : '/assets/blog-placeholder-about.jpg'
-                              }
-                              alt={post.data.title}
-                              style="width: 100%; height: 140px; object-fit: cover; display: block; border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
-                              class="post-image"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                            <div style="padding: 1.5rem;">
-                                <h3 style="margin-top: 0;font-family: 'SmileySans-Oblique';">{post.data.title}</h3>
-                                <p style="color: #888;">{new Date(post.data.pubDate).toLocaleDateString()}</p>
-                                <p>{post.data.description}</p>
-                            </div>
-                        </a>
-                    ))}
-                </div>
-            </section>
-
-            <div style="height: 100px;"></div>
+          </a>
+        ))}
+      </div>
+    </section>
+  </main>
+  <Footer />
+  
+  <script>
+    // ===== 北京时间实时时钟 =====
+    (function() {
+      const timeDisplay = document.getElementById('beijing-time');
+      if (!timeDisplay) return;
+      
+      const timeEl = timeDisplay;
+      
+      function updateBeijingTime() {
+        const now = new Date();
+        const beijingTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
+        const hours = String(beijingTime.getHours()).padStart(2, '0');
+        const minutes = String(beijingTime.getMinutes()).padStart(2, '0');
+        timeEl.textContent = `${hours}:${minutes}`;
+      }
+      
+      updateBeijingTime();
+      setInterval(updateBeijingTime, 1000);
+    })();
+    
+    // ===== 波浪网格背景动画 =====
+    (function() {
+      const canvas = document.getElementById('wave-grid');
+      if (!canvas || !(canvas instanceof HTMLCanvasElement)) return;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      const canvasEl = canvas;
+      const ctxEl = ctx;
+      
+      let timeRef = 0;
+      let mousePos = { x: 0.5, y: 0.5 };
+      
+      const CANVAS_WIDTH = 1500;
+      const CANVAS_HEIGHT = 460;
+      
+      function resizeCanvas() {
+        canvasEl.width = CANVAS_WIDTH * window.devicePixelRatio;
+        canvasEl.height = CANVAS_HEIGHT * window.devicePixelRatio;
+        ctxEl.scale(window.devicePixelRatio, window.devicePixelRatio);
+      }
+      
+      resizeCanvas();
+      
+      canvasEl.addEventListener('mousemove', (e) => {
+        const rect = canvasEl.getBoundingClientRect();
+        mousePos.x = (e.clientX - rect.left) / rect.width;
+        mousePos.y = (e.clientY - rect.top) / rect.height;
+      });
+      
+      const gridSize = 50;
+      const waveAmplitude = 12;
+      const waveFrequency = 0.015;
+      const waveSpeed = 0.015;
+      
+      function animate() {
+        timeRef += waveSpeed;
+        
+        ctxEl.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        ctxEl.strokeStyle = '#1A1A2E';
+        ctxEl.lineWidth = 1;
+        
+        for (let y = 0; y <= CANVAS_HEIGHT; y += gridSize) {
+          ctxEl.beginPath();
+          for (let x = 0; x <= CANVAS_WIDTH; x += 4) {
+            const distToMouse = Math.sqrt(
+              Math.pow(x / CANVAS_WIDTH - mousePos.x, 2) +
+              Math.pow(y / CANVAS_HEIGHT - mousePos.y, 2)
+            );
+            const mouseEffect = Math.max(0, 1 - distToMouse * 3) * 15;
             
-            <!-- 新增相册部分：最新相册为置顶展示，下面并排显示两篇 -->
-            <section>
-                <h2 class="latest-post">最新相册</h2>
-                </br>
-                {latestPhoto && (
-                    <a href={`/photo/${latestPhoto.id}/`} class="post-card featured">
-                        <img
-                            src={
-                                latestPhoto.data.heroImage
-                                    ? typeof latestPhoto.data.heroImage === 'string'
-                                        ? latestPhoto.data.heroImage
-                                        : latestPhoto.data.heroImage.src
-                                    : '/assets/blog-placeholder-about.jpg'
-                            }
-                            alt={latestPhoto.data.title}
-                            style="width: 100%; height: 220px; object-fit: cover; display: block; border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
-                            class="post-image"
-                            loading="lazy"
-                            decoding="async"
-                        />
-                        <div style="padding: 2rem;">
-                            <h3 style="margin-top: 0;font-family: 'SmileySans-Oblique';">{latestPhoto.data.title}</h3>
-                            <p style="color: #888;">{new Date(latestPhoto.data.pubDate).toLocaleDateString()}</p>
-                            <p>{latestPhoto.data.description}</p>
-                        </div>
-                    </a>
-                )}
-
-                <div class="post-row">
-                    {otherPhotos.map(photo => (
-                        <a href={`/photo/${photo.id}/`} class="post-card">
-                            <img
-                                src={
-                                    photo.data.heroImage
-                                        ? typeof photo.data.heroImage === 'string'
-                                            ? photo.data.heroImage
-                                            : photo.data.heroImage.src
-                                        : '/assets/blog-placeholder-about.jpg'
-                                }
-                                alt={photo.data.title}
-                                style="width: 100%; height: 140px; object-fit: cover; display: block; border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
-                                class="post-image"
-                                loading="lazy"
-                                decoding="async"
-                            />
-                            <div style="padding: 1.5rem;">
-                                <h3 style="margin-top: 0;font-family: 'SmileySans-Oblique';">{photo.data.title}</h3>
-                                <p style="color: #888;">{new Date(photo.data.pubDate).toLocaleDateString()}</p>
-                                <p>{photo.data.description}</p>
-                            </div>
-                        </a>
-                    ))}
-                </div>
-            </section>
-        </main>
-        <Footer />
-    </body>
+            const waveY = y +
+              Math.sin(x * waveFrequency + timeRef) * waveAmplitude +
+              Math.sin(x * waveFrequency * 2 + timeRef * 1.3) * (waveAmplitude * 0.5) +
+              mouseEffect * Math.sin(x * 0.03 + timeRef * 2);
+            
+            if (x === 0) ctxEl.moveTo(x, waveY);
+            else ctxEl.lineTo(x, waveY);
+          }
+          ctxEl.stroke();
+        }
+        
+        for (let x = 0; x <= CANVAS_WIDTH; x += gridSize) {
+          ctxEl.beginPath();
+          for (let y = 0; y <= CANVAS_HEIGHT; y += 4) {
+            const distToMouse = Math.sqrt(
+              Math.pow(x / CANVAS_WIDTH - mousePos.x, 2) +
+              Math.pow(y / CANVAS_HEIGHT - mousePos.y, 2)
+            );
+            const mouseEffect = Math.max(0, 1 - distToMouse * 3) * 15;
+            
+            const waveX = x +
+              Math.sin(y * waveFrequency + timeRef) * waveAmplitude +
+              Math.sin(y * waveFrequency * 2 + timeRef * 1.3) * (waveAmplitude * 0.5) +
+              mouseEffect * Math.sin(y * 0.03 + timeRef * 2);
+            
+            if (y === 0) ctxEl.moveTo(waveX, y);
+            else ctxEl.lineTo(waveX, y);
+          }
+          ctxEl.stroke();
+        }
+        
+        requestAnimationFrame(animate);
+      }
+      
+      animate();
+    })();
+    
+    // ===== 随机轮播图 =====
+    (function() {
+      const images = [
+        '/assets/1d442f5857f54f17818bcb2bf6b53730.png',
+        '/assets/2025-10-17_183005_789.png',
+        '/assets/2025-10-17_185645_393.png',
+        '/assets/2025-10-17_185917_944.png'
+      ];
+      
+      const carouselImg = document.querySelector('.carousel-image') as HTMLImageElement;
+      if (!carouselImg) return;
+      
+      const randomIndex = Math.floor(Math.random() * images.length);
+      carouselImg.src = images[randomIndex];
+    })();
+    
+  </script>
+</body>
 </html>
 
 <style>
-.post-card {
-    background: #fff;
-    border-radius: 1rem;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
-    padding: 0;
-    text-decoration: none;
-    color: inherit;
-    overflow: hidden;
-    transition: transform 0.2s cubic-bezier(.4,2,.6,1), box-shadow 0.2s;
-    will-change: transform, box-shadow;
-    display: block;
+/* main 区域限制 */
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3em 1em;
 }
-.post-card:hover {
-    transform: translateY(-8px) scale(1.03);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-    z-index: 1;
+
+/* ===== Hero区域样式 - 突破 main 限制 ===== */
+.hero-section {
+  position: relative;
+  min-height: 150px;
+  /* background: linear-gradient(135deg, #E8E8F5 0%, #F0F0FA 100%); */
+  overflow: visible;
+  /* margin-bottom: 2rem; */
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
 }
-.post-card:hover .post-image {
-    transform: scale(1.06) rotate(-1deg);
+
+/* 外层圆角框 */
+.hero-outer-frame {
+  position: relative;
+  width: 1880px;
+  height: 830px;
+  background: #fff;
+  border-radius: 8px;
+  border: 2px solid #7c7c7d;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
-.post-card.featured {
-    margin-bottom: 2rem;
+
+/* 波浪网格背景容器 */
+.wave-grid-container {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border: 1px solid #afafaf;
+  transform: translate(-50%, -50%);
+  width: 1500px;
+  height: 460px;
+  overflow: hidden;
 }
-.post-row {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    justify-content: center;
+
+/* 波浪网格背景 */
+.wave-grid {
+  width: 100%;
+  height: 100%;
+  opacity: 0.4;
+  will-change: contents;
 }
-.post-row .post-card {
-    flex: 1 1 300px;
-    max-width: 48%;
+
+/* 浮动窗口容器 */
+.windows-container {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
 }
-@media (max-width: 800px) {
-    .post-row {
-        flex-direction: column;
-    }
-    .post-row .post-card {
-        max-width: 100%;
-    }
+
+/* Windows风格窗口 */
+.win-box {
+  position: absolute;
+  background: white;
+  border: 1px solid #999;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.win-box:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+.win-header {
+  height: 28px;
+  background: linear-gradient(180deg, #f5f5f5 0%, #e0e0e0 100%);
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  cursor: grab;
+  user-select: none;
+}
+
+.win-header:active {
+  cursor: grabbing;
+}
+
+.win-header-title {
+  font-size: 12px;
+  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.win-close-btn {
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.win-close-btn:hover {
+  background: #e81123;
+  color: white;
+}
+
+.win-body {
+  flex: 1;
+  padding: 4px;
+  overflow: hidden;
+}
+
+.win-body img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 3px;
+}
+
+/* 角色 */
+.hero-character {
+  position: absolute;
+  right: 18%;
+  bottom: -15%;
+  width: 45.5%;
+  max-width: 390px;
+  z-index: 10;
+  animation: float 4s ease-in-out infinite;
+  will-change: transform;
+  background: transparent;
+}
+
+.character-img {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.2));
+  background: transparent;
+  mix-blend-mode: normal;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+/* 左侧内容 */
+.hero-content {
+  position: absolute;
+  left: 5%;
+  bottom: 12%;
+  z-index: 10;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #1A1A2E;
+  margin: 0 0 0.5rem 0;
+  line-height: 1;
+  font-family: monospace;
+}
+
+.hero-subtitle {
+  font-size: 1rem;
+  color: #4A4A6A;
+  margin: 0.2rem 0;
+  font-family: monospace;
+}
+
+/* 条形码 */
+.barcode {
+  width: 140px;
+  height: 45px;
+  margin-top: 1rem;
+  background: repeating-linear-gradient(
+    90deg,
+    #1A1A2E 0px,
+    #1A1A2E 3px,
+    transparent 3px,
+    transparent 5px,
+    #1A1A2E 5px,
+    #1A1A2E 8px,
+    transparent 8px,
+    transparent 12px,
+    #1A1A2E 12px,
+    #1A1A2E 14px,
+    transparent 14px,
+    transparent 18px
+  );
+}
+
+/* 右上角Logo */
+.hero-logo {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 20;
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #4A4A6A;
+}
+
+.hero-logo span {
+  margin: 0 1px;
+}
+
+/* 响应式 */
+@media (max-width: 1900px) {
+  .hero-outer-frame {
+    width: 95vw;
+    height: auto;
+    min-height: 600px;
+  }
+  
+  .wave-grid-container {
+    width: 80vw;
+    height: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  main {
+    padding: 0 0.5rem;
+  }
+  
+  .hero-section {
+    min-height: 500px;
+    padding: 10px;
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    width: calc(100% + 1rem);
+  }
+  
+  .win-box {
+    display: none !important;
+  }
+  
+  .win-box:first-child {
+    display: flex !important;
+    width: 180px !important;
+    height: 130px !important;
+    left: 50% !important;
+    top: 20% !important;
+    transform: translateX(-50%);
+  }
+  
+  .hero-outer-frame {
+    width: 100%;
+    min-height: 400px;
+  }
+  
+  .wave-grid-container {
+    width: 95%;
+    height: 250px;
+  }
+  
+  .hero-character {
+    width: 52%;
+    max-width: 260px;
+    right: 2%;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-content {
+    left: 5%;
+    bottom: 15%;
+  }
+}
+
+/* ===== 原有样式 ===== */
+.theme-carousel {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 1.5rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+
+.carousel-image {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease, opacity 0.3s ease;
 }
 
 .intro-card {
@@ -303,22 +657,7 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
   max-width: 820px;
   text-align: center;
 }
-.intro-title {
-  margin: 0 0 0.25rem 0;
-  font-size: 1.5rem;
-  line-height: 1.2;
-}
-.intro-title ruby {
-  ruby-position: over; /* 试用浏览器会支持的展示方式 */
-}
-.intro-title rt {
-  font-size: 0.6em;
-  display: inline-block;
-  transform: translateY(-0.25em);
-  color: rgba(0,0,0,0.6);
-  vertical-align: top;
-  margin-left: 0.25ch;
-}
+
 .intro-desc {
   margin: 0.25rem 0 0;
   color: #555;
@@ -326,18 +665,18 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
   font-size: 1rem;
 }
 
-/* 强制把注音显示在文字正上方 */
 .intro-desc ruby {
   display: inline-block;
-  position: relative; /* 作为定位容器 */
+  position: relative;
   line-height: 1;
   vertical-align: middle;
 }
+
 .intro-desc rt {
   position: absolute;
   left: 50%;
   top: 0;
-  transform: translate(-50%, -120%); /* 把注音移到上方 */
+  transform: translate(-50%, -120%);
   display: block;
   font-size: 0.65em;
   white-space: nowrap;
@@ -347,59 +686,89 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
   z-index: 2;
 }
 
-/* 如果希望注音紧贴并居中每个单字，可以在需要的地方把主体文字拆成单字符的 ruby，例如：
-   <ruby><rb>世</rb><rt>マ</rt></ruby><ruby><rb>界</rb><rt>ス</rt></ruby><ruby><rb>へ</rb><rt>カ</rt></ruby>
-   但上面样式对整体词的注音也会居中显示。
-*/
-
-/* 保持卡片与页面整体一贯样式 */
-.post-card, .intro-card { /* 如果已有 .post-card 规则，可以只保留共有属性 */
-  transition: box-shadow 0.18s ease, transform 0.18s ease;
+.latest-post {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 1rem 0;
+  text-align: center;
 }
 
-/* 轮播图样式 */
-.theme-carousel {
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto 1.5rem;
-    border-radius: 1rem;
-    overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+.post-card {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  padding: 0;
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(.4,2,.6,1), box-shadow 0.2s;
+  will-change: transform, box-shadow;
+  display: block;
 }
 
-.carousel-image {
-    width: 100%;
-    height: 350px; /* 设置适当的高度，可以根据需要调整 */
-    object-fit: cover; /* 保持图片比例并覆盖整个容器 */
-    display: block;
-    transition: transform 0.5s ease, opacity 0.3s ease;
-    background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%); /* 占位背景 */
+.post-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  z-index: 1;
 }
 
-.carousel-image:hover {
-    transform: scale(1.03); /* 鼠标悬停时轻微放大效果 */
+.post-card:hover .post-image {
+  transform: scale(1.06) rotate(-1deg);
 }
 
-/* 文章图片懒加载淡入效果 */
+.post-card.featured {
+  margin-bottom: 2rem;
+}
+
 .post-image {
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%); /* 占位背景 */
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.post-image[loading="lazy"] {
-    opacity: 0;
+.post-card:not(.featured) .post-image {
+  height: 140px;
 }
 
-.post-image[loading="lazy"].loaded,
-.post-image:not([loading="lazy"]) {
-    opacity: 1;
+.post-content {
+  padding: 1.5rem;
 }
 
-/* 响应式设计 */
+.post-content h3 {
+  margin-top: 0;
+  font-family: 'SmileySans-Oblique', sans-serif;
+}
+
+.post-date {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.post-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.post-row .post-card {
+  flex: 1 1 300px;
+  max-width: 48%;
+}
+
 @media (max-width: 800px) {
-    .carousel-image {
-        height: 220px; /* 在移动设备上调整高度 */
-    }
-    /* 其他现有响应式样式... */
+  .post-row {
+    flex-direction: column;
+  }
+  .post-row .post-card {
+    max-width: 100%;
+  }
+  .carousel-image {
+    height: 220px;
+  }
 }
 </style>
