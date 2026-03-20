@@ -1,0 +1,170 @@
+---
+// 自定义光标组件 - 支持精确控制大小
+// 使用方法: 在布局文件中引入 <CustomCursor />
+---
+
+<style is:global>
+  /* 隐藏默认光标 */
+  body.custom-cursor-enabled,
+  body.custom-cursor-enabled *,
+  body.custom-cursor-enabled a,
+  body.custom-cursor-enabled button {
+    cursor: none !important;
+  }
+  
+  /* 自定义光标元素 */
+  #custom-cursor {
+    position: fixed;
+    width: 24px;  /* 控制光标大小 */
+    height: 24px; /* 控制光标大小 */
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-2px, -2px); /* 调整点击点位置 */
+    transition: transform 0.05s ease;
+    image-rendering: pixelated;
+  }
+  
+  /* 确保光标在不同设备上大小一致 */
+  @media (max-width: 768px) {
+    #custom-cursor {
+      width: 20px;
+      height: 20px;
+    }
+  }
+  
+  /* 点击状态 */
+  #custom-cursor.clicking {
+    transform: translate(-2px, -2px) scale(0.9);
+  }
+  
+  /* 拖拽状态 */
+  #custom-cursor.dragging {
+    transform: translate(-2px, -2px) scale(1.1);
+  }
+</style>
+
+<script>
+  (function() {
+    // 检查是否是触摸设备
+    if (window.matchMedia('(pointer: coarse)').matches) {
+      return; // 触摸设备不启用自定义光标
+    }
+    
+    // 创建光标元素
+    const cursor = document.createElement('img');
+    cursor.id = 'custom-cursor';
+    cursor.src = '/cursors/Pointer.png'; // 使用 PNG 版本
+    cursor.style.left = '-100px';
+    cursor.style.top = '-100px';
+    document.body.appendChild(cursor);
+    
+    // 添加启用类
+    document.body.classList.add('custom-cursor-enabled');
+    
+    // 光标位置更新
+    let mouseX = 0, mouseY = 0;
+    let cursorX = 0, cursorY = 0;
+    
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    }, { passive: true });
+    
+    // 平滑跟随动画
+    function animate() {
+      const dx = mouseX - cursorX;
+      const dy = mouseY - cursorY;
+      
+      cursorX += dx * 0.2;
+      cursorY += dy * 0.2;
+      
+      cursor.style.left = cursorX + 'px';
+      cursor.style.top = cursorY + 'px';
+      
+      requestAnimationFrame(animate);
+    }
+    animate();
+    
+    // 检测悬停元素类型，切换光标图片
+    const cursorStates = {
+      default: '/cursors/Pointer.png',
+      pointer: '/cursors/Link.png',
+      text: '/cursors/Text.png',
+      move: '/cursors/Move.png',
+      wait: '/cursors/Busy.gif', // 动画需要转换为 gif
+      help: '/cursors/Help.png',
+      notAllowed: '/cursors/Unavailable.png',
+      crosshair: '/cursors/Cross.png',
+      zoomIn: '/cursors/Zoom-in.png',
+      zoomOut: '/cursors/Zoom-out.png'
+    };
+    
+    function updateCursor() {
+      const element = document.elementFromPoint(mouseX, mouseY);
+      if (!element) return;
+      
+      const computedStyle = window.getComputedStyle(element);
+      const nativeCursor = computedStyle.cursor;
+      
+      // 根据原生光标类型切换图片
+      switch(nativeCursor) {
+        case 'pointer':
+          cursor.src = cursorStates.pointer;
+          break;
+        case 'text':
+        case 'vertical-text':
+          cursor.src = cursorStates.text;
+          break;
+        case 'move':
+          cursor.src = cursorStates.move;
+          break;
+        case 'wait':
+        case 'progress':
+          cursor.src = cursorStates.wait;
+          break;
+        case 'help':
+          cursor.src = cursorStates.help;
+          break;
+        case 'not-allowed':
+          cursor.src = cursorStates.notAllowed;
+          break;
+        case 'crosshair':
+          cursor.src = cursorStates.crosshair;
+          break;
+        case 'zoom-in':
+          cursor.src = cursorStates.zoomIn;
+          break;
+        case 'zoom-out':
+          cursor.src = cursorStates.zoomOut;
+          break;
+        default:
+          cursor.src = cursorStates.default;
+      }
+    }
+    
+    // 节流更新
+    let ticking = false;
+    document.addEventListener('mousemove', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          updateCursor();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+    
+    // 点击效果
+    document.addEventListener('mousedown', () => cursor.classList.add('clicking'));
+    document.addEventListener('mouseup', () => cursor.classList.remove('clicking'));
+    
+    // 鼠标离开窗口时隐藏
+    document.addEventListener('mouseleave', () => {
+      cursor.style.opacity = '0';
+    });
+    document.addEventListener('mouseenter', () => {
+      cursor.style.opacity = '1';
+    });
+    
+  })();
+</script>

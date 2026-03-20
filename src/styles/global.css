@@ -48,6 +48,12 @@
 	font-display: swap;
 }
 
+/* ==================== 自定义鼠标指针 ==================== */
+/* 将所有 .cur 和 .ani 文件放入 public/cursors/ 目录 */
+/* 推荐尺寸: 32x32 像素 (Windows 标准光标大小) */
+/* 如果光标太大，请重新导出为 32x32 像素的文件 */
+
+/* 默认指针 - PNG 优先，带阴影效果 */
 body {
 	font-family: "Atkinson", sans-serif;
 	margin: 0;
@@ -60,6 +66,113 @@ body {
 	color: rgb(var(--gray-dark));
 	font-size: 20px;
 	line-height: 1.7;
+	/* PNG 优先，带阴影滤镜 */
+	cursor: url('/cursors/Pointer.png'), url('/cursors/Pointer.cur'), auto;
+}
+
+/* 链接和可点击元素 - 使用 Link */
+a, button, [role="button"], input[type="submit"], input[type="button"],
+a:hover, button:hover {
+	cursor: url('/cursors/Link.png'), url('/cursors/Link.cur'), pointer;
+}
+
+/* 文本输入框 - 使用 Text */
+input[type="text"], input[type="email"], input[type="password"], 
+input[type="search"], input[type="url"], textarea,
+input:focus, textarea:focus {
+	cursor: url('/cursors/Text.png'), url('/cursors/Text.cur'), text;
+}
+
+/* 忙/加载状态 - 使用 Busy */
+body.loading, .cursor-busy {
+	cursor: url('/cursors/Busy.png'), url('/cursors/Busy.ani'), url('/cursors/Busy.cur'), wait;
+}
+
+/* 拖拽状态 - 使用 Move */
+[draggable="true"], .cursor-move {
+	cursor: url('/cursors/Move.png'), url('/cursors/Move.cur'), move;
+}
+
+/* 缩放状态 */
+.cursor-zoom-in {
+	cursor: url('/cursors/Zoom-in.png'), url('/cursors/Zoom-in.cur'), zoom-in;
+}
+.cursor-zoom-out {
+	cursor: url('/cursors/Zoom-out.png'), url('/cursors/Zoom-out.cur'), zoom-out;
+}
+
+/* 调整大小 */
+.cursor-resize-h {
+	cursor: url('/cursors/Horz.png'), url('/cursors/Horz.cur'), ew-resize;
+}
+.cursor-resize-v {
+	cursor: url('/cursors/Vert.png'), url('/cursors/Vert.cur'), ns-resize;
+}
+.cursor-resize-d1 {
+	cursor: url('/cursors/Dgn1.png'), url('/cursors/Dgn1.cur'), nwse-resize;
+}
+.cursor-resize-d2 {
+	cursor: url('/cursors/Dgn2.png'), url('/cursors/Dgn2.cur'), nesw-resize;
+}
+
+/* 不可用状态 */
+.disabled, [disabled],
+input:disabled, button:disabled, textarea:disabled {
+	cursor: url('/cursors/Unavailable.png'), url('/cursors/Unavailable.cur'), not-allowed;
+}
+
+/* 帮助状态 */
+.cursor-help {
+	cursor: url('/cursors/Help.png'), url('/cursors/Help.cur'), help;
+}
+
+/* 手写字体/编辑 */
+.cursor-handwriting {
+	cursor: url('/cursors/Handwriting.png'), url('/cursors/Handwriting.cur'), text;
+}
+
+/* 抓取/拖拽 */
+.cursor-grabbing, .cursor-grabbing * {
+	cursor: url('/cursors/Grabbing.png'), url('/cursors/Grabbing.cur'), grabbing;
+}
+.cursor-grab {
+	cursor: url('/cursors/Pan.png'), url('/cursors/Pan.cur'), grab;
+}
+
+/* 精确选择（十字准星） */
+.cursor-crosshair {
+	cursor: url('/cursors/Cross.png'), url('/cursors/Cross.cur'), crosshair;
+}
+
+/* 备选指针（Alternate） */
+.cursor-alternate {
+	cursor: url('/cursors/Alternate.png'), url('/cursors/Alternate.cur'), default;
+}
+
+/* ==================== 光标使用说明 ==================== */
+/* 
+   以下光标会自动生效（无需额外操作）：
+   - Pointer.cur: 页面默认指针
+   - Link.cur: 悬停在链接、按钮上
+   - Text.cur: 聚焦输入框
+   - Unavailable.cur: 禁用状态的元素
+   - Busy.ani: 页面加载时（给 body 加 .loading 类）
+
+   以下光标需要手动添加 class（特殊场景）：
+   - cursor-move: 可拖拽元素
+   - cursor-help: 帮助提示
+   - cursor-zoom-in/cursor-zoom-out: 放大/缩小功能
+   - cursor-resize-h/v/d1/d2: 调整大小
+   - cursor-grab/cursor-grabbing: 抓取/拖拽中
+   - cursor-crosshair: 精确选择
+   - cursor-handwriting: 手写模式
+   - cursor-busy: 忙状态
+   - cursor-alternate: 备选指针
+*/
+
+/* 确保光标优先级足够高，覆盖其他样式 */
+body, * {
+	cursor: inherit;
 }
 main {
 	width: 720px;
