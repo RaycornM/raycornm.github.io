@@ -40,16 +40,21 @@ const posts = (await getCollection('blog')).sort(
 				margin-bottom: 1rem;
 				text-align: center;
 			}
-			ul li:first-child img {
-				width: 100%;
-			}
+				ul li:first-child img {
+					width: 100%;
+					height: auto;
+				}
 			ul li:first-child .title {
 				font-size: 2.369rem;
 			}
-			ul li img {
-				margin-bottom: 0.5rem;
-				border-radius: 12px;
-			}
+				ul li img {
+					margin-bottom: 0.5rem;
+					border-radius: 12px;
+					/* Default thumbnail size for non-feature items */
+					width: 447px;
+					height: 224px;
+					object-fit: cover;
+				}
 			ul li a {
 				display: block;
 			}
@@ -93,18 +98,30 @@ const posts = (await getCollection('blog')).sort(
 			<section>
 				<ul>
 					{
-						posts.map((post) => (
+						posts.map((post, i) => (
 							<li>
 								<a href={`/blog/${post.id}/`}>
 									{post.data.heroImage && (
-										<Image 
-											width={720} 
-											height={360} 
-											src={post.data.heroImage} 
-											alt="" 
-											loading="lazy"
-											decoding="async"
-										/>
+										i === 0 ? (
+											<Image 
+												width={720} 
+												height={360} 
+												src={post.data.heroImage} 
+												alt="" 
+												loading="lazy"
+												decoding="async"
+											/>
+										) : (
+											<Image 
+												width={447}
+												height={224}
+												src={post.data.heroImage}
+												alt=""
+												loading="lazy"
+												decoding="async"
+												class="post-thumb"
+											/>
+										)
 									)}
 									<h4 class="title">{post.data.title}</h4>
 									<p class="date">
