@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
+import CursorShadow from '../components/CursorShadow.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
@@ -313,6 +314,7 @@ const backLink = collection === 'photo' ? '/photo' : '/blog';
 	</head>
 
 	<body class={collection === 'photo' ? 'photo-theme' : ''}>
+		<CursorShadow />
 		<Header />
 		<main>
 			<div class="blog-container">
