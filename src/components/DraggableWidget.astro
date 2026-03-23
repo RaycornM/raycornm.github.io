@@ -18,7 +18,7 @@ interface Props {
 
 const {
   id,
-  title = '窗口',
+  title = "窗口",
   initialX = 100,
   initialY = 100,
   initialWidth = 300,
@@ -29,14 +29,17 @@ const {
   transparent = false,
   noResize = false,
   animate = true,
-  index = 0
+  index = 0,
 } = Astro.props;
 
 const animationDelay = animate ? index * 200 : 0;
 ---
 
 <div
-  class:list={['draggable-widget', { 'is-transparent': transparent, 'pop-in': animate }]}
+  class:list={[
+    "draggable-widget",
+    { "is-transparent": transparent, "pop-in": animate },
+  ]}
   id={id}
   data-magnifier-scale={magnifierScale}
   data-min-width={minWidth}
@@ -54,52 +57,67 @@ const animationDelay = animate ? index * 200 : 0;
     <span class="widget-title">{title}</span>
     <button class="widget-close" data-close aria-label="关闭">×</button>
   </div>
-  
+
   <div class="widget-content" data-content>
     <div class="widget-slot-content">
       <slot />
     </div>
   </div>
-  
+
   <div class="magnifier-layer" data-magnifier></div>
-  
-  {!noResize && (
-    <div class="resize-handlers">
-      <div class="resize-handle top" data-dir="top"></div>
-      <div class="resize-handle right" data-dir="right"></div>
-      <div class="resize-handle bottom" data-dir="bottom"></div>
-      <div class="resize-handle left" data-dir="left"></div>
-      <div class="resize-handle top-left" data-dir="top-left"></div>
-      <div class="resize-handle top-right" data-dir="top-right"></div>
-      <div class="resize-handle bottom-left" data-dir="bottom-left"></div>
-      <div class="resize-handle bottom-right" data-dir="bottom-right"></div>
-    </div>
-  )}
+
+  {
+    !noResize && (
+      <div class="resize-handlers">
+        <div class="resize-handle top" data-dir="top" />
+        <div class="resize-handle right" data-dir="right" />
+        <div class="resize-handle bottom" data-dir="bottom" />
+        <div class="resize-handle left" data-dir="left" />
+        <div class="resize-handle top-left" data-dir="top-left" />
+        <div class="resize-handle top-right" data-dir="top-right" />
+        <div class="resize-handle bottom-left" data-dir="bottom-left" />
+        <div class="resize-handle bottom-right" data-dir="bottom-right" />
+      </div>
+    )
+  }
 </div>
 
 <script is:inline>
-  (function() {
-    'use strict';
-    
+  (function () {
+    "use strict";
+
     if (window.__widgetManagerReady) return;
     window.__widgetManagerReady = true;
 
     const widgets = new Map();
-    let zIndexCounter = 100;
+    let zIndexCounter = 50;
     let activeWidget = null;
     let dragState = null;
 
+    function bringToFront(widget) {
+      zIndexCounter++;
+      // 添加上限，确保不超过菜单栏（假设菜单栏是 1000）
+      const MAX_Z_INDEX = 999;
+      const newZ = Math.min(zIndexCounter, MAX_Z_INDEX);
+
+      widget.style.zIndex = newZ;
+      const data = widgets.get(widget.id);
+      if (data) data.zIndex = newZ;
+    }
+
     function init() {
-      document.querySelectorAll('.draggable-widget').forEach(registerWidget);
-      
+      document.querySelectorAll(".draggable-widget").forEach(registerWidget);
+
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           mutation.addedNodes.forEach((node) => {
             if (node.nodeType === 1) {
-              if (node.classList.contains('draggable-widget')) {
+              if (node.classList.contains("draggable-widget")) {
                 registerWidget(node);
               }
-              node.querySelectorAll?.('.draggable-widget').forEach(registerWidget);
+              node
+                .querySelectorAll?.(".draggable-widget")
+                .forEach(registerWidget);
             }
           });
         });
@@ -110,26 +128,26 @@ const animationDelay = animate ? index * 200 : 0;
     function registerWidget(widget) {
       if (widgets.has(widget.id)) return;
 
-      const header = widget.querySelector('[data-header]');
-      const closeBtn = widget.querySelector('[data-close]');
-      const magnifier = widget.querySelector('[data-magnifier]');
-      const slotContent = widget.querySelector('.widget-slot-content');
-      
+      const header = widget.querySelector("[data-header]");
+      const closeBtn = widget.querySelector("[data-close]");
+      const magnifier = widget.querySelector("[data-magnifier]");
+      const slotContent = widget.querySelector(".widget-slot-content");
+
       let sourceImg = null;
       if (slotContent) {
-        const img = slotContent.querySelector('img');
+        const img = slotContent.querySelector("img");
         if (img && img.src) {
           sourceImg = img;
           if (!img.complete) {
-            img.addEventListener('load', () => updateMagnifier(widget));
+            img.addEventListener("load", () => updateMagnifier(widget));
           }
         }
       }
 
       if (closeBtn) {
-        closeBtn.addEventListener('click', (e) => {
+        closeBtn.addEventListener("click", (e) => {
           e.stopPropagation();
-          widget.classList.add('closing');
+          widget.classList.add("closing");
           setTimeout(() => {
             widget.remove();
             widgets.delete(widget.id);
@@ -139,20 +157,20 @@ const animationDelay = animate ? index * 200 : 0;
       }
 
       if (header) {
-        header.addEventListener('mousedown', (e) => {
-          if (e.target.closest('[data-close]')) return;
+        header.addEventListener("mousedown", (e) => {
+          if (e.target.closest("[data-close]")) return;
           startDrag(e, widget);
         });
       }
 
-      widget.querySelectorAll('.resize-handle').forEach(handle => {
-        handle.addEventListener('mousedown', (e) => {
+      widget.querySelectorAll(".resize-handle").forEach((handle) => {
+        handle.addEventListener("mousedown", (e) => {
           e.stopPropagation();
           startResize(e, widget, handle.dataset.dir);
         });
       });
 
-      widget.addEventListener('mousedown', () => {
+      widget.addEventListener("mousedown", () => {
         bringToFront(widget);
         updateAllMagnifiers();
       });
@@ -164,110 +182,116 @@ const animationDelay = animate ? index * 200 : 0;
         minWidth: parseFloat(widget.dataset.minWidth) || 100,
         minHeight: parseFloat(widget.dataset.minHeight) || 80,
         magnifierEl: magnifier,
-        zIndex: 100
+        zIndex: 100,
       });
 
       bringToFront(widget);
       updateMagnifier(widget);
-      
-      if (widget.classList.contains('pop-in')) {
+
+      if (widget.classList.contains("pop-in")) {
         const delay = parseFloat(getComputedStyle(widget).animationDelay) || 0;
-        setTimeout(() => {
-          widget.classList.remove('pop-in');
-          widget.style.willChange = 'auto';
-        }, 600 + delay * 1000);
+        setTimeout(
+          () => {
+            widget.classList.remove("pop-in");
+            widget.style.willChange = "auto";
+          },
+          600 + delay * 1000,
+        );
       }
     }
 
     function startDrag(e, widget) {
       activeWidget = widget;
       dragState = {
-        type: 'drag',
+        type: "drag",
         startX: e.clientX,
         startY: e.clientY,
         startLeft: widget.offsetLeft,
-        startTop: widget.offsetTop
+        startTop: widget.offsetTop,
       };
 
       bringToFront(widget);
-      widget.style.transition = 'none';
-      document.body.style.cursor = 'grabbing';
+      widget.style.transition = "none";
+      document.body.style.cursor = "grabbing";
       e.preventDefault();
     }
 
     function startResize(e, widget, dir) {
       activeWidget = widget;
       dragState = {
-        type: 'resize',
+        type: "resize",
         dir: dir,
         startX: e.clientX,
         startY: e.clientY,
         startLeft: widget.offsetLeft,
         startTop: widget.offsetTop,
         startWidth: widget.offsetWidth,
-        startHeight: widget.offsetHeight
+        startHeight: widget.offsetHeight,
       };
 
       bringToFront(widget);
-      widget.style.transition = 'none';
-      
+      widget.style.transition = "none";
+
       const cursors = {
-        'top': 'n-resize', 'bottom': 's-resize',
-        'left': 'w-resize', 'right': 'e-resize',
-        'top-left': 'nw-resize', 'top-right': 'ne-resize',
-        'bottom-left': 'sw-resize', 'bottom-right': 'se-resize'
+        top: "n-resize",
+        bottom: "s-resize",
+        left: "w-resize",
+        right: "e-resize",
+        "top-left": "nw-resize",
+        "top-right": "ne-resize",
+        "bottom-left": "sw-resize",
+        "bottom-right": "se-resize",
       };
-      document.body.style.cursor = cursors[dir] || 'default';
+      document.body.style.cursor = cursors[dir] || "default";
       e.preventDefault();
     }
 
     function onMouseMove(e) {
       if (!activeWidget || !dragState) return;
-      
-      if (dragState.type === 'drag') {
+
+      if (dragState.type === "drag") {
         const dx = e.clientX - dragState.startX;
         const dy = e.clientY - dragState.startY;
-        activeWidget.style.left = (dragState.startLeft + dx) + 'px';
-        activeWidget.style.top = (dragState.startTop + dy) + 'px';
+        activeWidget.style.left = dragState.startLeft + dx + "px";
+        activeWidget.style.top = dragState.startTop + dy + "px";
         updateAllMagnifiers();
-      } 
-      else if (dragState.type === 'resize') {
+      } else if (dragState.type === "resize") {
         const dx = e.clientX - dragState.startX;
         const dy = e.clientY - dragState.startY;
         const data = widgets.get(activeWidget.id);
-        
+
         let newLeft = dragState.startLeft;
         let newTop = dragState.startTop;
         let newWidth = dragState.startWidth;
         let newHeight = dragState.startHeight;
 
-        if (dragState.dir.includes('right')) {
+        if (dragState.dir.includes("right")) {
           newWidth = Math.max(data.minWidth, dragState.startWidth + dx);
         }
-        if (dragState.dir.includes('left')) {
+        if (dragState.dir.includes("left")) {
           newWidth = Math.max(data.minWidth, dragState.startWidth - dx);
           newLeft = dragState.startLeft + dx;
         }
-        if (dragState.dir.includes('bottom')) {
+        if (dragState.dir.includes("bottom")) {
           newHeight = Math.max(data.minHeight, dragState.startHeight + dy);
         }
-        if (dragState.dir.includes('top')) {
+        if (dragState.dir.includes("top")) {
           newHeight = Math.max(data.minHeight, dragState.startHeight - dy);
           newTop = dragState.startTop + dy;
         }
 
-        activeWidget.style.left = newLeft + 'px';
-        activeWidget.style.top = newTop + 'px';
-        activeWidget.style.width = newWidth + 'px';
-        activeWidget.style.height = newHeight + 'px';
+        activeWidget.style.left = newLeft + "px";
+        activeWidget.style.top = newTop + "px";
+        activeWidget.style.width = newWidth + "px";
+        activeWidget.style.height = newHeight + "px";
         updateAllMagnifiers();
       }
     }
 
     function onMouseUp() {
       if (!activeWidget) return;
-      activeWidget.style.transition = '';
-      document.body.style.cursor = '';
+      activeWidget.style.transition = "";
+      document.body.style.cursor = "";
       activeWidget = null;
       dragState = null;
       updateAllMagnifiers();
@@ -293,24 +317,24 @@ const animationDelay = animate ? index * 200 : 0;
 
       const magnifier = data.magnifierEl;
       const scale = data.magnifierScale;
-      
+
       const widgetRect = widget.getBoundingClientRect();
       const headerHeight = 32;
-      
+
       const contentRect = {
         left: widgetRect.left,
         top: widgetRect.top + headerHeight,
         right: widgetRect.right,
-        bottom: widgetRect.bottom
+        bottom: widgetRect.bottom,
       };
 
       let bestSource = null;
       let bestZ = -1;
 
       // 检查Hero Character
-      const heroSection = document.getElementById('hero-section');
+      const heroSection = document.getElementById("hero-section");
       if (heroSection) {
-        const heroImg = heroSection.querySelector('.hero-character img');
+        const heroImg = heroSection.querySelector(".hero-character img");
         if (heroImg) {
           const heroRect = heroImg.getBoundingClientRect();
           const overlap = getOverlapRect(contentRect, heroRect);
@@ -329,33 +353,33 @@ const animationDelay = animate ? index * 200 : 0;
         const imgRect = otherData.sourceImg.getBoundingClientRect();
         const overlap = getOverlapRect(contentRect, imgRect);
         if (overlap && otherData.zIndex > bestZ) {
-          bestSource = { 
-            img: otherData.sourceImg, 
-            overlap, 
-            zIndex: otherData.zIndex 
+          bestSource = {
+            img: otherData.sourceImg,
+            overlap,
+            zIndex: otherData.zIndex,
           };
           bestZ = otherData.zIndex;
         }
       });
 
       if (!bestSource) {
-        magnifier.style.display = 'none';
+        magnifier.style.display = "none";
         return;
       }
 
-      magnifier.style.display = 'block';
-      
+      magnifier.style.display = "block";
+
       const img = bestSource.img;
       const naturalWidth = img.naturalWidth || img.width || 100;
       const naturalHeight = img.naturalHeight || img.height || 100;
       const containerRect = img.getBoundingClientRect(); // 容器尺寸
-      
+
       // 计算 object-fit: cover 下图片的实际渲染尺寸和偏移
       const containerRatio = containerRect.width / containerRect.height;
       const imageRatio = naturalWidth / naturalHeight;
-      
+
       let renderedWidth, renderedHeight, offsetX, offsetY;
-      
+
       if (containerRatio > imageRatio) {
         // 容器更宽，图片按高度比例填满，左右被裁剪
         renderedHeight = containerRect.height;
@@ -373,15 +397,17 @@ const animationDelay = animate ? index * 200 : 0;
       // 关键修复：使用 natural 尺寸计算背景图大小（保持原始比例，防止变形）
       const bgWidth = naturalWidth * scale;
       const bgHeight = naturalHeight * scale;
-      
+
       // 计算重叠区域在"渲染后图片"中的位置
-      const overlapLeftInRendered = bestSource.overlap.left - (containerRect.left + offsetX);
-      const overlapTopInRendered = bestSource.overlap.top - (containerRect.top + offsetY);
-      
+      const overlapLeftInRendered =
+        bestSource.overlap.left - (containerRect.left + offsetX);
+      const overlapTopInRendered =
+        bestSource.overlap.top - (containerRect.top + offsetY);
+
       // 转换为 natural 坐标系（因为 background-size 是基于 natural 的）
       const ratioX = naturalWidth / renderedWidth;
       const ratioY = naturalHeight / renderedHeight;
-      
+
       const bgX = -(overlapLeftInRendered * ratioX * scale);
       const bgY = -(overlapTopInRendered * ratioY * scale);
 
@@ -390,12 +416,12 @@ const animationDelay = animate ? index * 200 : 0;
       const relTop = bestSource.overlap.top - widgetRect.top;
       const relWidth = bestSource.overlap.right - bestSource.overlap.left;
       const relHeight = bestSource.overlap.bottom - bestSource.overlap.top;
-      
-      magnifier.style.left = relLeft + 'px';
-      magnifier.style.top = relTop + 'px';
-      magnifier.style.width = relWidth + 'px';
-      magnifier.style.height = relHeight + 'px';
-      
+
+      magnifier.style.left = relLeft + "px";
+      magnifier.style.top = relTop + "px";
+      magnifier.style.width = relWidth + "px";
+      magnifier.style.height = relHeight + "px";
+
       magnifier.style.backgroundImage = `url(${img.src})`;
       magnifier.style.backgroundSize = `${bgWidth}px ${bgHeight}px`;
       magnifier.style.backgroundPosition = `${bgX}px ${bgY}px`;
@@ -412,11 +438,11 @@ const animationDelay = animate ? index * 200 : 0;
       return null;
     }
 
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
     } else {
       init();
     }
@@ -441,8 +467,14 @@ const animationDelay = animate ? index * 200 : 0;
   }
 
   @keyframes dwPopIn {
-    0% { opacity: 0; transform: translate3d(0, 20px, 0) scale(0.92); }
-    100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+    0% {
+      opacity: 0;
+      transform: translate3d(0, 20px, 0) scale(0.92);
+    }
+    100% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+    }
   }
 
   .draggable-widget.pop-in {
@@ -460,7 +492,10 @@ const animationDelay = animate ? index * 200 : 0;
   }
 
   @keyframes dwPopOut {
-    to { opacity: 0; transform: scale(0.9); }
+    to {
+      opacity: 0;
+      transform: scale(0.9);
+    }
   }
 
   .draggable-widget.is-transparent {
@@ -498,7 +533,7 @@ const animationDelay = animate ? index * 200 : 0;
   .widget-title {
     font-size: 13px;
     color: #333;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -570,12 +605,60 @@ const animationDelay = animate ? index * 200 : 0;
     background: transparent;
   }
 
-  .resize-handle.top { top: -3px; left: 8px; right: 8px; height: 6px; cursor: n-resize; }
-  .resize-handle.bottom { bottom: -3px; left: 8px; right: 8px; height: 6px; cursor: s-resize; }
-  .resize-handle.left { left: -3px; top: 8px; bottom: 8px; width: 6px; cursor: w-resize; }
-  .resize-handle.right { right: -3px; top: 8px; bottom: 8px; width: 6px; cursor: e-resize; }
-  .resize-handle.top-left { top: -3px; left: -3px; width: 12px; height: 12px; cursor: nw-resize; }
-  .resize-handle.top-right { top: -3px; right: -3px; width: 12px; height: 12px; cursor: ne-resize; }
-  .resize-handle.bottom-left { bottom: -3px; left: -3px; width: 12px; height: 12px; cursor: sw-resize; }
-  .resize-handle.bottom-right { bottom: -3px; right: -3px; width: 12px; height: 12px; cursor: se-resize; }
+  .resize-handle.top {
+    top: -3px;
+    left: 8px;
+    right: 8px;
+    height: 6px;
+    cursor: n-resize;
+  }
+  .resize-handle.bottom {
+    bottom: -3px;
+    left: 8px;
+    right: 8px;
+    height: 6px;
+    cursor: s-resize;
+  }
+  .resize-handle.left {
+    left: -3px;
+    top: 8px;
+    bottom: 8px;
+    width: 6px;
+    cursor: w-resize;
+  }
+  .resize-handle.right {
+    right: -3px;
+    top: 8px;
+    bottom: 8px;
+    width: 6px;
+    cursor: e-resize;
+  }
+  .resize-handle.top-left {
+    top: -3px;
+    left: -3px;
+    width: 12px;
+    height: 12px;
+    cursor: nw-resize;
+  }
+  .resize-handle.top-right {
+    top: -3px;
+    right: -3px;
+    width: 12px;
+    height: 12px;
+    cursor: ne-resize;
+  }
+  .resize-handle.bottom-left {
+    bottom: -3px;
+    left: -3px;
+    width: 12px;
+    height: 12px;
+    cursor: sw-resize;
+  }
+  .resize-handle.bottom-right {
+    bottom: -3px;
+    right: -3px;
+    width: 12px;
+    height: 12px;
+    cursor: se-resize;
+  }
 </style>
