@@ -1,12 +1,12 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import CursorShadow from '../components/CursorShadow.astro';
-import Footer from '../components/Footer.astro';
-import Header from '../components/Header.astro';
-import IntroCard from '../components/IntroCard.astro';
-import DraggableWidget from '../components/DraggableWidget.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
-import { getCollection } from 'astro:content';
+import BaseHead from "../components/BaseHead.astro";
+import CursorShadow from "../components/CursorShadow.astro";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import IntroCard from "../components/IntroCard.astro";
+import DraggableWidget from "../components/DraggableWidget.astro";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
+import { getCollection } from "astro:content";
 
 // Use import.meta.glob for blog posts
 type Post = {
@@ -22,753 +22,887 @@ type Post = {
 // 添加主题图片数组
 const themeImages = [
   // 使用本地图片资源替代外部链接
-  '/assets/1d442f5857f54f17818bcb2bf6b53730.png',
-  '/assets/2025-10-17_183005_789.png',
-  '/assets/2025-10-17_185645_393.png',
-  '/assets/2025-10-17_185917_944.png',
+  "/assets/1d442f5857f54f17818bcb2bf6b53730.png",
+  "/assets/2025-10-17_183005_789.png",
+  "/assets/2025-10-17_185645_393.png",
+  "/assets/2025-10-17_185917_944.png",
 ];
 
 // 注意：移除服务器端的随机图片选择，改为在客户端执行
 
-const posts = await getCollection('blog');
-const sortedPosts = posts
-  .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
+const posts = await getCollection("blog");
+const sortedPosts = posts.sort(
+  (a, b) =>
+    new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime(),
+);
 const [latestPost, ...otherPosts] = sortedPosts.slice(0, 3);
 
 // 新增相册数据获取
 // NOTE: the collection is named `photo` in `src/content.config.ts`, not `photos`.
-const photoAlbum = await getCollection('photo');
-const sortedPhotos = photoAlbum
-  .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
+const photoAlbum = await getCollection("photo");
+const sortedPhotos = photoAlbum.sort(
+  (a, b) =>
+    new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime(),
+);
 const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
 ---
 
 <!doctype html>
 <html lang="en">
-<head>
-  <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-</head>
-<body>
-  <CursorShadow />
-  <Header />
-  <main>
-    <!-- ===== 1:09风格Hero区域 ===== -->
-    <section class="hero-section" id="hero-section">
-      <!-- 外层圆角框 -->
-      <div class="hero-outer-frame">
-        <!-- 波浪网格背景容器 -->
-        <div class="wave-grid-container">
-          <canvas id="wave-grid" class="wave-grid"></canvas>
-        </div>
-        
-        <!-- 可拖拽组件 -->
-        <DraggableWidget 
-          id="widget-1"
-          title="CORN.exe"
-          initialX={350}
-          initialY={180}
-          initialWidth={400}
-          initialHeight={400}
-          magnifierScale={2}
-        >
-          <img src="/assets/meme-thumb.png" alt="meme" style="width: 400px; height: 400px; object-fit: contain;" />
-        </DraggableWidget>
-        <DraggableWidget 
-          id="widget-2"
-          title="CORN.bat"
-          initialX={100}
-          initialY={100}
-          initialWidth={200}
-          initialHeight={150}
-          magnifierScale={1.5}
-        />
-        <DraggableWidget 
-          id="widget-3"
-          title="CORN.dll"
-          initialX={700}
-          initialY={250}
-          initialWidth={180}
-          initialHeight={140}
-          magnifierScale={3}
-        />
-        
-        <!-- 动漫角色 -->
-        <div class="hero-character">
-          <img src="/assets/hero-character.png" alt="Hero Character" class="character-img" />
-        </div>
-        
-        <!-- 左侧内容 -->
-        <div class="hero-content">
-          <h1 class="hero-title" id="beijing-time"></h1>
-          <p class="hero-subtitle">Welcome</p>
-          <p class="hero-subtitle">Have a tea？</p>
-          <div class="barcode"></div>
-        </div>
-        
-      </div>
-    </section>
-    
-    <!-- 原有内容 -->
-    <div class="theme-carousel">
-      <img 
-        src={themeImages[0]} 
-        alt="网站主题图片" 
-        class="carousel-image"
-        loading="eager"
-        decoding="async"
-        fetchpriority="high"
-      />
-    </div>
-
-    <div class="intro-card" role="note" aria-label="intro">
-      <p class="intro-desc">…ようこそ。新日暮里の<ruby>世界へ<rt>マスカレード</rt></ruby></p>
-    </div>
-
-    <section>
-      <br />
-      <h2 class="latest-post">最新文章</h2>
-      <br />
-      {latestPost && (
-        <a href={`/blog/${latestPost.id}/`} class="post-card featured">
-          <img 
-            src={latestPost.data.heroImage ? (typeof latestPost.data.heroImage === 'string' ? latestPost.data.heroImage : latestPost.data.heroImage.src) : '/assets/blog-placeholder-about.jpg'}
-            alt={latestPost.data.title} 
-            class="post-image"
-            loading="eager"
-            decoding="async"
-            fetchpriority="high"
-          />
-          <div class="post-content">
-            <h3>{latestPost.data.title}</h3>
-            <p class="post-date">{new Date(latestPost.data.pubDate).toLocaleDateString()}</p>
-            <p>{latestPost.data.description}</p>
+  <head>
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+  </head>
+  <body>
+    <CursorShadow />
+    <Header />
+    <main>
+      <!-- ===== 1:09风格Hero区域 ===== -->
+      <section class="hero-section" id="hero-section">
+        <!-- 外层圆角框 -->
+        <div class="hero-outer-frame">
+          <!-- 波浪网格背景容器 -->
+          <div class="wave-grid-container">
+            <canvas id="wave-grid" class="wave-grid"></canvas>
           </div>
-        </a>
-      )}
-      <div class="post-row">
-        {otherPosts.map(post => (
-          <a href={`/blog/${post.id}/`} class="post-card">
-            <img
-              src={post.data.heroImage ? (typeof post.data.heroImage === 'string' ? post.data.heroImage : post.data.heroImage.src) : '/assets/blog-placeholder-about.jpg'}
-              alt={post.data.title}
-              class="post-image"
-              loading="lazy"
-              decoding="async"
-            />
-            <div class="post-content">
-              <h3>{post.data.title}</h3>
-              <p class="post-date">{new Date(post.data.pubDate).toLocaleDateString()}</p>
-              <p>{post.data.description}</p>
-            </div>
-          </a>
-        ))}
-      </div>
-    </section>
 
-    <div style="height: 100px;"></div>
-    
-    <section>
-      <h2 class="latest-post">最新相册</h2>
-      <br />
-      {latestPhoto && (
-        <a href={`/photo/${latestPhoto.id}/`} class="post-card featured">
-          <img
-            src={latestPhoto.data.heroImage ? (typeof latestPhoto.data.heroImage === 'string' ? latestPhoto.data.heroImage : latestPhoto.data.heroImage.src) : '/assets/blog-placeholder-about.jpg'}
-            alt={latestPhoto.data.title}
-            class="post-image"
-            loading="lazy"
-            decoding="async"
+          <!-- 可拖拽组件 -->
+          <!-- 第1个弹出的窗口 -->
+          <DraggableWidget
+            id="widget-1"
+            title="CORN.exe"
+            index={0}
+            initialX={350}
+            initialY={180}
+            initialWidth={400}
+            initialHeight={400}
+          >
+            <img
+              src="/assets/meme-thumb.png"
+              alt="meme"
+              style="width: 400px; height: 400px; object-fit: contain;"
+            />
+          </DraggableWidget>
+          <!-- 第2个弹出的窗口（等待250ms后弹出） -->
+          <DraggableWidget
+            id="widget-2"
+            title="CORN.bat"
+            index={1}
+            initialX={100}
+            initialY={100}
+            initialWidth={200}
+            initialHeight={150}
           />
-          <div class="post-content">
-            <h3>{latestPhoto.data.title}</h3>
-            <p class="post-date">{new Date(latestPhoto.data.pubDate).toLocaleDateString()}</p>
-            <p>{latestPhoto.data.description}</p>
-          </div>
-        </a>
-      )}
 
-      <div class="post-row">
-        {otherPhotos.map(photo => (
-          <a href={`/photo/${photo.id}/`} class="post-card">
+          <!-- 第3个弹出的窗口（等待500ms后弹出） -->
+          <DraggableWidget
+            id="widget-3"
+            title="CORN.dll"
+            index={2}
+            initialX={700}
+            initialY={250}
+            initialWidth={180}
+            initialHeight={140}
+          />
+
+          <!-- 动漫角色 -->
+          <div class="hero-character">
             <img
-              src={photo.data.heroImage ? (typeof photo.data.heroImage === 'string' ? photo.data.heroImage : photo.data.heroImage.src) : '/assets/blog-placeholder-about.jpg'}
-              alt={photo.data.title}
-              class="post-image"
-              loading="lazy"
-              decoding="async"
+              src="/assets/hero-character.png"
+              alt="Hero Character"
+              class="character-img"
             />
-            <div class="post-content">
-              <h3>{photo.data.title}</h3>
-              <p class="post-date">{new Date(photo.data.pubDate).toLocaleDateString()}</p>
-              <p>{photo.data.description}</p>
-            </div>
-          </a>
-        ))}
+          </div>
+
+          <!-- 左侧内容 -->
+          <div class="hero-content">
+            <h1 class="hero-title" id="beijing-time"></h1>
+            <p class="hero-subtitle">Welcome</p>
+            <p class="hero-subtitle">Have a tea？</p>
+            <div class="barcode"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 原有内容 -->
+      <div class="theme-carousel">
+        <img
+          src={themeImages[0]}
+          alt="网站主题图片"
+          class="carousel-image"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+        />
       </div>
-    </section>
-  </main>
-  <Footer />
-  
-  <script>
-    // ===== 北京时间实时时钟 =====
-    (function() {
-      const timeDisplay = document.getElementById('beijing-time');
-      if (!timeDisplay) return;
-      
-      const timeEl = timeDisplay;
-      
-      function updateBeijingTime() {
-        const now = new Date();
-        const beijingTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
-        const hours = String(beijingTime.getHours()).padStart(2, '0');
-        const minutes = String(beijingTime.getMinutes()).padStart(2, '0');
-        timeEl.textContent = `${hours}:${minutes}`;
-      }
-      
-      updateBeijingTime();
-      setInterval(updateBeijingTime, 1000);
-    })();
-    
-    // ===== 波浪网格背景动画 =====
-    (function() {
-      const canvas = document.getElementById('wave-grid');
-      if (!canvas || !(canvas instanceof HTMLCanvasElement)) return;
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      
-      const canvasEl = canvas;
-      const ctxEl = ctx;
-      
-      let timeRef = 0;
-      let mousePos = { x: 0.5, y: 0.5 };
-      
-      const CANVAS_WIDTH = 1500;
-      const CANVAS_HEIGHT = 460;
-      
-      function resizeCanvas() {
-        canvasEl.width = CANVAS_WIDTH * window.devicePixelRatio;
-        canvasEl.height = CANVAS_HEIGHT * window.devicePixelRatio;
-        ctxEl.scale(window.devicePixelRatio, window.devicePixelRatio);
-      }
-      
-      resizeCanvas();
-      
-      canvasEl.addEventListener('mousemove', (e) => {
-        const rect = canvasEl.getBoundingClientRect();
-        mousePos.x = (e.clientX - rect.left) / rect.width;
-        mousePos.y = (e.clientY - rect.top) / rect.height;
-      });
-      
-      const gridSize = 50;
-      const waveAmplitude = 12;
-      const waveFrequency = 0.015;
-      const waveSpeed = 0.015;
-      
-      function animate() {
-        timeRef += waveSpeed;
-        
-        ctxEl.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        ctxEl.strokeStyle = '#1A1A2E';
-        ctxEl.lineWidth = 1;
-        
-        for (let y = 0; y <= CANVAS_HEIGHT; y += gridSize) {
-          ctxEl.beginPath();
-          for (let x = 0; x <= CANVAS_WIDTH; x += 4) {
-            const distToMouse = Math.sqrt(
-              Math.pow(x / CANVAS_WIDTH - mousePos.x, 2) +
-              Math.pow(y / CANVAS_HEIGHT - mousePos.y, 2)
-            );
-            const mouseEffect = Math.max(0, 1 - distToMouse * 3) * 15;
-            
-            const waveY = y +
-              Math.sin(x * waveFrequency + timeRef) * waveAmplitude +
-              Math.sin(x * waveFrequency * 2 + timeRef * 1.3) * (waveAmplitude * 0.5) +
-              mouseEffect * Math.sin(x * 0.03 + timeRef * 2);
-            
-            if (x === 0) ctxEl.moveTo(x, waveY);
-            else ctxEl.lineTo(x, waveY);
-          }
-          ctxEl.stroke();
+
+      <div class="intro-card" role="note" aria-label="intro">
+        <p class="intro-desc">
+          …ようこそ。新日暮里の<ruby>世界へ<rt>マスカレード</rt></ruby>
+        </p>
+      </div>
+
+      <section>
+        <br />
+        <h2 class="latest-post">最新文章</h2>
+        <br />
+        {
+          latestPost && (
+            <a href={`/blog/${latestPost.id}/`} class="post-card featured">
+              <img
+                src={
+                  latestPost.data.heroImage
+                    ? typeof latestPost.data.heroImage === "string"
+                      ? latestPost.data.heroImage
+                      : latestPost.data.heroImage.src
+                    : "/assets/blog-placeholder-about.jpg"
+                }
+                alt={latestPost.data.title}
+                class="post-image"
+                loading="eager"
+                decoding="async"
+                fetchpriority="high"
+              />
+              <div class="post-content">
+                <h3>{latestPost.data.title}</h3>
+                <p class="post-date">
+                  {new Date(latestPost.data.pubDate).toLocaleDateString()}
+                </p>
+                <p>{latestPost.data.description}</p>
+              </div>
+            </a>
+          )
         }
-        
-        for (let x = 0; x <= CANVAS_WIDTH; x += gridSize) {
-          ctxEl.beginPath();
-          for (let y = 0; y <= CANVAS_HEIGHT; y += 4) {
-            const distToMouse = Math.sqrt(
-              Math.pow(x / CANVAS_WIDTH - mousePos.x, 2) +
-              Math.pow(y / CANVAS_HEIGHT - mousePos.y, 2)
-            );
-            const mouseEffect = Math.max(0, 1 - distToMouse * 3) * 15;
-            
-            const waveX = x +
-              Math.sin(y * waveFrequency + timeRef) * waveAmplitude +
-              Math.sin(y * waveFrequency * 2 + timeRef * 1.3) * (waveAmplitude * 0.5) +
-              mouseEffect * Math.sin(y * 0.03 + timeRef * 2);
-            
-            if (y === 0) ctxEl.moveTo(waveX, y);
-            else ctxEl.lineTo(waveX, y);
+        <div class="post-row">
+          {
+            otherPosts.map((post) => (
+              <a href={`/blog/${post.id}/`} class="post-card">
+                <img
+                  src={
+                    post.data.heroImage
+                      ? typeof post.data.heroImage === "string"
+                        ? post.data.heroImage
+                        : post.data.heroImage.src
+                      : "/assets/blog-placeholder-about.jpg"
+                  }
+                  alt={post.data.title}
+                  class="post-image"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div class="post-content">
+                  <h3>{post.data.title}</h3>
+                  <p class="post-date">
+                    {new Date(post.data.pubDate).toLocaleDateString()}
+                  </p>
+                  <p>{post.data.description}</p>
+                </div>
+              </a>
+            ))
           }
-          ctxEl.stroke();
+        </div>
+      </section>
+
+      <div style="height: 100px;"></div>
+
+      <section>
+        <h2 class="latest-post">最新相册</h2>
+        <br />
+        {
+          latestPhoto && (
+            <a href={`/photo/${latestPhoto.id}/`} class="post-card featured">
+              <img
+                src={
+                  latestPhoto.data.heroImage
+                    ? typeof latestPhoto.data.heroImage === "string"
+                      ? latestPhoto.data.heroImage
+                      : latestPhoto.data.heroImage.src
+                    : "/assets/blog-placeholder-about.jpg"
+                }
+                alt={latestPhoto.data.title}
+                class="post-image"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="post-content">
+                <h3>{latestPhoto.data.title}</h3>
+                <p class="post-date">
+                  {new Date(latestPhoto.data.pubDate).toLocaleDateString()}
+                </p>
+                <p>{latestPhoto.data.description}</p>
+              </div>
+            </a>
+          )
         }
-        
-        requestAnimationFrame(animate);
-      }
-      
-      animate();
-    })();
-    
-    // ===== 随机轮播图 =====
-    (function() {
-      const images = [
-        '/assets/1d442f5857f54f17818bcb2bf6b53730.png',
-        '/assets/2025-10-17_183005_789.png',
-        '/assets/2025-10-17_185645_393.png',
-        '/assets/2025-10-17_185917_944.png'
-      ];
-      
-      const carouselImg = document.querySelector('.carousel-image') as HTMLImageElement;
-      if (!carouselImg) return;
-      
-      const randomIndex = Math.floor(Math.random() * images.length);
-      carouselImg.src = images[randomIndex];
-    })();
-    
-  </script>
-</body>
+
+        <div class="post-row">
+          {
+            otherPhotos.map((photo) => (
+              <a href={`/photo/${photo.id}/`} class="post-card">
+                <img
+                  src={
+                    photo.data.heroImage
+                      ? typeof photo.data.heroImage === "string"
+                        ? photo.data.heroImage
+                        : photo.data.heroImage.src
+                      : "/assets/blog-placeholder-about.jpg"
+                  }
+                  alt={photo.data.title}
+                  class="post-image"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div class="post-content">
+                  <h3>{photo.data.title}</h3>
+                  <p class="post-date">
+                    {new Date(photo.data.pubDate).toLocaleDateString()}
+                  </p>
+                  <p>{photo.data.description}</p>
+                </div>
+              </a>
+            ))
+          }
+        </div>
+      </section>
+    </main>
+    <Footer />
+
+    <script>
+      // ===== 北京时间实时时钟 =====
+      (function () {
+        const timeDisplay = document.getElementById("beijing-time");
+        if (!timeDisplay) return;
+
+        const timeEl = timeDisplay;
+
+        function updateBeijingTime() {
+          const now = new Date();
+          const beijingTime = new Date(
+            now.toLocaleString("en-US", { timeZone: "Asia/Shanghai" }),
+          );
+          const hours = String(beijingTime.getHours()).padStart(2, "0");
+          const minutes = String(beijingTime.getMinutes()).padStart(2, "0");
+          timeEl.textContent = `${hours}:${minutes}`;
+        }
+
+        updateBeijingTime();
+        setInterval(updateBeijingTime, 1000);
+      })();
+
+      // ===== 波浪网格背景动画 =====
+      (function () {
+        const canvas = document.getElementById("wave-grid");
+        if (!canvas || !(canvas instanceof HTMLCanvasElement)) return;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        const canvasEl = canvas;
+        const ctxEl = ctx;
+
+        let timeRef = 0;
+        let mousePos = { x: 0.5, y: 0.5 };
+
+        const CANVAS_WIDTH = 1500;
+        const CANVAS_HEIGHT = 460;
+
+        function resizeCanvas() {
+          canvasEl.width = CANVAS_WIDTH * window.devicePixelRatio;
+          canvasEl.height = CANVAS_HEIGHT * window.devicePixelRatio;
+          ctxEl.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        resizeCanvas();
+
+        canvasEl.addEventListener("mousemove", (e) => {
+          const rect = canvasEl.getBoundingClientRect();
+          mousePos.x = (e.clientX - rect.left) / rect.width;
+          mousePos.y = (e.clientY - rect.top) / rect.height;
+        });
+
+        const gridSize = 50;
+        const waveAmplitude = 12;
+        const waveFrequency = 0.015;
+        const waveSpeed = 0.015;
+
+        function animate() {
+          timeRef += waveSpeed;
+
+          ctxEl.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+          ctxEl.strokeStyle = "#1A1A2E";
+          ctxEl.lineWidth = 1;
+
+          for (let y = 0; y <= CANVAS_HEIGHT; y += gridSize) {
+            ctxEl.beginPath();
+            for (let x = 0; x <= CANVAS_WIDTH; x += 4) {
+              const distToMouse = Math.sqrt(
+                Math.pow(x / CANVAS_WIDTH - mousePos.x, 2) +
+                  Math.pow(y / CANVAS_HEIGHT - mousePos.y, 2),
+              );
+              const mouseEffect = Math.max(0, 1 - distToMouse * 3) * 15;
+
+              const waveY =
+                y +
+                Math.sin(x * waveFrequency + timeRef) * waveAmplitude +
+                Math.sin(x * waveFrequency * 2 + timeRef * 1.3) *
+                  (waveAmplitude * 0.5) +
+                mouseEffect * Math.sin(x * 0.03 + timeRef * 2);
+
+              if (x === 0) ctxEl.moveTo(x, waveY);
+              else ctxEl.lineTo(x, waveY);
+            }
+            ctxEl.stroke();
+          }
+
+          for (let x = 0; x <= CANVAS_WIDTH; x += gridSize) {
+            ctxEl.beginPath();
+            for (let y = 0; y <= CANVAS_HEIGHT; y += 4) {
+              const distToMouse = Math.sqrt(
+                Math.pow(x / CANVAS_WIDTH - mousePos.x, 2) +
+                  Math.pow(y / CANVAS_HEIGHT - mousePos.y, 2),
+              );
+              const mouseEffect = Math.max(0, 1 - distToMouse * 3) * 15;
+
+              const waveX =
+                x +
+                Math.sin(y * waveFrequency + timeRef) * waveAmplitude +
+                Math.sin(y * waveFrequency * 2 + timeRef * 1.3) *
+                  (waveAmplitude * 0.5) +
+                mouseEffect * Math.sin(y * 0.03 + timeRef * 2);
+
+              if (y === 0) ctxEl.moveTo(waveX, y);
+              else ctxEl.lineTo(waveX, y);
+            }
+            ctxEl.stroke();
+          }
+
+          requestAnimationFrame(animate);
+        }
+
+        animate();
+      })();
+
+      // ===== 随机轮播图 =====
+      (function () {
+        const images = [
+          "/assets/1d442f5857f54f17818bcb2bf6b53730.png",
+          "/assets/2025-10-17_183005_789.png",
+          "/assets/2025-10-17_185645_393.png",
+          "/assets/2025-10-17_185917_944.png",
+        ];
+
+        const carouselImg = document.querySelector(
+          ".carousel-image",
+        ) as HTMLImageElement;
+        if (!carouselImg) return;
+
+        const randomIndex = Math.floor(Math.random() * images.length);
+        carouselImg.src = images[randomIndex];
+      })();
+
+      // ===== 窗口弹出动画：fade-in & scale（每次进入主页播放） =====
+      (function () {
+        function runWindowPopIn() {
+          const boxes = Array.from(document.querySelectorAll(".win-box"));
+          if (!boxes.length) return;
+
+          // initialize inline state so animation is visible from 0
+          boxes.forEach((el) => {
+            const node = el as HTMLElement;
+            node.style.opacity = "0";
+            node.style.transform = "scale(0.96)";
+            node.style.transition = "none";
+          });
+
+          // Next frame, staggered add animation class
+          requestAnimationFrame(() => {
+            boxes.forEach((el, i) => {
+              const delay = i * 120; // stagger interval in ms
+              setTimeout(() => {
+                el.classList.add("pop-in");
+                // cleanup inline styles after animation finishes
+                const onEnd = () => {
+                  const node = el as HTMLElement;
+                  node.style.opacity = "";
+                  node.style.transform = "";
+                  node.style.transition = "";
+                  el.removeEventListener("animationend", onEnd);
+                };
+                el.addEventListener("animationend", onEnd);
+              }, delay);
+            });
+          });
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", runWindowPopIn);
+        } else {
+          runWindowPopIn();
+        }
+      })();
+    </script>
+  </body>
 </html>
 
 <style>
-/* main 区域限制 */
-main {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 3em 1em;
-}
-
-/* ===== Hero区域样式 - 突破 main 限制 ===== */
-.hero-section {
-  position: relative;
-  min-height: 150px;
-  /* background: linear-gradient(135deg, #E8E8F5 0%, #F0F0FA 100%); */
-  overflow: visible;
-  /* margin-bottom: 2rem; */
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100vw;
-  max-width: none;
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
-}
-
-/* 外层圆角框 */
-.hero-outer-frame {
-  position: relative;
-  width: 1880px;
-  height: 830px;
-  background: #fff;
-  border-radius: 8px;
-  border: 2px solid #7c7c7d;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-}
-
-/* 波浪网格背景容器 */
-.wave-grid-container {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  border: 1px solid #afafaf;
-  transform: translate(-50%, -50%);
-  width: 1500px;
-  height: 460px;
-  overflow: hidden;
-}
-
-/* 波浪网格背景 */
-.wave-grid {
-  width: 100%;
-  height: 100%;
-  opacity: 0.4;
-  will-change: contents;
-}
-
-/* 浮动窗口容器 */
-.windows-container {
-  position: absolute;
-  inset: 0;
-  z-index: 50;
-}
-
-/* Windows风格窗口 */
-.win-box {
-  position: absolute;
-  background: white;
-  border: 1px solid #999;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.win-box:hover {
-  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-}
-
-.win-header {
-  height: 28px;
-  background: linear-gradient(180deg, #f5f5f5 0%, #e0e0e0 100%);
-  border-bottom: 1px solid #ccc;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 8px;
-  cursor: grab;
-  user-select: none;
-}
-
-.win-header:active {
-  cursor: grabbing;
-}
-
-.win-header-title {
-  font-size: 12px;
-  color: #333;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.win-close-btn {
-  width: 18px;
-  height: 18px;
-  border: none;
-  background: transparent;
-  color: #666;
-  font-size: 14px;
-  cursor: pointer;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  line-height: 1;
-}
-
-.win-close-btn:hover {
-  background: #e81123;
-  color: white;
-}
-
-.win-body {
-  flex: 1;
-  padding: 4px;
-  overflow: hidden;
-}
-
-.win-body img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 3px;
-}
-
-/* 角色 */
-.hero-character {
-  position: absolute;
-  right: 18%;
-  bottom: -15%;
-  width: 45.5%;
-  max-width: 390px;
-  z-index: 10;
-  animation: float 4s ease-in-out infinite;
-  will-change: transform;
-  background: transparent;
-}
-
-.character-img {
-  width: 100%;
-  height: auto;
-  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.2));
-  background: transparent;
-  mix-blend-mode: normal;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-15px); }
-}
-
-/* 左侧内容 */
-.hero-content {
-  position: absolute;
-  left: 5%;
-  bottom: 12%;
-  z-index: 10;
-}
-
-.hero-title {
-  font-size: 3.5rem;
-  font-weight: 700;
-  color: #1A1A2E;
-  margin: 0 0 0.5rem 0;
-  line-height: 1;
-  font-family: monospace;
-}
-
-.hero-subtitle {
-  font-size: 1rem;
-  color: #4A4A6A;
-  margin: 0.2rem 0;
-  font-family: monospace;
-}
-
-/* 条形码 */
-.barcode {
-  width: 140px;
-  height: 45px;
-  margin-top: 1rem;
-  background: repeating-linear-gradient(
-    90deg,
-    #1A1A2E 0px,
-    #1A1A2E 3px,
-    transparent 3px,
-    transparent 5px,
-    #1A1A2E 5px,
-    #1A1A2E 8px,
-    transparent 8px,
-    transparent 12px,
-    #1A1A2E 12px,
-    #1A1A2E 14px,
-    transparent 14px,
-    transparent 18px
-  );
-}
-
-/* 右上角Logo */
-.hero-logo {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 20;
-  font-family: monospace;
-  font-size: 0.9rem;
-  color: #4A4A6A;
-}
-
-.hero-logo span {
-  margin: 0 1px;
-}
-
-/* 响应式 */
-@media (max-width: 1900px) {
-  .hero-outer-frame {
-    width: 95vw;
-    height: auto;
-    min-height: 600px;
-  }
-  
-  .wave-grid-container {
-    width: 80vw;
-    height: 350px;
-  }
-}
-
-@media (max-width: 768px) {
+  /* main 区域限制 */
   main {
-    padding: 0 0.5rem;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 3em 1em;
   }
-  
+
+  /* ===== Hero区域样式 - 突破 main 限制 ===== */
   .hero-section {
-    min-height: 500px;
+    position: relative;
+    min-height: 150px;
+    /* background: linear-gradient(135deg, #E8E8F5 0%, #F0F0FA 100%); */
+    overflow: visible;
+    /* margin-bottom: 2rem; */
     padding: 10px;
-    margin-left: -0.5rem;
-    margin-right: -0.5rem;
-    width: calc(100% + 1rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    max-width: none;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
   }
-  
-  .win-box {
-    display: none !important;
-  }
-  
-  .win-box:first-child {
-    display: flex !important;
-    width: 180px !important;
-    height: 130px !important;
-    left: 50% !important;
-    top: 20% !important;
-    transform: translateX(-50%);
-  }
-  
+
+  /* 外层圆角框 */
   .hero-outer-frame {
-    width: 100%;
-    min-height: 400px;
+    position: relative;
+    width: 1880px;
+    height: 830px;
+    background: #fff;
+    border-radius: 8px;
+    border: 2px solid #7c7c7d;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
-  
+
+  /* 波浪网格背景容器 */
   .wave-grid-container {
-    width: 95%;
-    height: 250px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    border: 1px solid #afafaf;
+    transform: translate(-50%, -50%);
+    width: 1500px;
+    height: 460px;
+    overflow: hidden;
   }
-  
-  .hero-character {
-    width: 52%;
-    max-width: 260px;
-    right: 2%;
+
+  /* 波浪网格背景 */
+  .wave-grid {
+    width: 100%;
+    height: 100%;
+    opacity: 0.4;
+    will-change: contents;
   }
-  
-  .hero-title {
-    font-size: 2rem;
+
+  /* 浮动窗口容器 */
+  .windows-container {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
   }
-  
-  .hero-content {
-    left: 5%;
-    bottom: 15%;
-  }
-}
 
-/* ===== 原有样式 ===== */
-.theme-carousel {
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto 1.5rem;
-  border-radius: 1rem;
-  overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
-}
-
-.carousel-image {
-  width: 100%;
-  height: 350px;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.5s ease, opacity 0.3s ease;
-}
-
-.intro-card {
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
-  padding: 1.25rem 1.5rem;
-  margin: 1.5rem auto;
-  max-width: 820px;
-  text-align: center;
-}
-
-.intro-desc {
-  margin: 0.25rem 0 0;
-  color: #555;
-  line-height: 1.2;
-  font-size: 1rem;
-}
-
-.intro-desc ruby {
-  display: inline-block;
-  position: relative;
-  line-height: 1;
-  vertical-align: middle;
-}
-
-.intro-desc rt {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  transform: translate(-50%, -120%);
-  display: block;
-  font-size: 0.65em;
-  white-space: nowrap;
-  color: rgba(0,0,0,0.75);
-  pointer-events: none;
-  line-height: 1;
-  z-index: 2;
-}
-
-.latest-post {
-  font-size: 2rem;
-  font-weight: bold;
-  margin: 1rem 0;
-  text-align: center;
-}
-
-.post-card {
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
-  padding: 0;
-  text-decoration: none;
-  color: inherit;
-  overflow: hidden;
-  transition: transform 0.2s cubic-bezier(.4,2,.6,1), box-shadow 0.2s;
-  will-change: transform, box-shadow;
-  display: block;
-}
-
-.post-card:hover {
-  transform: translateY(-8px) scale(1.03);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  z-index: 1;
-}
-
-.post-card:hover .post-image {
-  transform: scale(1.06) rotate(-1deg);
-}
-
-.post-card.featured {
-  margin-bottom: 2rem;
-}
-
-.post-image {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  display: block;
-  border-top-left-radius: 1rem;
-  border-top-right-radius: 1rem;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.post-card:not(.featured) .post-image {
-  height: 140px;
-}
-
-.post-content {
-  padding: 1.5rem;
-}
-
-.post-content h3 {
-  margin-top: 0;
-  font-family: 'SmileySans-Oblique', sans-serif;
-}
-
-.post-date {
-  color: #888;
-  font-size: 0.9rem;
-}
-
-.post-row {
-  display: flex;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.post-row .post-card {
-  flex: 1 1 300px;
-  max-width: 48%;
-}
-
-@media (max-width: 800px) {
-  .post-row {
+  /* Windows风格窗口 */
+  .win-box {
+    position: absolute;
+    background: white;
+    border: 1px solid #999;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    display: flex;
     flex-direction: column;
   }
-  .post-row .post-card {
+
+  .win-box:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .win-header {
+    height: 28px;
+    background: linear-gradient(180deg, #f5f5f5 0%, #e0e0e0 100%);
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    cursor: grab;
+    user-select: none;
+  }
+
+  .win-header:active {
+    cursor: grabbing;
+  }
+
+  .win-header-title {
+    font-size: 12px;
+    color: #333;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .win-close-btn {
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: transparent;
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .win-close-btn:hover {
+    background: #e81123;
+    color: white;
+  }
+
+  .win-body {
+    flex: 1;
+    padding: 4px;
+    overflow: hidden;
+  }
+
+  .win-body img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 3px;
+  }
+
+  /* Popup animation - fade in & scale for windows on page load */
+  @keyframes popIn {
+    from {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .win-box.pop-in,
+  .draggable-widget.pop-in {
+    animation: popIn 420ms cubic-bezier(0.2, 0.85, 0.25, 1) both;
+    will-change: transform, opacity;
+  }
+
+  /* 角色 */
+  .hero-character {
+    position: absolute;
+    right: 18%;
+    bottom: -15%;
+    width: 45.5%;
+    max-width: 390px;
+    z-index: 10;
+    animation: float 4s ease-in-out infinite;
+    will-change: transform;
+    background: transparent;
+  }
+
+  .character-img {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.2));
+    background: transparent;
+    mix-blend-mode: normal;
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-15px);
+    }
+  }
+
+  /* 左侧内容 */
+  .hero-content {
+    position: absolute;
+    left: 5%;
+    bottom: 12%;
+    z-index: 10;
+  }
+
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 0.5rem 0;
+    line-height: 1;
+    font-family: monospace;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+    color: #4a4a6a;
+    margin: 0.2rem 0;
+    font-family: monospace;
+  }
+
+  /* 条形码 */
+  .barcode {
+    width: 140px;
+    height: 45px;
+    margin-top: 1rem;
+    background: repeating-linear-gradient(
+      90deg,
+      #1a1a2e 0px,
+      #1a1a2e 3px,
+      transparent 3px,
+      transparent 5px,
+      #1a1a2e 5px,
+      #1a1a2e 8px,
+      transparent 8px,
+      transparent 12px,
+      #1a1a2e 12px,
+      #1a1a2e 14px,
+      transparent 14px,
+      transparent 18px
+    );
+  }
+
+  /* 右上角Logo */
+  .hero-logo {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 20;
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: #4a4a6a;
+  }
+
+  .hero-logo span {
+    margin: 0 1px;
+  }
+
+  /* 响应式 */
+  @media (max-width: 1900px) {
+    .hero-outer-frame {
+      width: 95vw;
+      height: auto;
+      min-height: 600px;
+    }
+
+    .wave-grid-container {
+      width: 80vw;
+      height: 350px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    main {
+      padding: 0 0.5rem;
+    }
+
+    .hero-section {
+      min-height: 500px;
+      padding: 10px;
+      margin-left: -0.5rem;
+      margin-right: -0.5rem;
+      width: calc(100% + 1rem);
+    }
+
+    .win-box {
+      display: none !important;
+    }
+
+    .win-box:first-child {
+      display: flex !important;
+      width: 180px !important;
+      height: 130px !important;
+      left: 50% !important;
+      top: 20% !important;
+      transform: translateX(-50%);
+    }
+
+    .hero-outer-frame {
+      width: 100%;
+      min-height: 400px;
+    }
+
+    .wave-grid-container {
+      width: 95%;
+      height: 250px;
+    }
+
+    .hero-character {
+      width: 52%;
+      max-width: 260px;
+      right: 2%;
+    }
+
+    .hero-title {
+      font-size: 2rem;
+    }
+
+    .hero-content {
+      left: 5%;
+      bottom: 15%;
+    }
+  }
+
+  /* ===== 原有样式 ===== */
+  .theme-carousel {
+    width: 100%;
     max-width: 100%;
+    margin: 0 auto 1.5rem;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   }
+
   .carousel-image {
-    height: 220px;
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    display: block;
+    transition:
+      transform 0.5s ease,
+      opacity 0.3s ease;
   }
-}
+
+  .intro-card {
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem auto;
+    max-width: 820px;
+    text-align: center;
+  }
+
+  .intro-desc {
+    margin: 0.25rem 0 0;
+    color: #555;
+    line-height: 1.2;
+    font-size: 1rem;
+  }
+
+  .intro-desc ruby {
+    display: inline-block;
+    position: relative;
+    line-height: 1;
+    vertical-align: middle;
+  }
+
+  .intro-desc rt {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translate(-50%, -120%);
+    display: block;
+    font-size: 0.65em;
+    white-space: nowrap;
+    color: rgba(0, 0, 0, 0.75);
+    pointer-events: none;
+    line-height: 1;
+    z-index: 2;
+  }
+
+  .latest-post {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 1rem 0;
+    text-align: center;
+  }
+
+  .post-card {
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    transition:
+      transform 0.2s cubic-bezier(0.4, 2, 0.6, 1),
+      box-shadow 0.2s;
+    will-change: transform, box-shadow;
+    display: block;
+  }
+
+  .post-card:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    z-index: 1;
+  }
+
+  .post-card:hover .post-image {
+    transform: scale(1.06) rotate(-1deg);
+  }
+
+  .post-card.featured {
+    margin-bottom: 2rem;
+  }
+
+  .post-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .post-card:not(.featured) .post-image {
+    height: 140px;
+  }
+
+  .post-content {
+    padding: 1.5rem;
+  }
+
+  .post-content h3 {
+    margin-top: 0;
+    font-family: "SmileySans-Oblique", sans-serif;
+  }
+
+  .post-date {
+    color: #888;
+    font-size: 0.9rem;
+  }
+
+  .post-row {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .post-row .post-card {
+    flex: 1 1 300px;
+    max-width: 48%;
+  }
+
+  @media (max-width: 800px) {
+    .post-row {
+      flex-direction: column;
+    }
+    .post-row .post-card {
+      max-width: 100%;
+    }
+    .carousel-image {
+      height: 220px;
+    }
+  }
 </style>

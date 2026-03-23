@@ -10,13 +10,15 @@ interface Props {
   minWidth?: number;
   minHeight?: number;
   magnifierScale?: number;
+  animate?: boolean;
   transparent?: boolean;
   noResize?: boolean;
+  index?: number; // 新增：用于控制弹出顺序（0, 1, 2...）
 }
 
 const {
   id,
-  title = '窗口',
+  title = "窗口",
   initialX = 100,
   initialY = 100,
   initialWidth = 300,
@@ -25,22 +27,35 @@ const {
   minHeight = 80,
   magnifierScale = 2,
   transparent = false,
-  noResize = false
+  noResize = false,
+  animate = true,
+  index = 0, // 默认为0，不延迟
 } = Astro.props;
+
+// 计算延迟：每个窗口间隔 250ms，动画持续时间 800ms（更慢更优雅）
+const animationDelay = animate ? index * 300 : 0;
+const animationDuration = 800; // 增加到800毫秒，更慢的节奏
 ---
 
 <div
-  class:list={['draggable-widget', { 'is-transparent': transparent }]}
+  class:list={[
+    "draggable-widget",
+    { "is-transparent": transparent, "pop-in": animate },
+  ]}
   id={id}
+  data-animate={String(animate)}
   data-magnifier-scale={magnifierScale}
   data-min-width={minWidth}
   data-min-height={minHeight}
   data-no-resize={noResize}
+  data-index={index}
   style={`
     left: ${initialX}px;
     top: ${initialY}px;
     width: ${initialWidth}px;
     height: ${initialHeight}px;
+    animation-delay: ${animationDelay}ms;
+    animation-duration: ${animationDuration}ms;
   `}
 >
   <!-- 标题栏 -->
@@ -48,30 +63,30 @@ const {
     <span class="widget-title">{title}</span>
     <button class="widget-close" aria-label="关闭">×</button>
   </div>
-  
+
   <!-- 内容区域 -->
   <div class="widget-content">
     <div class="widget-slot-content">
       <slot />
     </div>
-    <div class="magnifier-viewport">
-      <div class="magnifier-content"></div>
-    </div>
+    <div class="magnifier-content"></div>
   </div>
-  
+
   <!-- 调整尺寸的手柄 -->
-  {!noResize && (
-    <>
-      <div class="resize-handle top" data-dir="top"></div>
-      <div class="resize-handle right" data-dir="right"></div>
-      <div class="resize-handle bottom" data-dir="bottom"></div>
-      <div class="resize-handle left" data-dir="left"></div>
-      <div class="resize-handle top-left" data-dir="top-left"></div>
-      <div class="resize-handle top-right" data-dir="top-right"></div>
-      <div class="resize-handle bottom-left" data-dir="bottom-left"></div>
-      <div class="resize-handle bottom-right" data-dir="bottom-right"></div>
-    </>
-  )}
+  {
+    !noResize && (
+      <>
+        <div class="resize-handle top" data-dir="top" />
+        <div class="resize-handle right" data-dir="right" />
+        <div class="resize-handle bottom" data-dir="bottom" />
+        <div class="resize-handle left" data-dir="left" />
+        <div class="resize-handle top-left" data-dir="top-left" />
+        <div class="resize-handle top-right" data-dir="top-right" />
+        <div class="resize-handle bottom-left" data-dir="bottom-left" />
+        <div class="resize-handle bottom-right" data-dir="bottom-right" />
+      </>
+    )
+  }
 </div>
 
 <script is:inline>
@@ -82,7 +97,7 @@ const {
       activeWidget: null,
       isDragging: false,
       isResizing: false,
-      resizeDir: '',
+      resizeDir: "",
       startX: 0,
       startY: 0,
       startLeft: 0,
@@ -90,38 +105,37 @@ const {
       startWidth: 0,
       startHeight: 0,
       zIndexCounter: 50,
-      
-      init: function() {
-        // 全局事件只绑定一次
-        document.addEventListener('mousemove', this.onMouseMove.bind(this));
-        document.addEventListener('mouseup', this.onMouseUp.bind(this));
-        
-        // 初始化所有 widget
+
+      init: function () {
+        document.addEventListener("mousemove", this.onMouseMove.bind(this));
+        document.addEventListener("mouseup", this.onMouseUp.bind(this));
         this.initAllWidgets();
-        
-        // 监听新 widget 的添加（通过 MutationObserver）
         this.observeNewWidgets();
+        this.cleanupAnimations();
       },
-      
-      initAllWidgets: function() {
-        var widgets = document.querySelectorAll('.draggable-widget');
+
+      initAllWidgets: function () {
+        var widgets = document.querySelectorAll(".draggable-widget");
         var self = this;
-        widgets.forEach(function(widget) {
+        widgets.forEach(function (widget) {
           self.registerWidget(widget);
         });
       },
-      
-      observeNewWidgets: function() {
+
+      observeNewWidgets: function () {
         var self = this;
-        var observer = new MutationObserver(function(mutations) {
-          mutations.forEach(function(mutation) {
-            mutation.addedNodes.forEach(function(node) {
-              if (node.nodeType === 1 && node.classList.contains('draggable-widget')) {
+        var observer = new MutationObserver(function (mutations) {
+          mutations.forEach(function (mutation) {
+            mutation.addedNodes.forEach(function (node) {
+              if (
+                node.nodeType === 1 &&
+                node.classList.contains("draggable-widget")
+              ) {
                 self.registerWidget(node);
               }
               if (node.nodeType === 1) {
-                var nestedWidgets = node.querySelectorAll('.draggable-widget');
-                nestedWidgets.forEach(function(w) {
+                var nestedWidgets = node.querySelectorAll(".draggable-widget");
+                nestedWidgets.forEach(function (w) {
                   self.registerWidget(w);
                 });
               }
@@ -130,204 +144,241 @@ const {
         });
         observer.observe(document.body, { childList: true, subtree: true });
       },
-      
-      registerWidget: function(widget) {
+
+      // 清理动画类 - 根据最大延迟调整时间
+      cleanupAnimations: function () {
+        // 找到所有widget中最大的index，计算最长等待时间
+        var widgets = document.querySelectorAll(".draggable-widget");
+        var maxIndex = 0;
+        widgets.forEach(function (w) {
+          var idx = parseInt(w.dataset.index || "0");
+          if (idx > maxIndex) maxIndex = idx;
+        });
+
+        // 800ms动画 + index*250ms延迟 + 200ms缓冲
+        var cleanupTime = 800 + maxIndex * 250 + 200;
+
+        setTimeout(function () {
+          widgets.forEach(function (widget) {
+            widget.classList.remove("pop-in");
+            widget.style.willChange = "auto";
+          });
+        }, cleanupTime);
+      },
+
+      registerWidget: function (widget) {
         if (this.widgets.has(widget.id)) return;
-        
+
         var self = this;
-        var header = widget.querySelector('.widget-header');
-        var closeBtn = widget.querySelector('.widget-close');
-        var resizeHandles = widget.querySelectorAll('.resize-handle');
-        
+        var header = widget.querySelector(".widget-header");
+        var closeBtn = widget.querySelector(".widget-close");
+        var resizeHandles = widget.querySelectorAll(".resize-handle");
+
         // 关闭功能
         if (closeBtn) {
-          closeBtn.addEventListener('click', function() {
-            widget.remove();
-            self.widgets.delete(widget.id);
+          closeBtn.addEventListener("click", function () {
+            widget.style.transition = "all 0.3s cubic-bezier(.4,0,.2,1)";
+            widget.style.opacity = "0";
+            widget.style.transform = "scale(0.9)";
+
+            setTimeout(function () {
+              widget.remove();
+              self.widgets.delete(widget.id);
+            }, 300);
           });
         }
-        
+
         // 拖拽开始
         if (header) {
-          header.addEventListener('mousedown', function(e) {
-            if (e.target.classList.contains('widget-close')) return;
-            
+          header.addEventListener("mousedown", function (e) {
+            if (e.target.classList.contains("widget-close")) return;
+
             self.activeWidget = widget;
             self.isDragging = true;
             self.startX = e.clientX;
             self.startY = e.clientY;
             self.startLeft = widget.offsetLeft;
             self.startTop = widget.offsetTop;
-            
+
             self.bringToFront(widget);
-            document.body.style.cursor = 'grabbing';
+            document.body.style.cursor = "grabbing";
             e.preventDefault();
           });
         }
-        
+
         // Resize 开始
-        resizeHandles.forEach(function(handle) {
-          handle.addEventListener('mousedown', function(e) {
+        resizeHandles.forEach(function (handle) {
+          handle.addEventListener("mousedown", function (e) {
             self.activeWidget = widget;
             self.isResizing = true;
-            self.resizeDir = handle.dataset.dir || '';
+            self.resizeDir = handle.dataset.dir || "";
             self.startX = e.clientX;
             self.startY = e.clientY;
             self.startLeft = widget.offsetLeft;
             self.startTop = widget.offsetTop;
             self.startWidth = widget.offsetWidth;
             self.startHeight = widget.offsetHeight;
-            
+
             self.bringToFront(widget);
-            
+
             var cursors = {
-              'top': 'n-resize', 'bottom': 's-resize',
-              'left': 'w-resize', 'right': 'e-resize',
-              'top-left': 'nw-resize', 'top-right': 'ne-resize',
-              'bottom-left': 'sw-resize', 'bottom-right': 'se-resize'
+              top: "n-resize",
+              bottom: "s-resize",
+              left: "w-resize",
+              right: "e-resize",
+              "top-left": "nw-resize",
+              "top-right": "ne-resize",
+              "bottom-left": "sw-resize",
+              "bottom-right": "se-resize",
             };
-            document.body.style.cursor = cursors[self.resizeDir] || 'default';
-            
+            document.body.style.cursor = cursors[self.resizeDir] || "default";
+
             e.preventDefault();
             e.stopPropagation();
           });
         });
-        
+
         // 点击置顶
-        widget.addEventListener('mousedown', function() {
+        widget.addEventListener("mousedown", function () {
           self.bringToFront(widget);
         });
-        
+
         // 存储 widget 数据
         this.widgets.set(widget.id, {
           element: widget,
-          magnifierScale: parseFloat(widget.dataset.magnifierScale || '2'),
-          minWidth: parseFloat(widget.dataset.minWidth || '100'),
-          minHeight: parseFloat(widget.dataset.minHeight || '80'),
-          magnifierContent: widget.querySelector('.magnifier-content')
+          magnifierScale: parseFloat(widget.dataset.magnifierScale || "2"),
+          minWidth: parseFloat(widget.dataset.minWidth || "100"),
+          minHeight: parseFloat(widget.dataset.minHeight || "80"),
+          magnifierContent: widget.querySelector(".magnifier-content"),
         });
-        
-        // 初始化放大镜
+
         this.updateMagnifier(widget);
       },
-      
-      onMouseMove: function(e) {
+
+      onMouseMove: function (e) {
         if (!this.activeWidget) return;
-        
+
         var widgetData = this.widgets.get(this.activeWidget.id);
         if (!widgetData) return;
-        
+
         if (this.isDragging) {
           var dx = e.clientX - this.startX;
           var dy = e.clientY - this.startY;
-          
-          this.activeWidget.style.left = (this.startLeft + dx) + 'px';
-          this.activeWidget.style.top = (this.startTop + dy) + 'px';
-          
+
+          this.activeWidget.style.left = this.startLeft + dx + "px";
+          this.activeWidget.style.top = this.startTop + dy + "px";
+
           this.updateMagnifier(this.activeWidget);
         }
-        
+
         if (this.isResizing) {
           var dx = e.clientX - this.startX;
           var dy = e.clientY - this.startY;
-          
+
           var newLeft = this.startLeft;
           var newTop = this.startTop;
           var newWidth = this.startWidth;
           var newHeight = this.startHeight;
-          
-          if (this.resizeDir.indexOf('right') !== -1) {
+
+          if (this.resizeDir.indexOf("right") !== -1) {
             newWidth = Math.max(widgetData.minWidth, this.startWidth + dx);
           }
-          if (this.resizeDir.indexOf('left') !== -1) {
+          if (this.resizeDir.indexOf("left") !== -1) {
             newWidth = Math.max(widgetData.minWidth, this.startWidth - dx);
             newLeft = this.startLeft + dx;
           }
-          if (this.resizeDir.indexOf('bottom') !== -1) {
+          if (this.resizeDir.indexOf("bottom") !== -1) {
             newHeight = Math.max(widgetData.minHeight, this.startHeight + dy);
           }
-          if (this.resizeDir.indexOf('top') !== -1) {
+          if (this.resizeDir.indexOf("top") !== -1) {
             newHeight = Math.max(widgetData.minHeight, this.startHeight - dy);
             newTop = this.startTop + dy;
           }
-          
-          this.activeWidget.style.left = newLeft + 'px';
-          this.activeWidget.style.top = newTop + 'px';
-          this.activeWidget.style.width = newWidth + 'px';
-          this.activeWidget.style.height = newHeight + 'px';
-          
+
+          this.activeWidget.style.left = newLeft + "px";
+          this.activeWidget.style.top = newTop + "px";
+          this.activeWidget.style.width = newWidth + "px";
+          this.activeWidget.style.height = newHeight + "px";
+
           this.updateMagnifier(this.activeWidget);
         }
       },
-      
-      onMouseUp: function() {
+
+      onMouseUp: function () {
         this.isDragging = false;
         this.isResizing = false;
         this.activeWidget = null;
-        document.body.style.cursor = '';
+        document.body.style.cursor = "";
       },
-      
-      bringToFront: function(widget) {
+
+      bringToFront: function (widget) {
         this.zIndexCounter++;
         widget.style.zIndex = String(this.zIndexCounter);
       },
-      
-      updateMagnifier: function(widget) {
+
+      updateMagnifier: function (widget) {
         var widgetData = this.widgets.get(widget.id);
         if (!widgetData) return;
-        
+
         var magnifierContent = widgetData.magnifierContent;
         if (!magnifierContent) return;
-        
-        // 获取角色图片
-        var heroSection = document.getElementById('hero-section');
-        var characterImg = heroSection ? heroSection.querySelector('.hero-character img') : null;
+
+        var heroSection = document.getElementById("hero-section");
+        var characterImg = heroSection
+          ? heroSection.querySelector(".hero-character img")
+          : null;
         if (!characterImg) {
-          magnifierContent.classList.remove('active');
+          magnifierContent.classList.remove("active");
           return;
         }
-        
+
         var widgetRect = widget.getBoundingClientRect();
         var charRect = characterImg.getBoundingClientRect();
-        
-        // 计算重叠区域
+
+        var headerHeight = 32;
+        var contentTop = widgetRect.top + headerHeight;
+        var contentBottom = widgetRect.bottom;
+
         var overlapLeft = Math.max(widgetRect.left, charRect.left);
-        var overlapTop = Math.max(widgetRect.top, charRect.top);
+        var overlapTop = Math.max(contentTop, charRect.top);
         var overlapRight = Math.min(widgetRect.right, charRect.right);
-        var overlapBottom = Math.min(widgetRect.bottom, charRect.bottom);
-        
+        var overlapBottom = Math.min(contentBottom, charRect.bottom);
+
         var overlapWidth = overlapRight - overlapLeft;
         var overlapHeight = overlapBottom - overlapTop;
-        
+
         if (overlapWidth > 0 && overlapHeight > 0) {
+          var magnifierLeft = overlapLeft - widgetRect.left;
+          var magnifierTop = overlapTop - contentTop;
+
           var relativeX = overlapLeft - charRect.left;
           var relativeY = overlapTop - charRect.top;
-          
-          var magnifierLeft = overlapLeft - widgetRect.left;
-          var magnifierTop = overlapTop - widgetRect.top;
-          
-          magnifierContent.style.left = magnifierLeft + 'px';
-          magnifierContent.style.top = magnifierTop + 'px';
-          magnifierContent.style.width = overlapWidth + 'px';
-          magnifierContent.style.height = overlapHeight + 'px';
-          
-          magnifierContent.style.backgroundImage = 'url(' + characterImg.src + ')';
-          magnifierContent.style.backgroundSize = (charRect.width * widgetData.magnifierScale) + 'px ' + (charRect.height * widgetData.magnifierScale) + 'px';
-          
+
+          magnifierContent.style.left = magnifierLeft + "px";
+          magnifierContent.style.top = magnifierTop + "px";
+          magnifierContent.style.width = overlapWidth + "px";
+          magnifierContent.style.height = overlapHeight + "px";
+
+          magnifierContent.style.backgroundImage =
+            "url(" + characterImg.src + ")";
+          var scaledCharWidth = charRect.width * widgetData.magnifierScale;
+          var scaledCharHeight = charRect.height * widgetData.magnifierScale;
+          magnifierContent.style.backgroundSize =
+            scaledCharWidth + "px " + scaledCharHeight + "px";
+
           var bgX = -relativeX * widgetData.magnifierScale;
           var bgY = -relativeY * widgetData.magnifierScale;
-          
-          magnifierContent.style.backgroundPosition = bgX + 'px ' + bgY + 'px';
-          magnifierContent.classList.add('active');
+
+          magnifierContent.style.backgroundPosition = bgX + "px " + bgY + "px";
+          magnifierContent.classList.add("active");
         } else {
-          magnifierContent.classList.remove('active');
+          magnifierContent.classList.remove("active");
         }
-      }
+      },
     };
-    
-    // 页面加载完成后初始化
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() {
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", function () {
         window.__widgetManager.init();
       });
     } else {
@@ -348,13 +399,61 @@ const {
     overflow: hidden;
     user-select: none;
     z-index: 50;
+    /* 初始状态 */
+    opacity: 0;
+    transform: scale(0.92) translateY(20px);
+    transform-origin: center center;
+    will-change: transform, opacity;
+  }
+
+  /* 更慢、更优雅的弹窗动画 */
+  @keyframes dwPopIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.92) translateY(20px);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.02) translateY(-4px);
+    }
+    80% {
+      transform: scale(0.98) translateY(2px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* 应用动画 - 使用 inline style 中的 delay 和 duration */
+  .draggable-widget.pop-in {
+    animation-name: dwPopIn;
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(
+      0.34,
+      1.56,
+      0.64,
+      1
+    ); /* Spring效果 */
+  }
+
+  /* 动画结束后保持最终状态 */
+  .draggable-widget:not(.pop-in) {
+    opacity: 1;
+    transform: scale(1);
+    transition:
+      box-shadow 0.2s ease,
+      left 0.1s,
+      top 0.1s,
+      width 0.1s,
+      height 0.1s;
   }
 
   .draggable-widget:hover {
-    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
   }
 
-  /* 透明模式 */
+  /* 透明模式样式...（保持不变） */
   .draggable-widget.is-transparent {
     background: transparent;
     border: none;
@@ -376,11 +475,7 @@ const {
     background: transparent;
   }
 
-  .draggable-widget.is-transparent .widget-slot-content img {
-    border-radius: 4px;
-  }
-
-  /* 标题栏 */
+  /* 标题栏、内容区域、放大镜、调整手柄等样式...（保持不变） */
   .widget-header {
     height: 32px;
     background: linear-gradient(180deg, #f5f5f5 0%, #e8e8e8 100%);
@@ -399,7 +494,7 @@ const {
   .widget-title {
     font-size: 13px;
     color: #333;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -427,7 +522,6 @@ const {
     color: white;
   }
 
-  /* 内容区域 */
   .widget-content {
     flex: 1;
     position: relative;
@@ -448,13 +542,6 @@ const {
     display: block;
   }
 
-  .magnifier-viewport {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    z-index: 5;
-  }
-
   .magnifier-content {
     position: absolute;
     background-repeat: no-repeat;
@@ -463,20 +550,20 @@ const {
     pointer-events: none;
     border-radius: 4px;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    z-index: 10;
   }
 
   .magnifier-content.active {
     opacity: 1;
   }
 
-  /* 调整尺寸的手柄 */
+  /* 调整手柄样式...（保持完整） */
   .resize-handle {
     position: absolute;
     background: transparent;
-    z-index: 10;
+    z-index: 100;
   }
 
-  /* 边 */
   .resize-handle.top {
     top: -3px;
     left: 8px;
@@ -509,7 +596,6 @@ const {
     cursor: e-resize;
   }
 
-  /* 角 */
   .resize-handle.top-left {
     top: -3px;
     left: -3px;
@@ -542,9 +628,8 @@ const {
     cursor: se-resize;
   }
 
-  /* 手柄悬停效果 */
   .resize-handle:hover::after {
-    content: '';
+    content: "";
     position: absolute;
     background: rgba(0, 120, 255, 0.3);
     border-radius: 2px;
