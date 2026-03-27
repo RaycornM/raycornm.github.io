@@ -120,7 +120,12 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
             <h1 class="hero-title" id="beijing-time"></h1>
             <p class="hero-subtitle">Welcome</p>
             <p class="hero-subtitle">Have a tea？</p>
-            <div class="barcode"></div>
+            <span
+              class="barcode"
+              aria-hidden="true"
+              translate="no"
+              data-text="rimuchahui">rimuchahui</span
+            >
           </div>
         </div>
       </section>
@@ -446,6 +451,11 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
 </html>
 
 <style>
+  @import url("https://fonts.googleapis.com/css2?family=Libre+Barcode+128&display=swap");
+
+  :root {
+    --font-barcode: "Libre Barcode 128", system-ui;
+  }
   /* main 区域限制 */
   main {
     max-width: 720px;
@@ -643,7 +653,12 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
 
   .hero-title {
     font-size: 3.5rem;
-    font-family: "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family:
+      "Noto Sans JP",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
     font-weight: 700;
     color: #1a1a2e;
     margin: 0 0 0.5rem 0;
@@ -654,29 +669,22 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
     font-size: 1rem;
     color: #4a4a6a;
     margin: 0.2rem 0;
-    font-family: var(--font-ibm, "IBM Plex Mono"), var(--font-ja, "Hiragino Kaku Gothic ProN", "Hiragino Sans"), sans-serif;
+    font-family:
+      var(--font-ibm, "IBM Plex Mono"),
+      var(--font-ja, "Hiragino Kaku Gothic ProN", "Hiragino Sans"), sans-serif;
   }
 
   /* 条形码 */
   .barcode {
-    width: 140px;
-    height: 45px;
+    display: inline-block;
     margin-top: 1rem;
-    background: repeating-linear-gradient(
-      90deg,
-      #1a1a2e 0px,
-      #1a1a2e 3px,
-      transparent 3px,
-      transparent 5px,
-      #1a1a2e 5px,
-      #1a1a2e 8px,
-      transparent 8px,
-      transparent 12px,
-      #1a1a2e 12px,
-      #1a1a2e 14px,
-      transparent 14px,
-      transparent 18px
-    );
+    font-family: var(--font-barcode);
+    font-size: 48px;
+    line-height: 1;
+    color: #1a1a2e;
+    letter-spacing: 0.02em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* 右上角Logo */
