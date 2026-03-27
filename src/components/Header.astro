@@ -6,6 +6,10 @@ import HeaderLink from './HeaderLink.astro';
 <header>
 	<nav>
 		<h2><a href="/">{SITE_TITLE}</a></h2>
+		<!-- Mobile menu toggle -->
+		<button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+			<span class="hamburger" aria-hidden="true"></span>
+		</button>
 		<div class="internal-links">
 			<HeaderLink href="/">Home</HeaderLink>
 			<HeaderLink href="/blog">Blog</HeaderLink>
@@ -109,9 +113,95 @@ import HeaderLink from './HeaderLink.astro';
 		filter: var(--social-icon-filter, none);
 		transition: filter 0.12s ease, opacity 0.12s ease;
 	}
+
+/* Mobile nav toggle */
+.nav-toggle {
+	display: none;
+	background: transparent;
+	border: none;
+	width: 44px;
+	height: 44px;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+}
+.nav-toggle .hamburger {
+	width: 22px;
+	height: 2px;
+	background: currentColor;
+	display: inline-block;
+	position: relative;
+}
+.nav-toggle .hamburger::before,
+.nav-toggle .hamburger::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 2px;
+	background: currentColor;
+}
+.nav-toggle .hamburger::before { top: -7px; }
+.nav-toggle .hamburger::after { top: 7px; }
+
+@media (max-width: 720px) {
+	.nav-toggle { display: inline-flex; }
+	.internal-links { display: none; }
+	header nav.menu-open .internal-links {
+		display: flex;
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		background: var(--header-bg, rgba(255,255,255,0.98));
+		flex-direction: column;
+		gap: 0;
+		padding: 0.5rem 1rem 1rem 1rem;
+		box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+		z-index: 70;
+	}
+	header nav.menu-open .internal-links a { padding: 0.75rem 0; }
+	.social-links { display: none; }
+}
 	@media (max-width: 720px) {
 		.social-links {
 			display: none;
 		}
 	}
 </style>
+<script is:inline>
+	(function(){
+		try {
+			var toggle = document.getElementById('nav-toggle');
+			var nav = document.querySelector('header nav');
+			var internal = nav && nav.querySelector('.internal-links');
+			if (!toggle || !nav || !internal) return;
+
+			// toggle menu open/close
+			toggle.addEventListener('click', function(e){
+				var open = nav.classList.toggle('menu-open');
+				toggle.setAttribute('aria-expanded', String(open));
+			});
+
+			// close when clicking outside
+			document.addEventListener('click', function(e){
+				if (!nav.classList.contains('menu-open')) return;
+				if (!nav.contains(e.target)) {
+					nav.classList.remove('menu-open');
+					toggle.setAttribute('aria-expanded', 'false');
+				}
+			}, {passive: true});
+
+			// close on escape
+			document.addEventListener('keydown', function(e){
+				if (e.key === 'Escape' && nav.classList.contains('menu-open')) {
+					nav.classList.remove('menu-open');
+					toggle.setAttribute('aria-expanded', 'false');
+					toggle.focus();
+				}
+			});
+		} catch (err) {
+			// noop
+		}
+	})();
+</script>
