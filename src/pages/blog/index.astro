@@ -19,7 +19,10 @@ const posts = (await getCollection('blog')).sort(
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 		<style>
 			main {
-				width: 960px;
+				max-width: 960px;
+				width: 100%;
+				margin: 0 auto;
+				padding: 0 1rem;
 			}
 			ul {
 				display: flex;
@@ -51,10 +54,10 @@ const posts = (await getCollection('blog')).sort(
 				ul li img {
 					margin-bottom: 0.5rem;
 					border-radius: 12px;
-					/* Default thumbnail size for non-feature items */
-					width: 447px;
-					height: 224px;
+					width: 100%;
+					height: auto;
 					object-fit: cover;
+					aspect-ratio: 447 / 224;
 				}
 			ul li a {
 				display: block;

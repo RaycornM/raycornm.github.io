@@ -38,7 +38,10 @@ const photos = (await getCollection('photo')).sort(
 		</style>
 		<style>
 			main {
-				width: 960px;
+				max-width: 960px;
+				width: 100%;
+				margin: 0 auto;
+				padding: 0 1rem;
 			}
 			ul {
 				display: flex;
@@ -69,6 +72,9 @@ const photos = (await getCollection('photo')).sort(
 			ul li img {
 				margin-bottom: 0.5rem;
 				border-radius: 12px;
+				width: 100%;
+				height: auto;
+				object-fit: cover;
 			}
 			ul li a {
 				display: block;
