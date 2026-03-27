@@ -125,24 +125,24 @@ import HeaderLink from './HeaderLink.astro';
 	justify-content: center;
 	cursor: pointer;
 }
-.nav-toggle .hamburger {
-	width: 22px;
-	height: 2px;
-	background: currentColor;
-	display: inline-block;
-	position: relative;
-}
-.nav-toggle .hamburger::before,
-.nav-toggle .hamburger::after {
-	content: '';
-	position: absolute;
-	left: 0;
-	right: 0;
-	height: 2px;
-	background: currentColor;
-}
-.nav-toggle .hamburger::before { top: -7px; }
-.nav-toggle .hamburger::after { top: 7px; }
+	.nav-toggle .hamburger {
+		width: 22px;
+		height: 2px;
+		background: var(--hamburger-color, currentColor);
+		display: inline-block;
+		position: relative;
+	}
+	.nav-toggle .hamburger::before,
+	.nav-toggle .hamburger::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		height: 2px;
+		background: var(--hamburger-color, currentColor);
+	}
+	.nav-toggle .hamburger::before { top: -7px; }
+	.nav-toggle .hamburger::after { top: 7px; }
 
 @media (max-width: 720px) {
 	.nav-toggle { display: inline-flex; }
@@ -170,38 +170,108 @@ import HeaderLink from './HeaderLink.astro';
 	}
 </style>
 <script is:inline>
-	(function(){
-		try {
-			var toggle = document.getElementById('nav-toggle');
-			var nav = document.querySelector('header nav');
-			var internal = nav && nav.querySelector('.internal-links');
-			if (!toggle || !nav || !internal) return;
+(() => {
+	try {
+		const toggle = document.getElementById('nav-toggle');
+		const nav = document.querySelector('header nav');
+		const header = document.querySelector('header');
+		const internal = nav && nav.querySelector('.internal-links');
+		if (!toggle || !nav || !internal || !header) return;
 
-			// toggle menu open/close
-			toggle.addEventListener('click', function(e){
-				var open = nav.classList.toggle('menu-open');
-				toggle.setAttribute('aria-expanded', String(open));
-			});
+		// toggle menu open/close
+		toggle.addEventListener('click', function () {
+			const open = nav.classList.toggle('menu-open');
+			toggle.setAttribute('aria-expanded', String(open));
+		});
 
-			// close when clicking outside
-			document.addEventListener('click', function(e){
-				if (!nav.classList.contains('menu-open')) return;
-				if (!nav.contains(e.target)) {
-					nav.classList.remove('menu-open');
-					toggle.setAttribute('aria-expanded', 'false');
+		// close when clicking outside
+		document.addEventListener('click', function (e) {
+			if (!nav.classList.contains('menu-open')) return;
+			if (!nav.contains(e.target)) {
+				nav.classList.remove('menu-open');
+				toggle.setAttribute('aria-expanded', 'false');
+			}
+		}, { passive: true });
+
+		// close on escape
+		document.addEventListener('keydown', function (e) {
+			if (e.key === 'Escape' && nav.classList.contains('menu-open')) {
+				nav.classList.remove('menu-open');
+				toggle.setAttribute('aria-expanded', 'false');
+				toggle.focus();
+			}
+		});
+
+		// Auto-set hamburger color to match header text or contrast with header background
+		function parseColorString(str) {
+			if (!str) return null;
+			str = str.trim();
+			// hex
+			if (str[0] === '#') {
+				const hex = str.slice(1);
+				if (hex.length === 3) {
+					const r = parseInt(hex[0] + hex[0], 16);
+					const g = parseInt(hex[1] + hex[1], 16);
+					const b = parseInt(hex[2] + hex[2], 16);
+					return { r, g, b, a: 1 };
 				}
-			}, {passive: true});
-
-			// close on escape
-			document.addEventListener('keydown', function(e){
-				if (e.key === 'Escape' && nav.classList.contains('menu-open')) {
-					nav.classList.remove('menu-open');
-					toggle.setAttribute('aria-expanded', 'false');
-					toggle.focus();
+				if (hex.length === 6) {
+					const r = parseInt(hex.slice(0, 2), 16);
+					const g = parseInt(hex.slice(2, 4), 16);
+					const b = parseInt(hex.slice(4, 6), 16);
+					return { r, g, b, a: 1 };
 				}
-			});
-		} catch (err) {
-			// noop
+			}
+			// rgb/rgba
+			const m = str.match(/rgba?\(([^)]+)\)/);
+			if (m) {
+				const parts = m[1].split(',').map(p => p.trim());
+				return { r: Number(parts[0]), g: Number(parts[1]), b: Number(parts[2]), a: parts[3] ? Number(parts[3]) : 1 };
+			}
+			return null;
 		}
-	})();
+
+		function luminance({ r, g, b }) {
+			const srgb = [r, g, b].map(v => v / 255).map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+			return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+		}
+
+		function updateHamburgerColor() {
+			const cs = getComputedStyle(header);
+			// prefer explicit header text variable
+			let headerTextVar = cs.getPropertyValue('--header-text').trim() || null;
+			let color = null;
+			if (headerTextVar) {
+				const parsed = parseColorString(headerTextVar);
+				if (parsed) color = `rgb(${parsed.r}, ${parsed.g}, ${parsed.b})`;
+			}
+			if (!color) {
+				// fallback to computed color or background luminance
+				const compColor = cs.color || '';
+				const parsedColor = parseColorString(compColor);
+				if (parsedColor) {
+					color = `rgb(${parsedColor.r}, ${parsedColor.g}, ${parsedColor.b})`;
+				} else {
+					const bg = cs.backgroundColor || '';
+					const parsedBg = parseColorString(bg);
+					if (parsedBg) {
+						const lum = luminance(parsedBg);
+						color = lum < 0.5 ? '#ffffff' : '#111827';
+					} else {
+						color = '#111827';
+					}
+				}
+			}
+			header.style.setProperty('--hamburger-color', color);
+		}
+
+		updateHamburgerColor();
+		const obs = new MutationObserver(() => updateHamburgerColor());
+		obs.observe(document.documentElement || document.body, { attributes: true, attributeFilter: ['class', 'style'] });
+		window.addEventListener('resize', updateHamburgerColor);
+
+	} catch (err) {
+		// noop
+	}
+})();
 </script>
