@@ -44,14 +44,6 @@
 	font-display: swap;
 }
 
-@font-face {
-	font-family: "SmileySans-Oblique";
-	src: url("/fonts/SmileySans-Oblique.otf.woff2") format("woff2");
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
-}
-
 /* ==================== 自定义鼠标指针 ==================== */
 /* 将所有 .cur 和 .ani 文件放入 public/cursors/ 目录 */
 /* 推荐尺寸: 32x32 像素 (Windows 标准光标大小) */
