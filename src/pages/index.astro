@@ -149,10 +149,8 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
         </p>
       </div>
 
-      <section>
-        <br />
-        <h2 class="latest-post">最新文章</h2>
-        <br />
+      <section style="margin-top: 3rem;">
+        <h2 class="latest-post" style="margin-bottom: 2rem;">最新文章</h2>
         {
           latestPost && (
             <PostCard post={latestPost} variant="featured" />
@@ -169,9 +167,8 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
 
       <div style="height: 100px;"></div>
 
-      <section>
-        <h2 class="latest-post">最新相册</h2>
-        <br />
+      <section style="margin-top: 3rem;">
+        <h2 class="latest-post" style="margin-bottom: 2rem;">最新相册</h2>
         {
           latestPhoto && (
             <PostCard post={latestPhoto} variant="featured" prefix="/photo" />

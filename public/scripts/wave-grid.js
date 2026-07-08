@@ -11,14 +11,16 @@
 
   let timeRef = 0;
   let mousePos = { x: 0.5, y: 0.5 };
+  let animFrameId = null;
 
   const CANVAS_WIDTH = 1500;
   const CANVAS_HEIGHT = 460;
 
   function resizeCanvas() {
-    canvasEl.width = CANVAS_WIDTH * window.devicePixelRatio;
-    canvasEl.height = CANVAS_HEIGHT * window.devicePixelRatio;
-    ctxEl.scale(window.devicePixelRatio, window.devicePixelRatio);
+    const dpr = Math.min(window.devicePixelRatio, 2);
+    canvasEl.width = CANVAS_WIDTH * dpr;
+    canvasEl.height = CANVAS_HEIGHT * dpr;
+    ctxEl.scale(dpr, dpr);
   }
 
   resizeCanvas();
@@ -85,8 +87,20 @@
       ctxEl.stroke();
     }
 
-    requestAnimationFrame(animate);
+    animFrameId = requestAnimationFrame(animate);
   }
+
+  /* 页面可见性感知：标签页隐藏时暂停动画，恢复时衔接 */
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = null;
+      }
+    } else {
+      if (!animFrameId) animate();
+    }
+  });
 
   animate();
 })();
