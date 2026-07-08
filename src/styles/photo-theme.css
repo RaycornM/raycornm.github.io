@@ -1,0 +1,74 @@
+/* ===== Photo Dark Theme =====
+ * Unified photo-theme styles consolidated from:
+ * - photo/index.astro
+ * - layouts/BlogPost.astro
+ * - components/Footer.astro
+ */
+
+body.photo-theme {
+  background: #0f1724;
+  color: #ffffff;
+  --header-bg: rgba(15,23,36,0.6);
+  --header-text: #ffffff;
+  --social-icon-filter: invert(1) brightness(2) saturate(0);
+  --header-backdrop: blur(8px);
+}
+
+html,
+body.photo-theme {
+  background: #0f1724;
+}
+
+/* ---- Header / Nav ---- */
+body.photo-theme header {
+  background: rgba(15,23,36,0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: none;
+}
+body.photo-theme nav a {
+  color: rgba(255,255,255,0.95);
+}
+body.photo-theme nav a.active {
+  border-bottom-color: rgba(255,255,255,0.12);
+}
+
+/* ---- Text / Prose ---- */
+body.photo-theme .title {
+  color: #ffffff;
+}
+body.photo-theme .date {
+  color: rgba(255,255,255,0.85);
+}
+body.photo-theme .title h1 {
+  color: #ffffff;
+}
+body.photo-theme .prose,
+body.photo-theme .title,
+body.photo-theme .date,
+body.photo-theme .last-updated-on,
+body.photo-theme p,
+body.photo-theme .article-content {
+  color: #ffffff;
+}
+body.photo-theme .back-button {
+  color: #ffffff;
+}
+
+/* ---- Footer ---- */
+body.photo-theme footer {
+  color: #ffffff;
+  background: #0f1724;
+}
+body.photo-theme .social-links a {
+  color: #ffffff;
+}
+body.photo-theme .bilibili-img,
+body.photo-theme .instagram-img {
+  display: none;
+}
+body.photo-theme .bilibili-svg,
+body.photo-theme .instagram-svg {
+  display: block;
+  color: currentColor;
+}

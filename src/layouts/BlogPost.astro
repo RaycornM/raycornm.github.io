@@ -266,50 +266,6 @@ const backLink = collection === 'photo' ? '/photo' : '/blog';
 				background: #f5f5f5 !important;
 				color: rgb(var(--gray-dark)) !important;
 			}
-
-			/* Photo theme overrides */
-			body.photo-theme {
-				background: #0f1724 !important;
-				color: #ffffff !important;
-				--header-backdrop: blur(8px);
-				--header-bg: rgba(15,23,36,0.6);
-				--header-text: #ffffff;
-				--social-icon-filter: invert(1) brightness(2) saturate(0);
-			}
-			/* also force html background to avoid global html styles overriding body */
-			html, body.photo-theme {
-				background: #0f1724 !important;
-			}
-			/* ensure article title and h1 are white and take precedence */
-			body.photo-theme .title,
-			body.photo-theme .title h1,
-			body.photo-theme .prose,
-			body.photo-theme .prose h1 {
-				color: #ffffff !important;
-			}
-			body.photo-theme .prose,
-			body.photo-theme .title,
-			body.photo-theme .date,
-			body.photo-theme .last-updated-on,
-			body.photo-theme p,
-			body.photo-theme .article-content {
-				color: #ffffff;
-			}
-			body.photo-theme .back-button {
-				color: #ffffff;
-			}
-			body.photo-theme header {
-				background: rgba(15,23,36,0.6);
-				backdrop-filter: blur(8px);
-				-webkit-backdrop-filter: blur(8px);
-				box-shadow: none;
-			}
-			body.photo-theme nav a {
-				color: rgba(255,255,255,0.95);
-			}
-			body.photo-theme nav a.active {
-				border-bottom-color: rgba(255,255,255,0.12);
-			}
 		</style>
 	</head>
 

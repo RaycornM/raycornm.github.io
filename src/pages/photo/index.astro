@@ -18,25 +18,6 @@ const photos = (await getCollection('photo')).sort(
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 		<style>
-			/* Photo theme: dark background, white text, frosted header */
-			body.photo-theme {
-				background: #0f1724;
-				color: #ffffff;
-				--header-bg: rgba(15,23,36,0.6);
-				--header-text: #ffffff;
-				--social-icon-filter: invert(1) brightness(2) saturate(0);
-				--header-backdrop: blur(8px);
-			}
-			body.photo-theme header {
-				box-shadow: none;
-			}
-			body.photo-theme nav a { color: rgba(255,255,255,0.95); }
-			body.photo-theme nav a.active { border-bottom-color: rgba(255,255,255,0.12); }
-			/* Ensure page titles and dates become readable on dark background */
-			body.photo-theme .title { color: #ffffff; }
-			body.photo-theme .date { color: rgba(255,255,255,0.85); }
-		</style>
-		<style>
 			main {
 				max-width: 960px;
 				width: 100%;
