@@ -749,65 +749,6 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
     text-align: center;
   }
 
-  .post-card {
-    background: #fff;
-    border-radius: 1rem;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    padding: 0;
-    text-decoration: none;
-    color: inherit;
-    overflow: hidden;
-    transition:
-      transform 0.2s cubic-bezier(0.4, 2, 0.6, 1),
-      box-shadow 0.2s;
-    will-change: transform, box-shadow;
-    display: block;
-  }
-
-  .post-card:hover {
-    transform: translateY(-8px) scale(1.03);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
-    z-index: 1;
-  }
-
-  .post-card:hover .post-image {
-    transform: scale(1.06) rotate(-1deg);
-  }
-
-  .post-card.featured {
-    margin-bottom: 2rem;
-  }
-
-  .post-image {
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-    display: block;
-    border-top-left-radius: 1rem;
-    border-top-right-radius: 1rem;
-    transition:
-      opacity 0.3s ease,
-      transform 0.3s ease;
-  }
-
-  .post-card:not(.featured) .post-image {
-    height: 140px;
-  }
-
-  .post-content {
-    padding: 1.5rem;
-  }
-
-  .post-content h3 {
-    margin-top: 0;
-    font-family: "SmileySans-Oblique", sans-serif;
-  }
-
-  .post-date {
-    color: #888;
-    font-size: 0.9rem;
-  }
-
   .post-row {
     display: flex;
     gap: 1.5rem;
@@ -815,7 +756,7 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
     justify-content: center;
   }
 
-  .post-row .post-card {
+  .post-row > :global(*) {
     flex: 1 1 300px;
     max-width: 48%;
   }
@@ -824,7 +765,7 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
     .post-row {
       flex-direction: column;
     }
-    .post-row .post-card {
+    .post-row > :global(*) {
       max-width: 100%;
     }
     .carousel-image {
