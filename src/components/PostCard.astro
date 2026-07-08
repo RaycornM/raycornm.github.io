@@ -1,0 +1,41 @@
+---
+import { getImageSrc } from "../utils/image";
+
+interface Props {
+  post: {
+    id: string;
+    data: {
+      title: string;
+      pubDate: string | Date;
+      description: string;
+      heroImage?: string | { src: string };
+    };
+  };
+  showImage?: boolean;
+  variant?: "featured" | "default";
+  prefix?: string;
+}
+
+const { post, showImage = true, variant = "default", prefix = "/blog" } = Astro.props;
+const placeholder = "/assets/blog-placeholder-about.jpg";
+---
+
+<a href={`${prefix}/${post.id}/`} class={`post-card${variant === "featured" ? " featured" : ""}`}>
+  {showImage && (
+    <img
+      src={getImageSrc(post.data.heroImage, placeholder)}
+      alt={post.data.title}
+      class="post-image"
+      loading={variant === "featured" ? "eager" : "lazy"}
+      decoding="async"
+      fetchpriority={variant === "featured" ? "high" : "auto"}
+    />
+  )}
+  <div class="post-content">
+    <h3>{post.data.title}</h3>
+    <p class="post-date">
+      {new Date(post.data.pubDate).toLocaleDateString()}
+    </p>
+    <p>{post.data.description}</p>
+  </div>
+</a>
