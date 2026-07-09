@@ -27,9 +27,11 @@ const themeImages = [
   "/assets/2025-10-17_183005_789.png",
   "/assets/2025-10-17_185645_393.png",
   "/assets/2025-10-17_185917_944.png",
+  "/assets/20250515202120.jpg",
+  "/assets/006mowZngy1fu2cf4xqszg307i048nk4.gif"
 ];
 
-// 注意：移除服务器端的随机图片选择，改为在客户端执行
+const randomThemeImage = themeImages[Math.floor(Math.random() * themeImages.length)];
 
 const posts = await getCollection("blog");
 const sortedPosts = posts.sort(
@@ -52,140 +54,263 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
 <html lang="en">
   <head>
     <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- 终端打字动画 —— 全局样式，供 JS 动态注入的元素使用 -->
+    <style is:global>
+      @keyframes terminal-type-fade {
+        0%   { opacity: 0; transform: translateY(6px); filter: blur(2px); }
+        40%  { opacity: 1; transform: translateY(0);   filter: blur(0); }
+        60%  { opacity: 0.7; transform: translateY(-1px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes terminal-cursor-blink {
+        0%, 100% { opacity: 1; text-shadow: 0 0 6px #1a1a2e, 0 0 12px rgba(26,26,46,0.4); }
+        50%      { opacity: 0; text-shadow: none; }
+      }
+      .terminal-prompt,
+      .terminal-char {
+        display: inline-block;
+        opacity: 0;
+        animation: terminal-type-fade 0.12s ease forwards;
+      }
+      .terminal-char.space-char {
+        animation-duration: 0.01s;
+      }
+      .terminal-cursor {
+        display: inline-block;
+        opacity: 0;
+        animation: terminal-type-fade 0.12s ease forwards;
+        color: #1a1a2e;
+        margin-left: 2px;
+      }
+      .terminal-cursor.typing-done {
+        animation: terminal-cursor-blink 0.9s step-end infinite;
+        opacity: 1;
+      }
+
+      /* Hero subtitle typing */
+      .hero-subtitle-char {
+        display: inline-block;
+        opacity: 0;
+        animation: terminal-type-fade 0.1s ease forwards;
+      }
+    </style>
   </head>
   <body>
     <CursorShadow />
     <Header />
     <main>
+      <!-- ====== Unified Frame（109ichiki 风格：贯穿全页的统一框架）====== -->
+      <div class="unified-frame">
+
       <!-- ===== 1:09风格Hero区域 ===== -->
       <section class="hero-section" id="hero-section">
-        <!-- 外层圆角框 -->
-        <div class="hero-outer-frame">
-          <!-- 波浪网格背景容器 -->
-          <div class="wave-grid-container">
-            <canvas id="wave-grid" class="wave-grid"></canvas>
-          </div>
-
-          <!-- 可拖拽组件 -->
-          <!-- 第1个弹出的窗口 -->
-          <DraggableWidget
-            id="widget-1"
-            title="CORN.exe"
-            index={0}
-            initialX={350}
-            initialY={180}
-            initialWidth={400}
-            initialHeight={400}
-          >
-            <img
-              src="/assets/meme-thumb.png"
-              alt="meme"
-              style="width: 400px; height: 400px; object-fit: contain;"
-            />
-          </DraggableWidget>
-          <!-- 第2个弹出的窗口（等待250ms后弹出） -->
-          <DraggableWidget
-            id="widget-2"
-            title="CORN.bat"
-            index={1}
-            initialX={80}
-            initialY={100}
-            initialWidth={250}
-            initialHeight={150}
-            magnifierScale={1}
-          />
-
-          <!-- 第3个弹出的窗口（等待500ms后弹出） -->
-          <DraggableWidget
-            id="widget-3"
-            title="CORN.dll"
-            index={2}
-            initialX={700}
-            initialY={250}
-            initialWidth={180}
-            initialHeight={140}
-            magnifierScale={1}
-          />
-
-          <!-- 角色 -->
-          <div class="hero-character">
-            <img
-              src="/assets/hero-character.png"
-              alt="Hero Character"
-              class="character-img"
-            />
-          </div>
-
-          <!-- 左侧内容 -->
-          <div class="hero-content">
-            <h1 class="hero-title" id="beijing-time"></h1>
-            <p class="hero-subtitle">Welcome</p>
-            <p class="hero-subtitle">Have a tea？</p>
-            <span
-              class="barcode"
-              aria-hidden="true"
-              translate="no"
-              data-text="rimuchahui">rimuchahui</span
-            >
-          </div>
+        <!-- 波浪网格背景容器 -->
+        <div class="wave-grid-container">
+          <canvas id="wave-grid" class="wave-grid"></canvas>
         </div>
-      </section>
 
-      <!-- 原有内容 -->
-      <div class="theme-carousel">
-        <img
-          src={themeImages[0]}
-          alt="网站主题图片"
-          class="carousel-image"
-          loading="eager"
-          decoding="async"
-          fetchpriority="high"
+        <!-- 可拖拽组件 -->
+        <!-- 第1个弹出的窗口 -->
+        <DraggableWidget
+          id="widget-1"
+          title="CORN.exe"
+          index={0}
+          initialX={350}
+          initialY={180}
+          initialWidth={400}
+          initialHeight={400}
+        >
+          <img
+            src="/assets/meme-thumb.png"
+            alt="meme"
+            style="width: 400px; height: 400px; object-fit: contain;"
+          />
+        </DraggableWidget>
+        <!-- 第2个弹出的窗口（等待250ms后弹出） -->
+        <DraggableWidget
+          id="widget-2"
+          title="CORN.bat"
+          index={1}
+          initialX={80}
+          initialY={100}
+          initialWidth={250}
+          initialHeight={150}
+          magnifierScale={1}
         />
-      </div>
 
-      <div class="intro-card" role="note" aria-label="intro">
-        <p class="intro-desc">
-          …ようこそ。新日暮里の<ruby>世界へ<rt>マスカレード</rt></ruby>
-        </p>
-      </div>
+        <!-- 第3个弹出的窗口（等待500ms后弹出） -->
+        <DraggableWidget
+          id="widget-3"
+          title="CORN.dll"
+          index={2}
+          initialX={700}
+          initialY={250}
+          initialWidth={180}
+          initialHeight={140}
+          magnifierScale={1}
+        />
 
-      <section style="margin-top: 3rem;">
-        <h2 class="latest-post" style="margin-bottom: 2rem;">最新文章</h2>
-        {
-          latestPost && (
-            <PostCard post={latestPost} variant="featured" />
-          )
-        }
-        <div class="post-row">
-          {
-            otherPosts.map((post) => (
-              <PostCard post={post} />
-            ))
-          }
+        <!-- 角色 -->
+        <div class="hero-character">
+          <img
+            src="/assets/hero-character.png"
+            alt="Hero Character"
+            class="character-img"
+          />
+        </div>
+
+        <!-- 左侧内容 -->
+        <div class="hero-content">
+          <h1 class="hero-title" id="beijing-time"></h1>
+          <p class="hero-subtitle hero-subtitle--typing" data-text="Welcome"></p>
+          <p class="hero-subtitle hero-subtitle--typing" data-text="Have a tea？"></p>
+          <span
+            class="barcode"
+            aria-hidden="true"
+            translate="no"
+            data-text="rimuchahui">rimuchahui</span
+          >
         </div>
       </section>
 
-      <div style="height: 100px;"></div>
+      <hr class="section-divider hero-divider" />
 
-      <section style="margin-top: 3rem;">
-        <h2 class="latest-post" style="margin-bottom: 2rem;">最新相册</h2>
-        {
-          latestPhoto && (
-            <PostCard post={latestPhoto} variant="featured" prefix="/photo" />
-          )
-        }
+      <!-- ====== Desktop Surface ====== -->
+      <div class="desktop-surface">
 
-        <div class="post-row">
+        <!-- Theme carousel as scatter print -->
+        <div class="theme-carousel-scatter">
+          <img
+            src={randomThemeImage}
+            alt="网站主题图片"
+            class="carousel-image"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+          />
+        </div>
+
+        <!-- Intro card as scatter sticky note -->
+        <div class="intro-card-scatter">
+          <p class="intro-desc">
+            …ようこそ。新日暮里の<ruby>世界へ<rt>マスカレード</rt></ruby>
+          </p>
+        </div>
+
+        <hr class="section-divider" />
+
+        <!-- Post pile -->
+        <section class="scatter-section scatter-section--posts">
+          <div class="terminal-label" data-text="cat ~/posts/recent.log"></div>
           {
-            otherPhotos.map((photo) => (
-              <PostCard post={photo} prefix="/photo" />
+            latestPost && (
+              <article class="scatter-card scatter-card--featured scatter-card--post" style="--scatter-rotate: 0.75deg; --scatter-x: 7px; --scatter-y: -4px;">
+                <PostCard post={latestPost} variant="scatter-featured" />
+              </article>
+            )
+          }
+          {
+            otherPosts.map((post, i) => (
+              <article class="scatter-card scatter-card--post" style={`--scatter-rotate: ${[1.5, -0.9, 0.25, -1.1, 0.6][i % 5]}deg; --scatter-x: ${[10, -7, 15, -12, 5][i % 5]}px; --scatter-y: ${[-5, 6, -2, 4, -7][i % 5]}px; --scatter-delay: ${i * 0.08}s;`}>
+                <PostCard post={post} variant="scatter" />
+              </article>
             ))
           }
-        </div>
-      </section>
+        </section>
+
+        <hr class="section-divider" />
+
+        <!-- Album pile -->
+        <section class="scatter-section scatter-section--photos">
+          <div class="terminal-label" data-text="cat ~/photos/recent.log"></div>
+          {
+            latestPhoto && (
+              <article class="scatter-card scatter-card--featured scatter-card--album" style="--scatter-rotate: -0.6deg; --scatter-x: -6px; --scatter-y: 2px;">
+                <PostCard post={latestPhoto} prefix="/photo" variant="scatter-featured" />
+              </article>
+            )
+          }
+          {
+            otherPhotos.map((photo, i) => (
+              <article class="scatter-card scatter-card--album" style={`--scatter-rotate: ${[-1.25, 0.9, -0.35, 1.6, -0.75][i % 5]}deg; --scatter-x: ${[-14, 9, -4, 17, -10][i % 5]}px; --scatter-y: ${[4, -3, 7, -6, 2][i % 5]}px; --scatter-delay: ${i * 0.08}s;`}>
+                <PostCard post={photo} prefix="/photo" variant="scatter" />
+              </article>
+            ))
+          }
+        </section>
+
+        <!-- Spacer for breathing room -->
+        <div class="desktop-spacer"></div>
+
+      </div>
+
+      <div class="section-divider"></div>
+
+      <Footer />
+
+      </div><!-- /unified-frame -->
     </main>
-    <Footer />
 
+    <script is:inline>
+      // Hero subtitle typing —— 首屏立即触发
+      document.addEventListener('DOMContentLoaded', () => {
+        const heroSubtitles = document.querySelectorAll('.hero-subtitle--typing');
+        heroSubtitles.forEach((el, idx) => {
+          const text = el.dataset.text;
+          if (!text) return;
+          el.textContent = '';
+          for (let i = 0; i < text.length; i++) {
+            const span = document.createElement('span');
+            span.className = 'hero-subtitle-char';
+            span.textContent = text[i] === ' ' ? '\u00A0' : text[i];
+            span.style.animationDelay = `${idx * 400 + i * 50}ms`;
+            el.appendChild(span);
+          }
+        });
+
+        // 散落卡片入场动画
+        const cards = document.querySelectorAll('.scatter-card');
+        cards.forEach((card, i) => {
+          card.style.setProperty('--scatter-delay', `${i * 0.06}s`);
+        });
+
+        // 桌面表面滚动渐显
+        const surface = document.querySelector('.desktop-surface');
+        const surfaceObserver = new IntersectionObserver(
+          ([entry]) => {
+            if (entry.isIntersecting) {
+              surface.classList.add('surface-visible');
+              surfaceObserver.unobserve(entry.target);
+
+              // 终端标签逐字打字 —— 延迟 10ms 确保入场动画先播完
+              setTimeout(() => {
+                document.querySelectorAll('.terminal-label').forEach(label => {
+                  const text = label.dataset.text;
+                  if (!text) return;
+                  let chars = '<span class="terminal-prompt" style="animation-delay:200ms">&gt;</span>';
+                  for (let i = 0; i < text.length; i++) {
+                    const isSpace = text[i] === ' ';
+                    const ch = isSpace ? '&nbsp;' : text[i];
+                    const spaceClass = isSpace ? ' space-char' : '';
+                    chars += `<span class="terminal-char${spaceClass}" style="animation-delay:${i * 60 + 300}ms">${ch}</span>`;
+                  }
+                  const cursorDelay = text.length * 60 + 500;
+                  chars += `<span class="terminal-cursor" style="animation-delay:${cursorDelay}ms">█</span>`;
+                  label.innerHTML = chars;
+                  setTimeout(() => {
+                    label.querySelector('.terminal-cursor')?.classList.add('typing-done');
+                  }, cursorDelay + 200);
+                });
+              }, 10);
+            }
+          },
+          { threshold: 0.05 }
+        );
+        if (surface) surfaceObserver.observe(surface);
+      });
+    </script>
     <script is:inline src="/scripts/beijing-time.js"></script>
     <script is:inline src="/scripts/wave-grid.js"></script>
     <script is:inline src="/scripts/carousel.js"></script>
@@ -196,43 +321,68 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
 <style>
   @import url("https://fonts.googleapis.com/css2?family=Libre+Barcode+128&display=swap");
 
+  @font-face {
+    font-family: "Smiley Sans Oblique";
+    src: url("https://cdn.jsdelivr.net/gh/xue-ding-e/smiley-sans-online/SmileySans-Oblique.ttf.woff2") format("woff2");
+    font-weight: 400 700;
+    font-style: oblique;
+    font-display: swap;
+  }
+
   :root {
     --font-barcode: "Libre Barcode 128", system-ui;
   }
-  /* main 区域限制 */
-  main {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 3em 1em;
+  /* ====== 全页固定布局 ====== */
+  :global(html),
+  :global(body) {
+    height: 100%;
+    overflow: hidden;
   }
 
-  /* ===== Hero区域样式 - 突破 main 限制 ===== */
+  :global(body) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* main 区域 —— 撑满 Header 下方，居中容纳框架 */
+  main {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  /* ====== Unified Frame（固定框架 + 内部滚动）====== */
+  .unified-frame {
+    width: 100%;
+    max-width: 1880px;
+    height: 100%;
+    background: #fff;
+    border: 2px solid #7c7c7d;
+    border-radius: 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    scroll-behavior: smooth;
+  }
+
+  /* ===== Hero区域样式 ===== */
   .hero-section {
     position: relative;
-    min-height: 150px;
-    /* background: linear-gradient(135deg, #E8E8F5 0%, #F0F0FA 100%); */
+    height: calc(100% - 2px);
+    min-height: auto;
     overflow: visible;
-    /* margin-bottom: 2rem; */
     padding: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100vw;
-    max-width: none;
-    margin-left: calc(-50vw + 50%);
-    margin-right: calc(-50vw + 50%);
-  }
-
-  /* 外层圆角框 */
-  .hero-outer-frame {
-    position: relative;
-    width: 1880px;
-    height: 830px;
-    background: #fff;
-    border-radius: 8px;
-    border: 2px solid #7c7c7d;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
 
   /* 波浪网格背景容器 */
@@ -359,7 +509,7 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
   .hero-character {
     position: absolute;
     right: 18%;
-    bottom: -15%;
+    bottom: -12%;
     width: 45.5%;
     max-width: 390px;
     z-index: 10;
@@ -447,9 +597,7 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
 
   /* 响应式 */
   @media (max-width: 1900px) {
-    .hero-outer-frame {
-      width: 95vw;
-      height: auto;
+    .hero-section {
       min-height: 600px;
     }
 
@@ -467,9 +615,6 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
     .hero-section {
       min-height: 500px;
       padding: 10px;
-      margin-left: -0.5rem;
-      margin-right: -0.5rem;
-      width: calc(100% + 1rem);
     }
 
     .win-box {
@@ -485,8 +630,7 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
       transform: translateX(-50%);
     }
 
-    .hero-outer-frame {
-      width: 100%;
+    .hero-section {
       min-height: 400px;
     }
 
@@ -511,41 +655,266 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
     }
   }
 
-  /* ===== 原有样式 ===== */
-  .theme-carousel {
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto 1.5rem;
-    border-radius: 1rem;
+  /* ====== Theme Carousel Scatter ====== */
+  .theme-carousel-scatter {
+    max-width: 540px;
+    margin: 0 auto 80px;
+    opacity: 0;
+    transform: rotate(-0.3deg) translateY(20px) scale(0.96);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.1));
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
   }
 
-  .carousel-image {
-    width: 100%;
-    height: 350px;
-    object-fit: cover;
+  .desktop-surface.surface-visible .theme-carousel-scatter {
+    opacity: 1;
+    transform: rotate(-0.3deg) translateY(0) scale(1);
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s;
+  }
+
+  .desktop-surface.surface-visible .theme-carousel-scatter:hover {
+    transform: rotate(0deg) translateY(-6px) scale(1.02);
+    filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.15));
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.35s ease;
+  }
+
+  .theme-carousel-scatter .carousel-image {
     display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+  }
+
+  /* ====== Section Divider ====== */
+  .section-divider {
+    border: none;
+    border-top: 2px solid #7c7c7d;
+    margin: 0 -40px;
+    width: auto;
+  }
+
+  /* hero区域与内容区之间的分隔线 */
+  .hero-divider {
+    margin: 0;
+    width: 100%;
+  }
+
+  /* ====== Desktop Surface ====== */
+  .desktop-surface {
+    position: relative;
+    max-width: 100%;
+    margin: 0;
+    padding: 60px 40px 40px;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(200, 200, 210, 0.15) 0%, transparent 70%),
+      radial-gradient(ellipse at 80% 30%, rgba(190, 195, 205, 0.12) 0%, transparent 70%);
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .desktop-surface.surface-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ====== Scatter Section ====== */
+  .scatter-section {
+    position: relative;
+    padding: 40px 0 30px;
+    margin-bottom: 20px;
+  }
+
+  .scatter-section--posts {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .scatter-section--posts .terminal-label {
+    text-align: left;
+    width: 50%;
+  }
+
+  .scatter-section--photos .terminal-label {
+    text-align: right;
+    width: 50%;
+    align-self: flex-end;
+  }
+
+  .scatter-section--posts .scatter-card--featured,
+  .scatter-section--photos .scatter-card--featured {
+    width: 50%;
+    max-width: 50%;
+    margin: 0 0 16px;
+  }
+
+  .scatter-section--posts .scatter-card {
+    width: 50%;
+    max-width: 50%;
+  }
+
+  .scatter-section--photos {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .scatter-section--photos .scatter-card {
+    width: 50%;
+    max-width: 50%;
+  }
+
+  /* ====== Terminal Label ====== */
+  .terminal-label {
+    font-family: "Smiley Sans Oblique", "SmileySans", var(--font-ja, sans-serif);
+    font-size: 1.21rem;
+    font-weight: 900;
+    margin-bottom: 2.5rem;
+    padding-left: 4px;
+    letter-spacing: 0.02em;
+  }
+
+  .terminal-prompt {
+    color: #777;
+    margin-right: 6px;
+  }
+
+  .terminal-char {
+    color: #1a1a2e;
+  }
+
+  /* ====== Scatter Card ====== */
+  .scatter-card {
+    display: inline-block;
+    vertical-align: top;
+    margin: 8px;
+    opacity: 0;
+    transform:
+      rotate(var(--scatter-rotate, 0deg))
+      translate(var(--scatter-x, 0px), var(--scatter-y, 0px))
+      scale(0.97);
     transition:
-      transform 0.5s ease,
-      opacity 0.3s ease;
+      opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+      transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.3s ease;
+    transition-delay: var(--scatter-delay, 0s);
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
   }
 
-  .intro-card {
+  .desktop-surface.surface-visible .scatter-card {
+    opacity: 1;
+    transform:
+      rotate(var(--scatter-rotate, 0deg))
+      translate(var(--scatter-x, 0px), var(--scatter-y, 0px))
+      scale(1);
+  }
+
+  .desktop-surface.surface-visible .scatter-card:hover {
+    transform:
+      rotate(var(--scatter-rotate, 0deg))
+      translate(var(--scatter-x, 0px), calc(var(--scatter-y, 0px) - 8px))
+      scale(1.02);
+    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.14));
+    z-index: 10;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.35s ease;
+  }
+
+  /* ====== Featured Card ====== */
+  .scatter-card--featured {
+    display: block;
+    max-width: 680px;
+    margin: 0 auto 16px;
+    transform:
+      rotate(var(--scatter-rotate, 0deg))
+      scale(0.97);
+    filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.1));
+  }
+
+  .desktop-surface.surface-visible .scatter-card--featured {
+    transform:
+      rotate(var(--scatter-rotate, 0deg))
+      scale(1);
+  }
+
+  .desktop-surface.surface-visible .scatter-card--featured:hover {
+    transform:
+      rotate(var(--scatter-rotate, 0deg))
+      translateY(-6px)
+      scale(1.03);
+    filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.15));
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.35s ease;
+  }
+
+  /* ====== Album vs Post tint ====== */
+  .scatter-card--album {
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.06)) sepia(0.05);
+  }
+
+  /* ====== PostCard internal override ====== */
+  .scatter-card :global(.post-card) {
+    box-shadow: none !important;
+    border: 1px solid #e8e8e8;
     background: #fff;
-    border-radius: 1rem;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    padding: 1.25rem 1.5rem;
-    margin: 1.5rem auto;
-    max-width: 820px;
-    text-align: center;
   }
 
+  /* ====== Intro Card Scatter ====== */
+  .intro-card-scatter {
+    max-width: 480px;
+    margin: 40px auto 80px;
+    padding: 32px 36px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    opacity: 0;
+    transform: rotate(0.8deg) translateY(20px) scale(0.95);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.06));
+    position: relative;
+    cursor: default;
+  }
+
+  .intro-card-scatter::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.04) 50%);
+  }
+
+  .desktop-surface.surface-visible .intro-card-scatter {
+    opacity: 1;
+    transform: rotate(0.8deg) translateY(0) scale(1);
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s;
+  }
+
+  .desktop-surface.surface-visible .intro-card-scatter:hover {
+    transform: rotate(0deg) translateY(-4px) scale(1.01);
+    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.1));
+    border-color: #c0c0c0;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.35s ease, border-color 0.35s ease;
+  }
+
+  /* ====== Desktop Spacer ====== */
+  .desktop-spacer {
+    height: 40px;
+  }
+
+  /* ====== Intro Desc (keep ruby styles) ====== */
   .intro-desc {
     margin: 0.25rem 0 0;
     color: #555;
     line-height: 1.2;
     font-size: 1rem;
+    text-align: center;
   }
 
   .intro-desc ruby {
@@ -569,23 +938,60 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
     z-index: 2;
   }
 
-  .latest-post {
-    font-size: 2rem;
-    font-weight: bold;
-    margin: 1rem 0;
-    text-align: center;
-  }
-
+  /* ====== Post-row (keep for backward compat) ====== */
   .post-row {
     display: flex;
     gap: 1.5rem;
     flex-wrap: wrap;
     justify-content: center;
+    margin-top: 2rem;
   }
 
   .post-row > :global(*) {
     flex: 1 1 300px;
     max-width: 48%;
+  }
+
+  /* ====== Responsive ====== */
+  @media (max-width: 768px) {
+    main {
+      padding: 4px;
+      height: 100dvh;
+    }
+
+    .unified-frame {
+      border-radius: 0;
+    }
+
+    .section-divider {}
+
+    .scatter-section {
+      padding: 40px 16px 40px;
+    }
+
+    .terminal-label {
+      padding-left: 16px;
+    }
+
+    .scatter-card {
+      display: block;
+      margin: 0 auto 20px;
+      max-width: 100%;
+      --scatter-x: 0 !important;
+    }
+
+    .desktop-surface.surface-visible .scatter-card:hover {
+      transform: rotate(var(--scatter-rotate, 0deg)) translateY(-4px) scale(1.01) !important;
+    }
+
+    .desktop-surface {
+      padding: 40px 16px 80px;
+    }
+
+    .intro-card-scatter {
+      max-width: 100%;
+      margin: 24px 16px 60px;
+    }
   }
 
   @media (max-width: 800px) {
@@ -594,9 +1000,6 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
     }
     .post-row > :global(*) {
       max-width: 100%;
-    }
-    .carousel-image {
-      height: 220px;
     }
   }
 </style>
