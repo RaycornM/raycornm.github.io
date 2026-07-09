@@ -3,6 +3,8 @@ const today = new Date();
 ---
 
 <footer>
+    <canvas class="footer-canvas" aria-hidden="true"></canvas>
+    <div class="footer-content">
     <p class="welcome">
                 🍵欢迎来到日暮茶会...
                 <br />
@@ -46,13 +48,28 @@ const today = new Date();
         </svg>
     </a>
 </div>
+    </div><!-- /footer-content -->
 
 <style>
     footer {
+        position: relative;
         padding: 2em 1em 6em 1em;
-        background: linear-gradient(var(--gray-gradient)) no-repeat;
         color: #60739F;
         text-align: center;
+        overflow: hidden;
+        background: linear-gradient(var(--gray-gradient)) no-repeat;
+    }
+    .footer-canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        pointer-events: none;
+    }
+    .footer-content {
+        position: relative;
+        z-index: 1;
     }
     .social-links {
         display: flex;
@@ -60,8 +77,6 @@ const today = new Date();
         gap: 1em;
         margin-top: 1em;
     }
-
-    /* welcome paragraph color */
     .welcome {
         text-align: center;
         color: #60739F;
@@ -73,13 +88,13 @@ const today = new Date();
     }
     .social-links a {
         text-decoration: none;
-        color: #60739F; /* GitHub的currentColor来源 */
+        color: #60739F;
         display: inline-flex;
         align-items: center;
         justify-content: center;
     }
     .social-links a:hover {
-        color: #222939; /* hover时对齐GitHub颜色 */
+        color: #222939;
     }
     .bilibili-svg,
     .instagram-svg {
@@ -97,5 +112,151 @@ const today = new Date();
     .instagram-link:hover .instagram-img {
         display: block;
     }
-
 </style>
+
+<script is:inline>
+(function() {
+    const canvas = document.querySelector('.footer-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let w, h, rafId;
+    let tick = 0;
+
+    function resize() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        w = rect.width;
+        h = rect.height;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    // ── vaporwave palette: 废墟美学 × 冷淡文艺 ──
+    const GRID_C    = 'rgba(124,124,125,0.18)';   // #7c7c7d ≈ 框架色
+    const GLOW_TEAL = 'rgba(78,205,196,0.06)';   // 青绿底光
+    const GLOW_PINK = 'rgba(217,84,141,0.04)';   // 粉紫光
+    const SUN_LINE  = 'rgba(78,205,196,0.12)';   // 水平扫线
+    const DUST      = 'rgba(124,124,125,0.25)';  // 噪点粒子
+
+    const GRID_SPACING = 40;
+    const HORIZON_Y = 0.48;  // 地平线在 48%
+
+    function drawGradient() {
+        // 从底部向上：粉紫光晕 → 青绿辉光 → 渐隐
+        const grad = ctx.createLinearGradient(0, h, 0, h * 0.2);
+        grad.addColorStop(0, 'rgba(217,84,141,0.08)');
+        grad.addColorStop(0.5, 'rgba(78,205,196,0.04)');
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+    }
+
+    function drawGrid() {
+        const baseline = h * HORIZON_Y;
+
+        ctx.strokeStyle = GRID_C;
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+
+        // 垂直线：透视汇聚
+        const vCount = Math.ceil(w / GRID_SPACING) + 2;
+        const vanishX = w / 2;
+        for (let i = -2; i < vCount + 2; i++) {
+            const x = i * GRID_SPACING + (tick * 0.08) % GRID_SPACING;
+            const topW = (x - vanishX) * 0.02;
+            ctx.moveTo(vanishX + topW, 0);
+            ctx.lineTo(x, baseline);
+            // 延伸到下方（固定间距）
+            ctx.moveTo(x, baseline);
+            ctx.lineTo(x, h);
+        }
+
+        // 水平线：越靠近地平线越密
+        const hSteps = 28;
+        for (let i = 0; i <= hSteps; i++) {
+            const t = i / hSteps;
+            const easeT = 1 - Math.pow(1 - t, 3); // ease-out, 上方密下方疏
+            let y;
+            if (t < 0.5) {
+                y = baseline - baseline * easeT * 1.4;
+            } else {
+                y = baseline + (h - baseline) * (easeT - 0.5) * 2;
+            }
+            ctx.moveTo(0, y);
+            ctx.lineTo(w, y);
+        }
+        ctx.stroke();
+    }
+
+    function drawSunStripes() {
+        // 水平扫线：模拟 CRT/蒸汽波的荧光残像
+        const stripes = 8;
+        const spacing = 56;
+        const phase = (tick * 0.3) % spacing;
+        for (let i = -1; i < stripes + 1; i++) {
+            const y = i * spacing - phase;
+            if (y < -spacing || y > h + spacing) continue;
+            const alpha = 0.04 + 0.02 * Math.sin(i * 1.7 + tick * 0.01);
+            ctx.fillStyle = `rgba(78,205,196,${alpha})`;
+            ctx.fillRect(0, y, w, 2);
+        }
+    }
+
+    function drawGlitchBlocks() {
+        // 偶尔闪现的矩形色块——Win95 对话框遗骸
+        if (tick % 120 < 8 && Math.random() < 0.7) {
+            for (let b = 0; b < 2; b++) {
+                const bx = Math.random() * w * 0.8 + w * 0.1;
+                const by = Math.random() * h * 0.7;
+                const bw = 80 + Math.random() * 60;
+                const bh = 1 + Math.random() * 4;
+                ctx.fillStyle = Math.random() < 0.5
+                    ? `rgba(78,205,196,${0.08 + Math.random() * 0.06})`
+                    : `rgba(217,84,141,${0.06 + Math.random() * 0.05})`;
+                ctx.fillRect(bx, by, bw, bh);
+            }
+        }
+    }
+
+    function drawDust() {
+        // 浮游噪点，废墟感
+        ctx.fillStyle = DUST;
+        const count = Math.floor(w * h / 5000);
+        const seed = tick * 37;
+        for (let i = 0; i < count; i++) {
+            const x = ((seed * (i + 1) * 7919) % 10000) / 10000 * w;
+            const y = ((seed * (i + 2) * 6271) % 10000) / 10000 * h;
+            const s = 0.3 + ((i * 13 + tick) % 7) / 20;
+            ctx.fillRect(x, y, s, s);
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, w, h);
+        drawGradient();
+        drawGrid();
+        drawSunStripes();
+        drawGlitchBlocks();
+        drawDust();
+        tick++;
+        rafId = requestAnimationFrame(draw);
+    }
+
+    // init
+    resize();
+    draw();
+
+    window.addEventListener('resize', () => { resize(); });
+    document.addEventListener('astro:page-load', () => { resize(); });
+
+    // 切出页面暂停
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            cancelAnimationFrame(rafId);
+        } else {
+            draw();
+        }
+    });
+})();
+</script>
