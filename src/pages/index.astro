@@ -95,9 +95,189 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
         opacity: 0;
         animation: terminal-type-fade 0.1s ease forwards;
       }
+
+      /* ====== Splash 入场屏（v7 · 终端清屏 + 就地欢迎）====== */
+      .splash {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        background: #000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: "IBM Plex Mono", "JetBrains Mono", "Courier New", monospace;
+        color: #fff;
+        overflow: hidden;
+      }
+      .splash::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+        pointer-events: none;
+        z-index: 100;
+      }
+      .splash--done { opacity: 0; pointer-events: none; display: none; }
+
+      /* ---- 终端框 ---- */
+      .splash-console {
+        width: min(600px, 90vw);
+        padding: 32px 36px;
+        position: relative;
+        z-index: 1;
+        border: 1px solid #2a2a2a;
+        min-height: 200px;
+        overflow: hidden;
+      }
+
+      /* ---- 终端行 ---- */
+      .splash-lines { position: relative; z-index: 1; transition: opacity 0.2s ease; }
+      .splash-line {
+        font-size: 13px;
+        line-height: 2;
+        min-height: 2em;
+        color: #999;
+        letter-spacing: 0.05em;
+        white-space: pre-wrap;
+        position: relative;
+      }
+      .splash-line .dim  { color: #777; }
+      .splash-line .pink { color: #ff5b9b; }
+      .splash-line .white { color: #eee; }
+
+      .splash-cursor-trail {
+        display: inline-block;
+        color: #ff5b9b;
+        animation: splash-blink 0.65s step-end infinite;
+      }
+      @keyframes splash-blink {
+        0%, 100% { opacity: 1; }
+        50%      { opacity: 0; }
+      }
+
+      /* ---- 进度块（█ 字符）---- */
+      .splash-load-bar {
+        position: absolute;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(600px, 90vw);
+        padding: 0 36px;
+        box-sizing: border-box;
+        z-index: 1;
+        display: flex;
+        gap: 3px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px;
+        line-height: 1;
+      }
+      .splash-load-bar.show { opacity: 1; }
+      .splash-load-block {
+        color: #333;
+        transition: color 0.2s ease;
+      }
+      .splash-load-block.done { color: #ff5b9b; text-shadow: 0 0 6px rgba(255,91,155,0.3); }
+
+      /* ---- 欢迎文字（终端内就地显示）---- */
+      .splash-welcome-inner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s ease;
+        z-index: 2;
+      }
+      .splash-welcome-inner.show { opacity: 1; pointer-events: auto; }
+      .splash-welcome-sub {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
+        font-size: 14px;
+        color: #ff5b9b;
+        opacity: 0.7;
+        letter-spacing: 0.06em;
+      }
+      .splash-welcome-text {
+        font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
+        font-size: clamp(18px, 2.8vw, 22px);
+        color: #ff5b9b;
+        text-align: center;
+        line-height: 1.8;
+        margin: 0;
+        letter-spacing: 0.04em;
+        padding: 0 24px;
+        text-shadow: 0 0 16px rgba(255,91,155,0.45), 0 0 36px rgba(255,91,155,0.25);
+      }
+
+      /* ---- CRT 关机退场 ---- */
+      .splash--shutdown {
+        animation: crt-poweroff 0.55s cubic-bezier(0.4, 0, 1, 1) forwards;
+      }
+      @keyframes crt-poweroff {
+        0%   { transform: scaleY(1); opacity: 1; filter: brightness(1); }
+        15%  { transform: scaleY(1); opacity: 1; filter: brightness(3); }
+        100% { transform: scaleY(0.015); opacity: 0.6; filter: brightness(4); }
+      }
+
+      /* ---- 主页 CRT 启动 ---- */
+      main {
+        opacity: 0;
+        transform: scaleY(0.01);
+        filter: brightness(3);
+        transition: none;
+      }
+      main.booted {
+        animation: crt-poweron 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      }
+      @keyframes crt-poweron {
+        0%   { opacity: 0; transform: scaleY(0.01); filter: brightness(3); }
+        12%  { opacity: 1; filter: brightness(3); }
+        45%  { transform: scaleY(1); filter: brightness(1.15); }
+        75%  { filter: brightness(1); }
+        100% { transform: scaleY(1); filter: brightness(1); opacity: 1; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .splash--shutdown { animation: none; opacity: 0; }
+        main.booted { animation: none; opacity: 1; transform: scaleY(1); filter: none; }
+        .splash-cursor-trail { animation: none; opacity: 0; }
+      }
+      @media (max-width: 480px) {
+        .splash-console { padding: 24px 18px; }
+        .splash-line { font-size: 11px; }
+        .splash-load-bar { bottom: 36px; padding: 0 18px; font-size: 9px; gap: 2px; }
+        .splash-welcome-sub { top: 14px; right: 18px; font-size: 12px; }
+      }
     </style>
   </head>
   <body>
+    <!-- ====== Splash 入场屏（v7 · 终端清屏 + 就地欢迎）====== -->
+    <div class="splash" id="splash">
+      <div class="splash-console" id="splash-console">
+        <div class="splash-lines" id="splash-lines">
+          <div class="splash-line" id="splash-l0"></div>
+          <div class="splash-line" id="splash-l1"></div>
+          <div class="splash-line" id="splash-l2"></div>
+          <div class="splash-line" id="splash-l3"></div>
+          <div class="splash-line" id="splash-l4"></div>
+          <div class="splash-line" id="splash-l5"></div>
+          <div class="splash-line" id="splash-l6"></div>
+          <div class="splash-line" id="splash-l7"></div>
+        </div>
+        <div class="splash-welcome-inner" id="splash-welcome-inner">
+          <p class="splash-welcome-text">…ようこそ。新日暮里の<ruby>世界へ<rt>マスカレード</rt></ruby></p>
+        </div>
+      </div>
+      <div class="splash-load-bar" id="splash-load-bar"></div>
+    </div>
+
     <CursorShadow />
     <Header />
     <main>
@@ -310,6 +490,149 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
         );
         if (surface) surfaceObserver.observe(surface);
       });
+    </script>
+    <!-- ====== Splash 动画（v7 · 终端清屏 + 就地欢迎）====== -->
+    <script is:inline>
+      (function runSplash() {
+        var splash    = document.getElementById('splash');
+        var consoleEl = document.getElementById('splash-console');
+        var linesEl   = document.getElementById('splash-lines');
+        var loadBar   = document.getElementById('splash-load-bar');
+        var welcome   = document.getElementById('splash-welcome-inner');
+        if (!splash) return;
+
+        // sessionStorage 检查：同一标签会话内已播过则跳过 splash
+        if (sessionStorage.getItem('splash-shown')) {
+          splash.style.display = 'none';
+          var mainEl = document.querySelector('main');
+          if (mainEl) { mainEl.style.opacity = '1'; mainEl.style.transform = 'scaleY(1)'; mainEl.style.filter = 'brightness(1)'; }
+          return;
+        }
+
+        var lines = [
+          { id: 'splash-l0', plain: 'RIMUCHAHUI SYSTEM  Ver 1.09',       html: '<span class="dim">RIMUCHAHUI SYSTEM</span>  <span class="pink">Ver 1.09</span>',            speed: [16, 31] },
+          { id: 'splash-l1', plain: '(C) 2024 RIMUCHAHUI Project.',       html: '<span class="dim">(C) 2024 RIMUCHAHUI Project.</span>',                                    speed: [14, 25] },
+          { id: 'splash-l2', plain: '',                                    html: '',                                                                                         speed: [0, 0], gap: 125 },
+          { id: 'splash-l3', plain: 'MEMORY  TEST ........ 65536K OK',    html: '<span class="dim">MEMORY  TEST ........</span> <span class="white">65536K OK</span>',        speed: [13, 24] },
+          { id: 'splash-l4', plain: 'DISK    CHECK ....... OK',           html: '<span class="dim">DISK    CHECK .......</span> <span class="white">OK</span>',              speed: [14, 28] },
+          { id: 'splash-l5', plain: 'SYSTEM  INIT  ....... OK',           html: '<span class="dim">SYSTEM  INIT  .......</span> <span class="white">OK</span>',              speed: [14, 28] },
+          { id: 'splash-l6', plain: '',                                    html: '',                                                                                         speed: [0, 0], gap: 100 },
+          { id: 'splash-l7', plain: 'LOADING',                             html: '<span class="white">LOADING</span>',                                                       speed: [20, 38] },
+        ];
+
+        var totalChars = 0;
+        lines.forEach(function(l) { totalChars += l.plain.length; });
+
+        var BLOCKS = 42;
+        var frag = '';
+        for (var b = 0; b < BLOCKS; b++) {
+          frag += '<span class="splash-load-block" id="splash-bk' + b + '">&#x2588;</span>';
+        }
+        loadBar.innerHTML = frag;
+        loadBar.classList.add('show');
+
+        var typedCount = 0;
+        var lineIdx    = 0;
+        var charIdx    = 0;
+
+        function rand(min, max) { return min + Math.random() * (max - min); }
+
+        function advanceBlocks() {
+          var target = Math.floor((typedCount / Math.max(totalChars, 1)) * BLOCKS);
+          target = Math.min(target, BLOCKS - 1);
+          for (var b = 0; b <= target; b++) {
+            var blk = document.getElementById('splash-bk' + b);
+            if (blk && !blk.classList.contains('done')) blk.classList.add('done');
+          }
+        }
+
+        function flickerLine(i) {
+          var el = document.getElementById(lines[i].id);
+          if (!el || !el.textContent.trim()) return;
+          el.style.opacity = '0.35';
+          setTimeout(function() { el.style.opacity = '1'; }, 28 + Math.random() * 20);
+        }
+
+        function finishLineThenAdvance() {
+          var ln = lines[lineIdx];
+          var el = document.getElementById(ln.id);
+          if (el && ln.html) el.innerHTML = ln.html;
+
+          flickerLine(lineIdx);
+          lineIdx++;
+          charIdx = 0;
+          typedCount += 1;
+          advanceBlocks();
+
+          setTimeout(typeChar, lineIdx < lines.length ? rand(65, 160) : 15);
+        }
+
+        function typeChar() {
+          if (lineIdx >= lines.length) {
+            finishTyping();
+            return;
+          }
+
+          var ln = lines[lineIdx];
+          var el = document.getElementById(ln.id);
+
+          if (ln.plain.length === 0) {
+            if (el) { el.innerHTML = '&nbsp;'; el.style.opacity = '1'; }
+            lineIdx++;
+            charIdx = 0;
+            setTimeout(typeChar, ln.gap || 60);
+            return;
+          }
+
+          if (!el) { lineIdx++; charIdx = 0; typeChar(); return; }
+
+          if (charIdx === 0 && lineIdx > 0) {
+            flickerLine(lineIdx - 1);
+          }
+
+          el.innerHTML = ln.plain.substring(0, charIdx + 1) + '<span class="splash-cursor-trail">_</span>';
+          typedCount++;
+          charIdx++;
+          advanceBlocks();
+
+          if (charIdx < ln.plain.length) {
+            setTimeout(typeChar, rand(ln.speed[0], ln.speed[1]));
+          } else {
+            finishLineThenAdvance();
+          }
+        }
+
+        function finishTyping() {
+          loadBar.classList.remove('show');
+
+          // 终端清屏：极短淡出 → 消失
+          setTimeout(function() {
+            linesEl.style.opacity = '0';
+            setTimeout(function() { linesEl.style.display = 'none'; }, 150);
+          }, 300);
+
+          // 空窗口停顿 500ms → 欢迎淡入
+          setTimeout(function() {
+            welcome.classList.add('show');
+          }, 900);
+
+          // 欢迎停留 → CRT 关机
+          setTimeout(function() {
+            welcome.classList.remove('show');
+            setTimeout(function() {
+              splash.classList.add('splash--shutdown');
+              splash.addEventListener('animationend', function handler() {
+                splash.removeEventListener('animationend', handler);
+                splash.classList.add('splash--done');
+                var mainEl2 = document.querySelector('main');
+                if (mainEl2) { mainEl2.classList.add('booted'); sessionStorage.setItem('splash-shown', '1'); }
+              }, { once: true });
+            }, 250);
+          }, 2500);
+        }
+
+        typeChar();
+      })();
     </script>
     <script is:inline src="/scripts/beijing-time.js"></script>
     <script is:inline src="/scripts/wave-grid.js"></script>
