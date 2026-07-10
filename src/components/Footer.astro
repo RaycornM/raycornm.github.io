@@ -123,10 +123,12 @@ const today = new Date();
     let tick = 0;
 
     function resize() {
-        const rect = canvas.parentElement.getBoundingClientRect();
+        const parent = canvas.parentElement;
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        w = rect.width;
-        h = rect.height;
+        // 使用 clientWidth/clientHeight（布局尺寸），而非 getBoundingClientRect（受祖先 transform 影响）
+        w = parent.clientWidth;
+        h = parent.clientHeight;
+        if (w === 0 || h === 0) return;
         canvas.width = w * dpr;
         canvas.height = h * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
