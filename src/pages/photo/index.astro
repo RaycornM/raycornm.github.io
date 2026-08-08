@@ -1,130 +1,158 @@
 ---
-import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import CursorShadow from '../../components/CursorShadow.astro';
+import Spotlight from '../../components/Spotlight.astro';
+import PageChrome from '../../components/PageChrome.astro';
 import Footer from '../../components/Footer.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import CoverImg from '../../components/CoverImg.astro';
 
 const photos = (await getCollection('photo')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+
+function fmtDate(d: Date): string {
+	const mm = String(d.getMonth() + 1).padStart(2, '0');
+	return `${mm} · ${d.getFullYear()}`;
+}
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="zh-Hans">
 	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<style>
-			main {
-				max-width: 960px;
-				width: 100%;
-				margin: 0 auto;
-				padding: 0 1rem;
-			}
-			ul {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 2rem;
-				list-style-type: none;
-				margin: 0;
-				padding: 0;
-			}
-			ul li {
-				width: calc(50% - 1rem);
-			}
-			ul li * {
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			ul li:first-child {
-				width: 100%;
-				margin-bottom: 1rem;
-				text-align: center;
-			}
-			ul li:first-child img {
-				width: 100%;
-			}
-			ul li:first-child .title {
-				font-size: 2.369rem;
-			}
-			ul li img {
-				margin-bottom: 0.5rem;
-				border-radius: 12px;
-				width: 100%;
-				height: auto;
-				object-fit: cover;
-			}
-			ul li a {
-				display: block;
-			}
-			.title {
-				font-family: "SmileySans-Oblique";
-				margin: 0;
-				color: rgb(var(--black));
-				line-height: 1;
-			}
-			.date {
-				margin: 0;
-				color: rgb(var(--gray));
-			}
-			ul li a:hover h4,
-			ul li a:hover .date {
-				color: rgb(var(--accent));
-			}
-			ul a:hover img {
-				box-shadow: var(--box-shadow);
-			}
-			@media (max-width: 720px) {
-				ul {
-					gap: 0.5em;
-				}
-				ul li {
-					width: 100%;
-					text-align: center;
-				}
-				ul li:first-child {
-					margin-bottom: 0;
-				}
-				ul li:first-child .title {
-					font-size: 1.563em;
-				}
-			}
-		</style>
+		<BaseHead title={`Album · ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
 	</head>
-	<body class="photo-theme">
+	<body class="photo-page">
 		<CursorShadow />
+		<Spotlight />
+		<PageChrome />
 		<Header />
-		<main>
-			<section>
-				<ul>
-					{
-						photos.map((photo) => (
-							<li>
-								<a href={`/photo/${photo.id}/`}>
-									{photo.data.heroImage && (
-										<Image 
-											width={720} 
-											height={360} 
-											src={photo.data.heroImage} 
-											alt="" 
-											loading="lazy"
-											decoding="async"
-										/>
-									)}
-									<h4 class="title">{photo.data.title}</h4>
-									<p class="date">
-										<FormattedDate date={photo.data.pubDate} />
-									</p>
-								</a>
-							</li>
-						))
-					}
-				</ul>
-			</section>
+		<main class="page-reveal">
+			<div class="page-inner">
+				<div class="mag-eyebrow-row">
+					<span class="num-circle">C</span>
+					<span class="divider"></span>
+					<span class="label">Album</span>
+					<span>·</span>
+					<span>影集 / 摄影</span>
+				</div>
+
+				<p class="stagger-eyebrow pink-soft">No. 03 — Photographs from the quiet hours.</p>
+
+				<h2 class="stagger-title" data-stagger>… photograph.</h2>
+
+				<h3 class="mask-title">
+					<span class="mask-line"><span>记录光</span></span>
+					<span class="mask-line"><span>的形状</span></span>
+				</h3>
+
+				<div class="photo-grid-block">
+					{photos.map((photo, i) => (
+						<a class="photo-tile" href={`/photo/${photo.id}/`}>
+							<CoverImg src={photo.data.heroImage} alt={photo.data.title} zoom />
+							<div class="photo-tile-overlay">
+								<div>
+									<div class="photo-tile-title">{photo.data.title}</div>
+									<div class="photo-tile-date">{fmtDate(photo.data.pubDate)}</div>
+								</div>
+							</div>
+							<span class="photo-tile-no">No. {String(i + 1).padStart(2, '0')}</span>
+						</a>
+					))}
+				</div>
+			</div>
 		</main>
 		<Footer />
+		<script is:inline src="/scripts/reveal.js"></script>
 	</body>
 </html>
+
+<style>
+	.page-inner {
+		max-width: 1320px;
+		margin: 0 auto;
+		padding: 100px 48px 120px;
+	}
+
+	/* 标题颜色用 --ink：随 photo 页明暗反转自动切换
+	   （亮色模式→影集页暗底白字；暗色模式→反转亮底黑字） */
+	main .stagger-title { color: var(--ink); }
+	main .mask-title { color: var(--ink); }
+
+	.photo-grid-block {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 32px;
+		margin-top: 80px;
+	}
+
+	.photo-tile {
+		position: relative;
+		aspect-ratio: 4/3;
+		background: linear-gradient(135deg, #2a2020 0%, #1a1414 100%);
+		border: 1px solid var(--line-soft);
+		box-shadow: 6px 6px 0 var(--paper-shadow);
+		overflow: hidden;
+		color: inherit;
+		display: block;
+		opacity: 0;
+		transform: translateY(40px);
+		transition:
+			opacity 1s var(--ease-expo),
+			transform 1s var(--ease-expo),
+			box-shadow 0.4s var(--ease-soft);
+	}
+	.in-view .photo-tile { opacity: 1; transform: translateY(0); }
+	.in-view .photo-tile:nth-child(1) { transition-delay: 0.1s; }
+	.in-view .photo-tile:nth-child(2) { transition-delay: 0.2s; }
+	.in-view .photo-tile:nth-child(3) { transition-delay: 0.3s; }
+	.in-view .photo-tile:nth-child(4) { transition-delay: 0.4s; }
+	.in-view .photo-tile:nth-child(5) { transition-delay: 0.5s; }
+	.in-view .photo-tile:nth-child(6) { transition-delay: 0.6s; }
+	.photo-tile:hover {
+		box-shadow: 10px 10px 0 var(--paper-shadow);
+		transform: translate(-2px, -2px);
+	}
+
+	.photo-tile:hover .cover-img { transform: scale(1.06); }
+
+	.photo-tile-overlay {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(180deg, transparent 40%, rgba(15, 23, 36, 0.92) 100%);
+		display: flex;
+		align-items: flex-end;
+		padding: 24px;
+	}
+	.photo-tile-no {
+		position: absolute;
+		top: 14px;
+		left: 16px;
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.2em;
+		color: rgba(245, 243, 238, 0.7);
+	}
+	.photo-tile-no::before { content: "● "; color: var(--pink); }
+	.photo-tile-title {
+		font-family: var(--font-serif-jp);
+		font-weight: 300;
+		font-size: 24px;
+		margin-bottom: 4px;
+		color: var(--photo-paper);
+	}
+	.photo-tile-date {
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.2em;
+		text-transform: uppercase;
+		color: rgba(245, 243, 238, 0.6);
+	}
+
+	@media (max-width: 700px) {
+		.page-inner { padding: 80px 24px 100px; }
+		.photo-grid-block { grid-template-columns: 1fr; }
+	}
+</style>

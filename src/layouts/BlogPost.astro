@@ -4,9 +4,11 @@ import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import CursorShadow from '../components/CursorShadow.astro';
+import Spotlight from '../components/Spotlight.astro';
+import PageChrome from '../components/PageChrome.astro';
 import Footer from '../components/Footer.astro';
-import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
+import { readingTimeMinutes } from '../utils/reading-time';
 
 type BlogData = CollectionEntry<'blog'>['data'];
 type PhotoData = CollectionEntry<'photo'>['data'];
@@ -19,9 +21,10 @@ interface Props {
 	heroImage?: any;
 	id?: string;
 	collection?: string;
+	body?: string;
 }
 
-const { title, description, pubDate, updatedDate, heroImage, id = '', collection = 'blog' } = Astro.props as Props;
+const { title, description, pubDate, updatedDate, heroImage, id = '', collection = 'blog', body = '' } = Astro.props as Props;
 
 // Get all posts from the collection
 const allPosts = (await getCollection(collection as 'blog' | 'photo')).sort(
@@ -36,318 +39,472 @@ const newerPost = currentIndex > 0 ? allPosts[currentIndex - 1] : allPosts[allPo
 const olderPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : allPosts[0];
 
 const backLink = collection === 'photo' ? '/photo' : '/blog';
+const backLabel = collection === 'photo' ? 'Back to Album' : 'Back to Blog';
+const currentPost = currentIndex >= 0 ? allPosts[currentIndex] : null;
+const tags: string[] =
+	currentPost && 'tags' in currentPost.data ? (currentPost.data.tags as string[]) : [];
+const minutes = readingTimeMinutes(body);
+
+function fmtDate(d: Date): string {
+	const mm = String(d.getMonth() + 1).padStart(2, '0');
+	return `${mm} · ${d.getFullYear()}`;
+}
 ---
 
-<html lang="en">
+<html lang="zh-Hans">
 	<head>
 		<BaseHead title={title} description={description} />
-		<style>
-			.blog-container {
-				display: flex;
-				gap: 2em;
-				max-width: 1400px;
-				margin: 0 auto;
-			}
-			.sidebar {
-				width: 120px;
-				position: fixed;
-				left: 0;
-				top: 0;
-				bottom: 0;
-				display: flex;
-				flex-direction: column;
-				padding: 1em 0.75em;
-				gap: 1em;
-				background: transparent; /* full-height left sidebar, no card */
-				border-radius: 0;
-				box-shadow: none;
-				overflow: visible; /* allow indicator to overflow */
-			}
-			.thumbnail-group {
-				display: flex;
-				flex-direction: column;
-				gap: 0.6em;
-				margin-top: auto; /* push thumbnails to bottom */
-				align-items: center; /* center thumbnails horizontally */
-			}
-			.thumbnail-item {
-				position: relative;
-				width: 83px; /* ~75px * 1.1 */
-				height: 50px; /* ~45px * 1.1 */
-				overflow: hidden;
-				border-radius: 4px;
-				display: block;
-				cursor: pointer;
-				transition: transform 0.12s ease;
-			}
-			.thumbnail-item:hover {
-				transform: scale(0.98);
-			}
-			.thumbnail-item img {
-				width: 100%;
-				height: 100%;
-				object-fit: cover;
-			}
-			.thumbnail-item.current {
-				cursor: default;
-				overflow: visible; /* allow the indicator to overflow outside the thumbnail box */
-				z-index: 50; /* keep current thumbnail above neighbors */
-			}
-			.thumbnail-item.current:hover {
-				transform: scale(1);
-			}
-			.indicator {
-				position: absolute;
-				right: -24px; /* move a bit further out so it's fully visible */
-				top: 50%;
-				transform: translateY(-50%);
-				font-size: 18px;
-				color: #60739F; /* use the same color as other icons */
-				font-weight: 700;
-				z-index: 1000; /* ensure it sits above page content */
-				pointer-events: none;
-			}
-			.thumbnail-item .indicator {
-				display: none;
-			}
-			.thumbnail-item.current .indicator {
-				display: block;
-			}
-			.back-button {
-				display: block;
-				text-align: center;
-				padding: 0.5em 0.4em;
-				background: transparent;
-				color: rgb(var(--gray-dark));
-				text-decoration: underline;
-				border-radius: 0;
-				transition: color 0.12s ease;
-				font-size: 12px;
-				white-space: nowrap;
-				align-self: center; /* center the back button under thumbnails */
-			}
-			.article-content {
-				flex: 1;
-				padding: 2em 0;
-				min-width: 0;
-				/* Remove desktop left offset so article can be centered in viewport.
-				   Sidebar is fixed at left; it may visually overlap the left gutter but
-				   the article itself will be centered. */
-				margin-left: 0;
-				/* stack hero-image above prose and center both */
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-			}
-			.hero-image {
-				/* constrain hero width to match prose so they share same centerline */
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: 0 auto 1em auto;
-			}
-			.hero-image img {
-				display: block;
-				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
-				max-width: 100%;
-			}
-			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: 0 auto;
-				padding: 1em;
-				color: rgb(var(--gray-dark));
-				font-size: 15px; /* increased by 3px from 10px, per request */
-			}
-
-			/* Keep titles at their original visual sizes (original base was 20px):
-			   h1: ~61px, h2: ~49px, h3: ~39px, h4: ~31px, h5: 25px */
-			.prose h1 { font-size: 39px; }
-			.prose h2 { font-size: 33px; }
-			.prose h3 { font-size: 28px; }
-			.prose h4 { font-size: 21px; }
-			.prose h5 { font-size: 18px; }
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
-			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
-			}
-			.date {
-				margin-bottom: 0.5em;
-				color: rgb(var(--gray));
-			}
-			.last-updated-on {
-				font-style: italic;
-			}
-			@media (max-width: 1024px) {
-				.blog-container {
-					flex-direction: column;
-					gap: 1em;
-				}
-				.sidebar {
-					width: 100%;
-					position: static;
-					flex-direction: row;
-					justify-content: flex-start;
-					gap: 1em;
-					padding: 1em;
-					overflow-x: auto;
-					border-bottom: 1px solid rgb(var(--gray-light));
-				}
-
-				/* When sidebar moves to the top on mobile/tablet, remove left offset
-				   so article sits centered beneath it instead of being pushed right. */
-				.article-content {
-					margin-left: 0; /* remove desktop left offset */
-					margin-right: 0;
-					padding: 1em 0.75em;
-				}
-
-				/* Make prose fluid and centered on smaller screens */
-				.prose {
-					width: 100%;
-					max-width: 720px;
-					margin: 0 auto;
-					padding: 0.5em 0.5em;
-				}
-				.thumbnail-group {
-					display: flex;
-					flex-direction: row;
-					gap: 1em;
-				}
-				.thumbnail-item {
-					width: 150px;
-					height: 150px;
-					flex-shrink: 0;
-				}
-				.back-button {
-					display: none;
-				}
-			}
-
-			/* Header/nav adjustments to avoid nav links wrapping on smaller screens.
-			   Allow horizontal scroll if there isn't enough space. */
-			@media (max-width: 1024px) {
-				header {
-					display: flex;
-					align-items: center;
-					gap: 0.5rem;
-				}
-				header nav {
-					white-space: nowrap;
-					overflow-x: auto;
-					-webkit-overflow-scrolling: touch;
-				}
-				header nav a {
-					display: inline-block;
-					padding: 0 0.6rem;
-				}
-			}
-
-			@media (max-width: 720px) {
-				.prose {
-					font-size: 11px; /* increased by 3px from 8px for mobile */
-				}
-				/* keep mobile titles readable but not excessively large */
-				.prose h1 { font-size: 39px; }
-				.prose h2 { font-size: 31px; }
-				.prose h3 { font-size: 25px; }
-				.prose h4 { font-size: 19px; }
-				.prose h5 { font-size: 15px; }
-			}
-
-			/* Default (non-photo) theme - blog pages use light gray background */
-			body:not(.photo-theme) {
-				background: #f5f5f5 !important;
-				color: rgb(var(--gray-dark)) !important;
-			}
-		</style>
 	</head>
 
-	<body class={collection === 'photo' ? 'photo-theme' : ''}>
+	<body class={collection === 'photo' ? 'photo-page' : ''}>
+		<div class="reading-progress" id="reading-progress"></div>
 		<CursorShadow />
+		<Spotlight />
+		<PageChrome />
 		<Header />
 		<main>
-			<div class="blog-container">
-				<aside class="sidebar">
-					<div class="thumbnail-group">
-						<a href={`/${collection}/${newerPost.id}/`} class="thumbnail-item">
-							{newerPost?.data?.heroImage && (
-								<Image 
-									width={200} 
-									height={200} 
-									src={newerPost.data.heroImage} 
-									alt={newerPost.data.title}
-									loading="lazy"
-									decoding="async"
-								/>
-							)}
-						</a>
-						<div class="thumbnail-item current">
-							{heroImage && (
-								<Image 
-									width={200} 
-									height={200} 
-									src={heroImage} 
-									alt={title}
-									loading="eager"
-									decoding="async"
-								/>
-							)}
-							<span class="indicator">◂</span>
-						</div>
-						<a href={`/${collection}/${olderPost.id}/`} class="thumbnail-item">
-							{olderPost?.data?.heroImage && (
-								<Image 
-									width={200} 
-									height={200} 
-									src={olderPost.data.heroImage} 
-									alt={olderPost.data.title}
-									loading="lazy"
-									decoding="async"
-								/>
-							)}
-						</a>
-					</div>
-					<a href={backLink} class="back-button">Back to {collection === 'photo' ? 'Album' : 'Blog'}</a>
-				</aside>
-				<article class="article-content">
-					<div class="hero-image">
+			<div class="blog-post-layout">
+				<!-- 左侧 sidebar：相邻文章 -->
+				<aside class="blog-sidebar">
+					<div class="sidebar-label">Adjacent</div>
+					<a href={`/${collection}/${newerPost.id}/`} class="sidebar-thumb">
+						{newerPost?.data?.heroImage && (
+							<Image
+								width={180}
+								height={112}
+								src={newerPost.data.heroImage}
+								alt={newerPost.data.title}
+								loading="lazy"
+								decoding="async"
+							/>
+						)}
+						<span class="sidebar-thumb-label">Newer</span>
+					</a>
+					<div class="sidebar-thumb current">
 						{heroImage && (
-							<Image 
-								width={1020} 
-								height={510} 
-								src={heroImage} 
+							<Image
+								width={180}
+								height={112}
+								src={heroImage}
+								alt={title}
+								loading="eager"
+								decoding="async"
+							/>
+						)}
+						<span class="sidebar-thumb-label">Current</span>
+						<span class="sidebar-thumb-indicator">▸</span>
+					</div>
+					<a href={`/${collection}/${olderPost.id}/`} class="sidebar-thumb">
+						{olderPost?.data?.heroImage && (
+							<Image
+								width={180}
+								height={112}
+								src={olderPost.data.heroImage}
+								alt={olderPost.data.title}
+								loading="lazy"
+								decoding="async"
+							/>
+						)}
+						<span class="sidebar-thumb-label">Older</span>
+					</a>
+					<a href={backLink} class="sidebar-back">{backLabel}</a>
+				</aside>
+
+				<!-- 中间 article -->
+				<article class="blog-article" id="blog-article">
+					{heroImage && (
+						<div class="blog-article-hero">
+							<Image
+								width={1020}
+								height={510}
+								src={heroImage}
 								alt=""
 								loading="eager"
 								decoding="async"
 								fetchpriority="high"
 							/>
-						)}
-					</div>
-					<div class="prose">
-						<div class="title">
-							<div class="date">
-								<FormattedDate date={pubDate} />
-								{updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)}
-							</div>
-							<h1>{title}</h1>
-							<hr />
 						</div>
+					)}
+
+					<div class="blog-article-meta">
+						<span class="accent">{fmtDate(pubDate)}</span>
+						<span>{collection === 'photo' ? 'Album' : 'Notes'}</span>
+						{tags[0] && <span>{tags[0]}</span>}
+						<span>{minutes} min read</span>
+						{updatedDate && <span>Updated {fmtDate(updatedDate)}</span>}
+					</div>
+
+					<h1 class="blog-article-title">{title}</h1>
+
+					<div class="blog-article-prose prose" id="blog-article-prose">
 						<slot />
 					</div>
 				</article>
+
+				<!-- 右侧 sticky TOC -->
+				<aside class="blogpost-toc" id="blogpost-toc">
+					<div class="blogpost-toc-label">目录 · TOC</div>
+					<ul class="blogpost-toc-list" id="toc-list"></ul>
+					<div class="blogpost-toc-progress">
+						<span>阅读进度</span>
+						<div class="blogpost-toc-progress-bar">
+							<div class="blogpost-toc-progress-fill" id="toc-progress-fill"></div>
+						</div>
+					</div>
+				</aside>
 			</div>
 		</main>
 		<Footer />
+
+		<script is:inline>
+			(function () {
+				var article = document.getElementById('blog-article');
+				var prose = document.getElementById('blog-article-prose');
+				var tocList = document.getElementById('toc-list');
+				var tocAside = document.getElementById('blogpost-toc');
+				var tocProgress = document.getElementById('toc-progress-fill');
+				var topBar = document.getElementById('reading-progress');
+				if (!article || !prose) return;
+
+				// ===== TOC 自动生成 =====
+				var headings = Array.prototype.slice.call(prose.querySelectorAll('h2, h3'));
+				if (!headings.length && tocAside) {
+					tocAside.style.display = 'none';
+				}
+				headings.forEach(function (h, i) {
+					if (!h.id) h.id = 'heading-' + i;
+				});
+				if (tocList && headings.length) {
+					tocList.innerHTML = headings.map(function (h) {
+						var isH3 = h.tagName === 'H3';
+						return (
+							'<li class="blogpost-toc-item' + (isH3 ? ' toc-h3' : '') + '">' +
+							'<a href="#' + h.id + '">' + h.textContent + '</a></li>'
+						);
+					}).join('');
+				}
+				var tocItems = tocList
+					? Array.prototype.slice.call(tocList.querySelectorAll('.blogpost-toc-item'))
+					: [];
+
+				// 平滑滚动到锚点（sticky header 偏移）
+				if (tocList) {
+					tocList.addEventListener('click', function (e) {
+						var link = e.target.closest('a');
+						if (!link) return;
+						var target = document.getElementById(link.getAttribute('href').slice(1));
+						if (!target) return;
+						e.preventDefault();
+						var y = target.getBoundingClientRect().top + window.scrollY - 90;
+						window.scrollTo({ top: y, behavior: 'smooth' });
+					});
+				}
+
+				// ===== Scroll spy + 双进度 =====
+				function update() {
+					var scrollY = window.scrollY;
+
+					var activeId = null;
+					for (var i = 0; i < headings.length; i++) {
+						var h = headings[i];
+						if (h.getBoundingClientRect().top + scrollY - 120 <= scrollY) {
+							activeId = h.id;
+						} else {
+							break;
+						}
+					}
+					tocItems.forEach(function (item) {
+						var link = item.querySelector('a');
+						item.classList.toggle('active', link.getAttribute('href') === '#' + activeId);
+					});
+
+					var r = article.getBoundingClientRect();
+					var total = r.height - window.innerHeight;
+					var pct = 0;
+					if (total > 0) {
+						pct = Math.max(0, Math.min(1, -r.top / total));
+					}
+					if (topBar) topBar.style.width = pct * 100 + '%';
+					if (tocProgress) tocProgress.style.width = pct * 100 + '%';
+				}
+
+				window.addEventListener('scroll', update, { passive: true });
+				update();
+			})();
+		</script>
 	</body>
 </html>
+
+<style>
+	/* ===== 顶部阅读进度条 ===== */
+	.reading-progress {
+		position: fixed;
+		top: 0;
+		left: 0;
+		height: 2px;
+		background: var(--pink);
+		z-index: 300;
+		width: 0%;
+		transition: width 0.05s linear;
+	}
+
+	/* ===== 布局：sidebar / article / TOC ===== */
+	.blog-post-layout {
+		display: grid;
+		grid-template-columns: 120px minmax(0, 1fr) 200px;
+		gap: 48px;
+		max-width: 1320px;
+		margin: 0 auto;
+		padding: 60px 48px 120px;
+		align-items: start;
+	}
+
+	/* ===== 左侧 sidebar ===== */
+	.blog-sidebar {
+		position: sticky;
+		top: 100px;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+	.sidebar-label {
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.22em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+		margin-bottom: 8px;
+	}
+	.sidebar-thumb {
+		position: relative;
+		width: 90px;
+		height: 56px;
+		overflow: visible;
+		border: 1px solid var(--hairline);
+		background: linear-gradient(135deg, #2a2020 0%, #1a1414 100%);
+		display: block;
+		transition: transform 0.3s var(--ease-soft), box-shadow 0.3s var(--ease-soft);
+	}
+	.sidebar-thumb img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+	.sidebar-thumb:hover {
+		transform: translateX(4px);
+		box-shadow: 4px 4px 0 var(--paper-shadow);
+	}
+	.sidebar-thumb.current {
+		border-color: var(--pink);
+		box-shadow: 4px 4px 0 var(--paper-shadow);
+	}
+	.sidebar-thumb-label {
+		position: absolute;
+		bottom: 4px;
+		left: 4px;
+		font-family: var(--font-mono);
+		font-size: 8px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: rgba(245, 243, 238, 0.85);
+		text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+	}
+	.sidebar-thumb-indicator {
+		position: absolute;
+		right: -16px;
+		top: 50%;
+		transform: translateY(-50%);
+		font-size: 12px;
+		color: var(--pink);
+	}
+	.sidebar-back {
+		margin-top: 24px;
+		padding-top: 16px;
+		border-top: 1px solid var(--line-soft);
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+		transition: color 0.3s var(--ease-soft);
+	}
+	.sidebar-back:hover { color: var(--ink); }
+	.sidebar-back::before { content: "← "; }
+
+	/* ===== 中间 article ===== */
+	.blog-article {
+		max-width: 720px;
+		min-width: 0;
+	}
+	.blog-article-hero {
+		width: 100%;
+		border: 1px solid var(--hairline);
+		box-shadow: 6px 6px 0 var(--paper-shadow);
+		margin-bottom: 60px;
+		overflow: hidden;
+	}
+	.blog-article-hero img {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+
+	.blog-article-meta {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+		margin-bottom: 24px;
+		display: flex;
+		gap: 20px;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+	.blog-article-meta::before { content: "● "; color: var(--pink); }
+	.blog-article-meta .accent { color: var(--ink); }
+
+	.blog-article-title {
+		font-family: var(--font-serif-jp);
+		font-weight: 200;
+		font-size: clamp(40px, 5vw, 72px);
+		line-height: 1.1;
+		margin: 0 0 40px;
+		letter-spacing: -0.02em;
+		color: var(--ink);
+	}
+
+	.blog-article-prose {
+		font-family: var(--font-serif);
+		font-size: 16px;
+		line-height: 1.9;
+	}
+	.blog-article-prose :global(h2) {
+		font-family: var(--font-serif-jp);
+		font-weight: 300;
+		font-size: 28px;
+		margin: 60px 0 20px;
+		color: var(--ink);
+	}
+	.blog-article-prose :global(h3) {
+		font-family: var(--font-serif-jp);
+		font-weight: 400;
+		font-size: 22px;
+		margin: 48px 0 16px;
+		color: var(--ink);
+	}
+
+	/* ===== 右侧 TOC ===== */
+	.blogpost-toc {
+		position: sticky;
+		top: 100px;
+	}
+	.blogpost-toc-label {
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.22em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+		margin-bottom: 16px;
+		padding-bottom: 12px;
+		border-bottom: 1px solid var(--line-soft);
+	}
+	.blogpost-toc-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	.blogpost-toc :global(.blogpost-toc-item) {
+		position: relative;
+		padding: 8px 0 8px 16px;
+		border-left: 1px solid var(--line-soft);
+		font-family: var(--font-serif);
+		font-size: 13px;
+		line-height: 1.4;
+	}
+	.blogpost-toc :global(.blogpost-toc-item.toc-h3) {
+		padding-left: 32px;
+		font-size: 12px;
+	}
+	.blogpost-toc :global(.blogpost-toc-item a) {
+		color: var(--ink-soft);
+		display: block;
+		transition: color 0.3s var(--ease-soft);
+	}
+	.blogpost-toc :global(.blogpost-toc-item.toc-h3 a) {
+		color: var(--ink-faint);
+	}
+	.blogpost-toc :global(.blogpost-toc-item a:hover) { color: var(--ink); }
+	.blogpost-toc :global(.blogpost-toc-item.active) {
+		border-left-color: var(--pink);
+	}
+	.blogpost-toc :global(.blogpost-toc-item.active a) {
+		color: var(--ink);
+		font-weight: 500;
+	}
+	.blogpost-toc :global(.blogpost-toc-item.active::before) {
+		content: "";
+		position: absolute;
+		left: -1px;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 3px;
+		height: 16px;
+		background: var(--pink);
+	}
+	.blogpost-toc-progress {
+		margin-top: 24px;
+		padding-top: 16px;
+		border-top: 1px solid var(--line-soft);
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+	}
+	.blogpost-toc-progress-bar {
+		height: 2px;
+		background: var(--paper-deep);
+		margin-top: 8px;
+		position: relative;
+	}
+	.blogpost-toc-progress-fill {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 100%;
+		background: var(--pink);
+		width: 0%;
+	}
+
+	/* ===== 响应式 ===== */
+	@media (max-width: 1200px) {
+		.blog-post-layout {
+			grid-template-columns: 120px minmax(0, 1fr);
+		}
+		.blogpost-toc { display: none; }
+	}
+	@media (max-width: 900px) {
+		.blog-post-layout {
+			grid-template-columns: 1fr;
+			gap: 40px;
+			padding: 40px 24px 80px;
+		}
+		.blog-sidebar {
+			position: static;
+			flex-direction: row;
+			align-items: center;
+			flex-wrap: wrap;
+			gap: 12px;
+		}
+		.sidebar-label { width: 100%; margin-bottom: 0; }
+		.sidebar-back {
+			margin-top: 0;
+			padding-top: 0;
+			border-top: none;
+			margin-left: auto;
+		}
+		.blog-article { max-width: 100%; }
+	}
+</style>

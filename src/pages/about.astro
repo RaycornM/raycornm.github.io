@@ -1,146 +1,521 @@
 ---
-import AboutHeroImage from '../assets/₊⁺♡̶♡̶₊⁺.png';
-import Layout from '../layouts/BlogPost.astro';
+import BaseHead from '../components/BaseHead.astro';
+import CursorShadow from '../components/CursorShadow.astro';
+import Spotlight from '../components/Spotlight.astro';
+import PageChrome from '../components/PageChrome.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const attrTags = [
+	{ label: '音游佬', rotate: 'l' },
+	{ label: '乌蒙 / 中二 / SDVX', rotate: 'r' },
+	{ label: '摄影', rotate: 'l' },
+	{ label: 'PC · 主机 · 街机', rotate: 'r' },
+	{ label: 'FF14', rotate: 'l' },
+	{ label: 'NAS', rotate: 'r' },
+	{ label: '机械加工', rotate: 'l' },
+	{ label: '剪视频', rotate: 'r' },
+];
 ---
 
-<Layout
-	title="关于"
-	description="Lorem ipsum dolor sit amet"
-	pubDate={new Date('October 15 2025')}
-    heroImage={AboutHeroImage}
->
+<!doctype html>
+<html lang="zh-Hans">
+	<head>
+		<BaseHead title={`About · ${SITE_TITLE}`} description="关于日暮茶会" />
+	</head>
+	<body>
+		<CursorShadow />
+		<Spotlight />
+		<PageChrome />
+		<Header />
+		<main class="page-reveal about-main">
+			<!-- 角色立绘（可交互） -->
+			<div class="about-character" id="about-character" role="button" tabindex="0" aria-label="角色立绘">
+				<img src="/assets/hero-character.png" alt="Character" class="about-character-img" />
+				<span class="about-character-ripple"></span>
+				<div class="about-character-info">
+					<p>看板娘 · Corn</p>
+					<p>…ようこそ、茶会へ。</p>
+				</div>
+			</div>
 
-	<div class="profile-card">
-        <div class="profile-header">
-            <img class="profile-avatar" src="https://gh-proxy.com/https://github.com/RaycornM/person-picture-bed/blob/main/img/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20240912234811.jpg" alt="头像" />
-            <h3>RaycornM</h3>
-        </div>
-        <div>
-            <p>喜欢打游戏，pc主机街机；<br />音游佬，乌蒙，中二，山东卫星，暮色大师；<br />狒狒人</p>
-        </div>
-    </div>
+			<div class="page-inner">
+				<div class="mag-eyebrow-row">
+					<span class="num-circle">D</span>
+					<span class="divider"></span>
+					<span class="label">About</span>
+					<span>·</span>
+					<span>关于 / 茶会</span>
+				</div>
 
-	<p>
-		这个网站是一个个人分享性质的网站，"日暮茶会"，平时这里会更新我个人的摄影作品以及软件技术相关记录等。<br />
-        本人平常比较懒，随缘更新一些摄影内容，或者是平常搞软件代码遇到问题，
-        解决后记录问题解决方法、配置步骤等。平日喜欢分享自己日常的所见所摄，
-        在空闲时间也喜欢剪一些视频，想用媒体记录下我的这些日常。<br />
-	</p>
+				<p class="stagger-eyebrow pink">No. 04 — A short biography.</p>
 
-    <p>
-        网站的技术栈主要是 Astro + MDX + CSS 搭建而成，部署在 Netlify 上。
-        如果你对网站的搭建有兴趣，可以查看我的 <a href="https://github.com/RaycornM/person-astro-blog" class="accent-link">GitHub</a>。
-	</p>
+				<h2 class="stagger-title" data-stagger>… biography.</h2>
 
-    <p>感谢你的访问！</p>
+				<div class="about-header">
+					<img
+						class="about-avatar"
+						src="https://gh-proxy.com/https://github.com/RaycornM/person-picture-bed/blob/main/img/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20240912234811.jpg"
+						alt="头像"
+						loading="lazy"
+						decoding="async"
+					/>
+					<div>
+						<div class="about-name">RaycornM</div>
+						<div class="about-tagline">A cup of tea before we part.</div>
+					</div>
+				</div>
 
-    <p>我的其他平台：</br>
-    <a href="https://space.bilibili.com/4572890?spm_id_from=333.1007.0.0" target="_blank" rel="noopener noreferrer" class="accent-link">
-                <span class="sr-only">Follow me on Bilibili</span>
-                <svg viewBox="0 0 1024 1024" width="32" height="32" aria-hidden="true" astro-icon="social/bilibili">
-                    <path fill="currentColor" d="M256 128a32 32 0 1 1 0 64h-64v64h640v-64h-64a32 32 0 1 1 0-64h64a64 64 0 0 1 64 64v640a64 64 0 0 1-64 64H192a64 64 0 0 1-64-64V192a64 64 0 0 1 64-64h64zm-64 192v512h640V320H192zm160 160a32 32 0 1 1 0 64 32 32 0 0 1 0-64zm320 0a32 32 0 1 1 0 64 32 32 0 0 1 0-64z"/>
-                </svg>
-        </a>
-        <a href="https://www.instagram.com/denkyraymond/" target="_blank" rel="noopener noreferrer" class="accent-link">
-            <span class="sr-only">Follow me on Instagram</span>
-            <svg viewBox="0 0 448 512" aria-hidden="true" width="32" height="32" astro-icon="social/instagram">
-                <path fill="currentColor" d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9 114.9-51.3 114.9-114.9S287.7 141 224.1 141zm0 186c-39.5 0-71.5-32-71.5-71.5s32-71.5 71.5-71.5 71.5 32 71.5 71.5-32 71.5-71.5 71.5zm146.4-194.3c0 14.9-12 26.9-26.9 26.9s-26.9-12-26.9-26.9 12-26.9 26.9-26.9 26.9 12 26.9 26.9zm76.1 27.2c-1.7-35.3-9.9-66.7-36.2-92.9S388.6 1.7 353.3 0C317.8-1.7 130.2-1.7 94.7 0 59.4 1.7 28 9.9 1.7 36.2S1.7 123.4 0 158.7c-1.7 35.3-1.7 222.9 0 258.2 1.7 35.3 9.9 66.7 36.2 92.9s57.6 34.5 92.9 36.2c35.3 1.7 222.9 1.7 258.2 0 35.3-1.7 66.7-9.9 92.9-36.2s34.5-57.6 36.2-92.9c1.7-35.3 1.7-222.9 0-258.2zM398.8 388c-7.8 19.6-22.9 34.7-42.5 42.5-29.4 11.7-99.2 9-132.3 9s-102.9 2.6-132.3-9c-19.6-7.8-34.7-22.9-42.5-42.5-11.7-29.4-9-99.2-9-132.3s-2.6-102.9 9-132.3c7.8-19.6 22.9-34.7 42.5-42.5 29.4-11.7 99.2-9 132.3-9s102.9-2.6 132.3 9c19.6 7.8 34.7 22.9 42.5 42.5 11.7 29.4 9 99.2 9 132.3s2.6 102.9-9 132.3z"/>
-            </svg>
-        </a>
-        <a href="https://github.com/RaycornM" target="_blank" rel="noopener noreferrer" class="accent-link">
-            <span class="sr-only">Go to my GitHub repo</span>
-            <svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32" astro-icon="social/github"
-                ><path
-                    fill="currentColor"
-                    d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-                ></path></svg
-            >
-        </a>
-    </p>
+				<div class="about-prose">
+					<p>
+						这个网站是一个个人分享性质的网站，"日暮茶会"，平时这里会更新我个人的摄影作品以及软件技术相关记录等。
+						本人平常比较懒，随缘更新一些摄影内容，或者是平常搞软件代码遇到问题，
+						解决后记录问题解决方法、配置步骤等。平日喜欢分享自己日常的所见所摄，
+						在空闲时间也喜欢剪一些视频，想用媒体记录下我的这些日常。
+					</p>
+					<p>
+						网站的技术栈主要是 Astro + MDX + CSS 搭建而成。
+						如果你对网站的搭建有兴趣，可以查看我的
+						<a href="https://github.com/RaycornM/person-astro-blog" target="_blank" rel="noopener noreferrer">GitHub</a>。
+					</p>
+					<p>感谢你的访问！</p>
+				</div>
 
-	<!-- 音乐播放器区域 -->
-    <div class="music-player-wrapper">
-        <div id="music-player">
-            <!-- 播放器将通过JavaScript动态插入 -->
-        </div>
-    </div>
+				<!-- 属性标签 -->
+				<p class="about-tags-eyebrow">… attributes.</p>
+				<div class="about-tags">
+					{attrTags.map((t) => (
+						<span class={`tag tag-rotate-${t.rotate}`}>{t.label}</span>
+					))}
+				</div>
 
-    <script>
-        // 等待DOM加载完成后执行
-        document.addEventListener('DOMContentLoaded', () => {
-            // 音乐列表，每个对象包含type和id参数
-            const musicList = [
-                { type: 3, id: 3061173126 } , // 您提供的第一首音乐
-                { type: 3, id: 3063151261 } ,
-                { type: 3, id: 3070746499 } ,
-                { type: 3, id: 3076107041 } ,
-                { type: 3, id: 3076877353 } ,
-                { type: 3, id: 3077860537 } ,
-                { type: 3, id: 3076528968 } ,
-                { type: 3, id: 3074975710 } ,
-                { type: 3, id: 3082140158 }
-				// 可以在这里添加更多音乐
-                // { type: 3, id: anotherMusicId }
-            ];
-            
-            // 随机选择一首音乐
-            const randomMusic = musicList[Math.floor(Math.random() * musicList.length)];
-            
-            // 创建iframe播放器
-            const iframe = document.createElement('iframe');
-            iframe.frameBorder = 'no';
-            iframe.marginWidth = '0';
-            iframe.marginHeight = '0';
-            iframe.width = '330';
-            iframe.height = '86';
-            iframe.src = `//music.163.com/outchain/player?type=${randomMusic.type}&id=${randomMusic.id}&auto=1&height=66`;
-            
-            // 添加到播放器容器
-            const playerContainer = document.getElementById('music-player');
-            if (playerContainer) {
-                playerContainer.appendChild(iframe);
-            }
-        });
-    </script>
+				<!-- 音乐播放器（网易云外链，包在 demo 播放器框架里） -->
+				<div class="player-block">
+					<div class="player-block-head">
+						<span class="player-block-label">BGM · 163 Playlist</span>
+						<button class="player-hint-link" id="player-hint" type="button">接入说明</button>
+					</div>
+					<div class="player">
+						<div class="player-toggle-deco" aria-hidden="true">
+							<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+						</div>
+						<div class="player-info">
+							<div class="player-title" id="player-title">Quiet Hours</div>
+							<div class="player-artist">RIMUCHAHUI · Vol. 26</div>
+						</div>
+						<div class="player-frame" id="music-player"></div>
+					</div>
+					<div class="player-hint" id="player-hint-panel" hidden>
+						<p>接入方式</p>
+						<p>当前使用网易云 <code>outchain</code> 外链播放器，从 <code>musicList</code> 随机选曲。</p>
+						<p>想换成自制播放器（播放/进度/切歌）：准备音频直链填入 <code>PLAYLIST_CONFIG.tracks</code>，</p>
+						<p>或用 163 歌曲 ID 走自建代理 <code>/api/163?id=xxx</code> → 返回 <code>&#123; url, title, artist &#125;</code>。</p>
+					</div>
+				</div>
 
-</Layout>
+				<!-- 其他平台 -->
+				<div class="about-socials">
+					<a href="https://space.bilibili.com/4572890?spm_id_from=333.1007.0.0" target="_blank" rel="noopener noreferrer">Bilibili</a>
+					<a href="https://www.instagram.com/denkyraymond/" target="_blank" rel="noopener noreferrer">Instagram</a>
+					<a href="https://github.com/RaycornM" target="_blank" rel="noopener noreferrer">GitHub</a>
+				</div>
+			</div>
+		</main>
+		<Footer />
+
+		<script is:inline src="/scripts/reveal.js"></script>
+		<script is:inline>
+			// ===== 角色立绘交互 =====
+			(function () {
+				var char = document.getElementById('about-character');
+				if (!char) return;
+				var active = false;
+				var timer = null;
+				function toggle() {
+					active = !active;
+					char.classList.toggle('active', active);
+					if (active) {
+						if (timer) clearTimeout(timer);
+						timer = setTimeout(function () {
+							char.classList.remove('active');
+							active = false;
+						}, 2400);
+					}
+				}
+				char.addEventListener('click', toggle);
+				char.addEventListener('keydown', function (e) {
+					if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+				});
+			})();
+
+			// ===== 163 播放器（沿用原外链方案） =====
+			(function () {
+				var musicList = [
+					{ type: 3, id: 3061173126 },
+					{ type: 3, id: 3063151261 },
+					{ type: 3, id: 3070746499 },
+					{ type: 3, id: 3076107041 },
+					{ type: 3, id: 3076877353 },
+					{ type: 3, id: 3077860537 },
+					{ type: 3, id: 3076528968 },
+					{ type: 3, id: 3074975710 },
+					{ type: 3, id: 3082140158 }
+				];
+				var pick = musicList[Math.floor(Math.random() * musicList.length)];
+				var iframe = document.createElement('iframe');
+				iframe.frameBorder = 'no';
+				iframe.marginWidth = '0';
+				iframe.marginHeight = '0';
+				iframe.width = '330';
+				iframe.height = '86';
+				iframe.src = '//music.163.com/outchain/player?type=' + pick.type + '&id=' + pick.id + '&auto=1&height=66';
+				var box = document.getElementById('music-player');
+				if (box) box.appendChild(iframe);
+
+				var hintLink = document.getElementById('player-hint');
+				var hintPanel = document.getElementById('player-hint-panel');
+				if (hintLink && hintPanel) {
+					hintLink.addEventListener('click', function () {
+						if (hintPanel.hasAttribute('hidden')) hintPanel.removeAttribute('hidden');
+						else hintPanel.setAttribute('hidden', '');
+					});
+				}
+			})();
+		</script>
+	</body>
+</html>
 
 <style>
-  /* === 个人资料卡片 === */
-  .profile-card {
-    background: #e7a7c8;
-    border-radius: 1rem;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
+	.about-main {
+		position: relative;
+	}
+	.page-inner {
+		max-width: 960px;
+		margin: 0 auto;
+		padding: 100px 48px 120px;
+	}
 
-  .profile-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
+	/* ===== 头部卡片 ===== */
+	.about-header {
+		display: flex;
+		align-items: center;
+		gap: 32px;
+		padding: 32px;
+		background: var(--paper);
+		border: 1px solid var(--hairline);
+		box-shadow: 6px 6px 0 var(--paper-shadow);
+		margin: 80px 0;
+		opacity: 0;
+		transform: translateY(30px);
+		transition: opacity 1s var(--ease-expo) 0.2s, transform 1s var(--ease-expo) 0.2s;
+	}
+	.in-view .about-header { opacity: 1; transform: translateY(0); }
+	.about-avatar {
+		width: 100px;
+		height: 100px;
+		border-radius: 50%;
+		border: 1px solid var(--hairline);
+		box-shadow: 4px 4px 0 var(--paper-shadow);
+		flex-shrink: 0;
+		object-fit: cover;
+	}
+	.about-name {
+		font-family: var(--font-serif);
+		font-weight: 400;
+		font-size: 32px;
+		margin-bottom: 8px;
+		color: var(--ink);
+	}
+	.about-tagline {
+		font-family: var(--font-deco);
+		font-style: italic;
+		font-size: 18px;
+		color: var(--ink-soft);
+	}
 
-  .profile-avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin-right: 1rem;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  }
+	/* ===== 正文 ===== */
+	.about-prose {
+		font-family: var(--font-serif);
+		font-size: 16px;
+		line-height: 1.9;
+		color: var(--ink-soft);
+	}
+	.about-prose p {
+		margin: 0 0 24px;
+		opacity: 0;
+		transform: translateY(20px);
+		transition: opacity 0.8s var(--ease-expo), transform 0.8s var(--ease-expo);
+	}
+	.in-view .about-prose p { opacity: 1; transform: translateY(0); }
+	.in-view .about-prose p:nth-child(1) { transition-delay: 0.1s; }
+	.in-view .about-prose p:nth-child(2) { transition-delay: 0.2s; }
+	.in-view .about-prose p:nth-child(3) { transition-delay: 0.3s; }
+	.about-prose a {
+		color: var(--pink);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
 
-  /* === 链接强调色 === */
-  .accent-link {
-    color: #e7a7c8;
-  }
-  .accent-link:hover {
-    color: #d494b0;
-  }
+	/* ===== 属性标签 ===== */
+	.about-tags-eyebrow {
+		font-family: var(--font-deco);
+		font-style: italic;
+		font-size: 18px;
+		color: var(--ink-soft);
+		margin: 60px 0 24px;
+	}
+	.about-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 14px;
+		margin-top: 12px;
+	}
+	.tag {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 12px 20px;
+		background: var(--paper);
+		border: 1px solid var(--hairline);
+		box-shadow: 4px 4px 0 var(--paper-shadow);
+		font-family: var(--font-serif-jp);
+		font-weight: 300;
+		font-size: 15px;
+		letter-spacing: 0.04em;
+		color: var(--ink);
+		cursor: default;
+		opacity: 0;
+		transform-origin: center center;
+	}
+	.in-view .tag { animation: tagIn 0.8s var(--ease-back) forwards; }
+	.in-view .tag:nth-child(1) { animation-delay: 0.05s; }
+	.in-view .tag:nth-child(2) { animation-delay: 0.10s; }
+	.in-view .tag:nth-child(3) { animation-delay: 0.15s; }
+	.in-view .tag:nth-child(4) { animation-delay: 0.20s; }
+	.in-view .tag:nth-child(5) { animation-delay: 0.25s; }
+	.in-view .tag:nth-child(6) { animation-delay: 0.30s; }
+	.in-view .tag:nth-child(7) { animation-delay: 0.35s; }
+	.in-view .tag:nth-child(8) { animation-delay: 0.40s; }
+	@keyframes tagIn {
+		0%   { opacity: 0; transform: scale(0.4) rotate(0deg); }
+		60%  { opacity: 1; transform: scale(1.08) rotate(2deg); }
+		100% { opacity: 1; transform: scale(1) rotate(var(--tag-rotate, 0deg)); }
+	}
+	.tag::before {
+		content: "●";
+		color: var(--pink);
+		font-size: 8px;
+	}
+	.tag-rotate-l { --tag-rotate: -2.5deg; }
+	.tag-rotate-r { --tag-rotate: 1.8deg; }
+	.tag:hover {
+		transform: rotate(0deg) translate(-2px, -2px) !important;
+		box-shadow: 6px 6px 0 var(--paper-shadow);
+		animation: none;
+		opacity: 1;
+	}
 
-  /* === 音乐播放器 === */
-  .music-player-wrapper {
-    text-align: center;
-    margin: 1.5rem auto;
-    max-width: 330px;
-  }
+	/* ===== 角色立绘 ===== */
+	.about-character {
+		position: absolute;
+		top: 140px;
+		right: 48px;
+		width: 160px;
+		z-index: 10;
+		animation: charFloat 6s var(--ease-soft) infinite;
+		cursor: pointer;
+	}
+	.about-character-img {
+		width: 100%;
+		height: auto;
+		filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.15));
+		background: transparent;
+	}
+	.about-character-ripple {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 80%;
+		aspect-ratio: 1;
+		border-radius: 50%;
+		border: 1px solid var(--pink);
+		transform: translate(-50%, -50%) scale(1);
+		opacity: 0;
+		pointer-events: none;
+	}
+	.about-character.active .about-character-ripple {
+		animation: ripple 1.2s var(--ease-expo);
+	}
+	@keyframes ripple {
+		0%   { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+		100% { opacity: 0;   transform: translate(-50%, -50%) scale(1.7); }
+	}
+	.about-character-info {
+		position: absolute;
+		top: 50%;
+		right: 100%;
+		transform: translateY(-50%) translateX(0);
+		background: var(--paper);
+		border: 1px solid var(--hairline);
+		box-shadow: 4px 4px 0 var(--paper-shadow);
+		padding: 12px 16px;
+		font-family: var(--font-serif);
+		font-size: 12px;
+		color: var(--ink);
+		white-space: nowrap;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.3s var(--ease-soft), transform 0.3s var(--ease-soft);
+		margin-right: 16px;
+	}
+	.about-character-info::after {
+		content: "";
+		position: absolute;
+		top: 50%;
+		right: -6px;
+		transform: translateY(-50%) rotate(45deg);
+		width: 10px;
+		height: 10px;
+		background: var(--paper);
+		border-right: 1px solid var(--hairline);
+		border-top: 1px solid var(--hairline);
+	}
+	.about-character.active .about-character-info {
+		opacity: 1;
+		transform: translateY(-50%) translateX(-4px);
+	}
+	.about-character-info p { margin: 0; }
+	.about-character-info p:first-child {
+		font-weight: 500;
+		margin-bottom: 2px;
+	}
+	.about-character-info p:last-child {
+		font-family: var(--font-deco);
+		font-style: italic;
+		color: var(--ink-soft);
+	}
+	@keyframes charFloat {
+		0%, 100% { transform: translateY(0); }
+		50%      { transform: translateY(-8px); }
+	}
+	.about-character:hover { animation-duration: 3s; }
+
+	/* ===== 播放器 ===== */
+	.player-block { margin-top: 80px; }
+	.player-block-head {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-bottom: 16px;
+	}
+	.player-block-label {
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.22em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+	}
+	.player-block-label::before { content: "● "; color: var(--pink); }
+	.player-hint-link {
+		appearance: none;
+		background: none;
+		border: none;
+		padding: 0 0 1px;
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--pink);
+		border-bottom: 1px dashed var(--pink);
+	}
+	.player {
+		display: grid;
+		grid-template-columns: auto 1fr auto;
+		gap: 20px;
+		align-items: center;
+		padding: 20px 24px;
+		background: var(--paper);
+		border: 1px solid var(--hairline);
+		box-shadow: 6px 6px 0 var(--paper-shadow);
+		transition: box-shadow 0.4s var(--ease-soft);
+	}
+	.player:hover { box-shadow: 8px 8px 0 var(--paper-shadow); }
+	.player-toggle-deco {
+		width: 48px;
+		height: 48px;
+		border: 1px solid var(--hairline);
+		background: var(--pink);
+		color: var(--paper);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.player-toggle-deco svg { width: 18px; height: 18px; fill: currentColor; }
+	.player-info { min-width: 0; }
+	.player-title {
+		font-family: var(--font-serif);
+		font-weight: 400;
+		font-size: 15px;
+		color: var(--ink);
+		margin-bottom: 2px;
+	}
+	.player-artist {
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+	}
+	.player-frame { line-height: 0; }
+	.player-hint {
+		margin-top: 16px;
+		padding: 20px 24px;
+		background: var(--paper-deep);
+		border-left: 2px solid var(--pink);
+		font-family: var(--font-mono);
+		font-size: 12px;
+		line-height: 1.8;
+		color: var(--ink-soft);
+	}
+	.player-hint p { margin: 0 0 4px; }
+	.player-hint p:first-child { font-weight: 500; color: var(--ink); margin-bottom: 8px; }
+	.player-hint code {
+		font-family: var(--font-mono);
+		background: var(--paper);
+		padding: 1px 6px;
+		border: 1px solid var(--line-soft);
+		font-size: 11px;
+	}
+
+	/* ===== 社交链接 ===== */
+	.about-socials {
+		display: flex;
+		gap: 24px;
+		margin-top: 60px;
+		padding-top: 32px;
+		border-top: 1px solid var(--line-soft);
+	}
+	.about-socials a {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-family: var(--font-mono);
+		font-size: 11px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--ink-soft);
+		transition: color 0.3s var(--ease-soft), transform 0.3s var(--ease-soft);
+	}
+	.about-socials a:hover { color: var(--pink); transform: translateY(-2px); }
+	.about-socials a::before { content: "● "; color: var(--pink); }
+
+	@media (max-width: 768px) {
+		.page-inner { padding: 80px 24px 100px; }
+		.about-character { top: 100px; right: 16px; width: 90px; }
+		.about-character-info { display: none; }
+		.about-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+		.player { grid-template-columns: auto 1fr; }
+		.player-frame { grid-column: 1 / -1; }
+	}
 </style>

@@ -1,6 +1,12 @@
 ---
 import { type CollectionEntry, getCollection, render } from 'astro:content';
-import BlogPost from '../../layouts/BlogPost.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import CursorShadow from '../../components/CursorShadow.astro';
+import Spotlight from '../../components/Spotlight.astro';
+import PageChrome from '../../components/PageChrome.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import CoverImg from '../../components/CoverImg.astro';
 
 export async function getStaticPaths() {
 	const photos = await getCollection('photo');
@@ -13,8 +19,379 @@ type Props = CollectionEntry<'photo'>;
 
 const photo = Astro.props;
 const { Content } = await render(photo);
+
+// ===== 从正文提取图集（markdown 图片 + HTML img，均为外链） =====
+const body = photo.body ?? '';
+const urls: string[] = [];
+const mdImg = /!\[[^\]]*\]\((https?:[^)\s]+)[^)]*\)/g;
+const htmlImg = /<img[^>]+src="(https?:[^"]+)"/g;
+let m: RegExpExecArray | null;
+while ((m = mdImg.exec(body)) !== null) urls.push(m[1]);
+while ((m = htmlImg.exec(body)) !== null) urls.push(m[1]);
+
+// ===== 图集数据：heroImage（本地 ImageMetadata 或远程 URL 原样保留，
+// 交给 CoverImg 的 Astro <Image> 优化/抓取）+ 正文外链图 =====
+const heroImage: any = photo.data.heroImage;
+const heroKey = heroImage
+	? typeof heroImage === 'string'
+		? heroImage
+		: heroImage.src
+	: '';
+const restUrls = urls.filter((u) => u !== heroKey);
+const items: any[] = [...(heroImage ? [heroImage] : []), ...restUrls];
+const slides = items.map((img, i) => ({
+	img,
+	no: `No. ${String(i + 1).padStart(2, '0')}`,
+	caption: i === 0 ? `Featured · ${photo.data.title}` : `${photo.data.title}`,
+}));
+
+function fmtDate(d: Date): string {
+	const mm = String(d.getMonth() + 1).padStart(2, '0');
+	return `${mm} · ${d.getFullYear()}`;
+}
 ---
 
-<BlogPost {...photo.data} id={photo.id} collection="photo">
-	<Content />
-</BlogPost>
+<!doctype html>
+<html lang="zh-Hans">
+	<head>
+		<BaseHead title={`${photo.data.title} · Album`} description={photo.data.description} />
+	</head>
+	<body class="photo-page">
+		<CursorShadow />
+		<Spotlight />
+		<PageChrome />
+		<Header />
+
+		<main class="photo-post">
+			<a class="gallery-back" href="/photo" aria-label="Back to Album">×</a>
+
+			<!-- ===== Gallery ===== -->
+			<div class="gallery">
+				<div class="gallery-stage" id="gallery-stage">
+					{slides.map((s, i) => (
+						<div
+							class:list={['gallery-slide', { active: i === 0 }]}
+							data-idx={i}
+							data-caption={s.caption}
+							data-no={s.no}
+						>
+							<CoverImg src={s.img} alt={s.caption} fit="contain" loading={i === 0 ? 'eager' : 'lazy'} />
+						</div>
+					))}
+				</div>
+				{slides.length > 1 && (
+					<>
+						<button class="gallery-arrow gallery-prev" id="gallery-prev" aria-label="上一张">←</button>
+						<button class="gallery-arrow gallery-next" id="gallery-next" aria-label="下一张">→</button>
+					</>
+				)}
+			</div>
+
+			<!-- ===== 底部信息 + 缩略图条 ===== -->
+			<div class="gallery-bottom">
+				<div class="gallery-meta">
+					<div class="gallery-counter">
+						<span class="gallery-current" id="gallery-current">01</span><span class="gallery-sep">/</span><span class="gallery-total" id="gallery-total">{String(slides.length).padStart(2, '0')}</span>
+					</div>
+					<div class="gallery-info">
+						<div class="gallery-title">{photo.data.title}</div>
+						<div class="gallery-date">{fmtDate(photo.data.pubDate)}</div>
+					</div>
+				</div>
+				{slides.length > 1 && (
+					<div class="gallery-thumbs" id="gallery-thumbs">
+						{slides.map((s, i) => (
+							<button
+								class:list={['gallery-thumb', { active: i === 0 }]}
+								data-idx={i}
+								aria-label={`第 ${i + 1} 张`}
+							>
+								<CoverImg src={s.img} alt="" width={144} height={108} />
+							</button>
+						))}
+					</div>
+				)}
+			</div>
+
+			<!-- ===== 正文（保留原有内容）===== -->
+			<article class="photo-prose prose">
+				<Content />
+			</article>
+		</main>
+
+		<Footer />
+
+		<script is:inline>
+			(function () {
+				var stage = document.getElementById('gallery-stage');
+				var thumbs = document.getElementById('gallery-thumbs');
+				if (!stage) return;
+
+				var slides = Array.prototype.slice.call(stage.querySelectorAll('.gallery-slide'));
+				var thumbEls = thumbs
+					? Array.prototype.slice.call(thumbs.querySelectorAll('.gallery-thumb'))
+					: [];
+				var total = slides.length;
+				if (total <= 1) return;
+
+				var idx = 0;
+				var tCur = document.getElementById('gallery-current');
+				var prevBtn = document.getElementById('gallery-prev');
+				var nextBtn = document.getElementById('gallery-next');
+
+				function goTo(i) {
+					if (i === idx) return;
+					slides[idx].classList.remove('active');
+					if (thumbEls[idx]) thumbEls[idx].classList.remove('active');
+					idx = ((i % total) + total) % total;
+					slides[idx].classList.add('active');
+					if (thumbEls[idx]) {
+						thumbEls[idx].classList.add('active');
+						// 手动滚动缩略图条：不用 scrollIntoView，
+						// 避免浏览器连带把页面整体横向滚动（布局左右偏移）
+						var t = thumbEls[idx];
+						var target = t.offsetLeft - (thumbs.clientWidth - t.clientWidth) / 2;
+						thumbs.scrollTo({ left: target, behavior: 'smooth' });
+					}
+					if (tCur) tCur.textContent = String(idx + 1).padStart(2, '0');
+				}
+
+				if (prevBtn) prevBtn.addEventListener('click', function () { goTo(idx - 1); });
+				if (nextBtn) nextBtn.addEventListener('click', function () { goTo(idx + 1); });
+				thumbEls.forEach(function (t) {
+					t.addEventListener('click', function () {
+						goTo(parseInt(t.getAttribute('data-idx') || '0', 10));
+					});
+				});
+
+				// 键盘左右切换（仅当图集在视口内）
+				document.addEventListener('keydown', function (e) {
+					var r = stage.getBoundingClientRect();
+					if (r.top > window.innerHeight || r.bottom < 0) return;
+					if (e.key === 'ArrowLeft') goTo(idx - 1);
+					if (e.key === 'ArrowRight') goTo(idx + 1);
+				});
+			})();
+		</script>
+	</body>
+</html>
+
+<style>
+	.photo-post {
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		position: relative;
+		padding: 80px 24px 60px;
+		/* 箭头悬于 .gallery 两侧 -64px，裁掉其造成的横向溢出，
+		   防止出现横向滚动条 / 页面整体左右位移 */
+		overflow-x: clip;
+	}
+
+	.gallery {
+		position: relative;
+		width: min(960px, 86vw);
+		aspect-ratio: 4/3;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.gallery-stage {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+	}
+	.gallery-slide {
+		position: absolute;
+		inset: 0;
+		background-color: #0a0f1a;
+		box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+		opacity: 0;
+		transform: scale(0.97);
+		transition: opacity 0.8s var(--ease-expo), transform 0.8s var(--ease-expo);
+	}
+	.gallery-slide.active {
+		opacity: 1;
+		transform: scale(1);
+	}
+	.gallery-slide::after {
+		content: attr(data-caption);
+		position: absolute;
+		bottom: 24px;
+		left: 24px;
+		z-index: 2;
+		font-family: var(--font-deco);
+		font-style: italic;
+		font-size: 20px;
+		color: rgba(245, 243, 238, 0.85);
+		text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+	}
+	.gallery-slide::before {
+		content: attr(data-no);
+		position: absolute;
+		top: 16px;
+		left: 16px;
+		z-index: 2;
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.22em;
+		color: rgba(245, 243, 238, 0.75);
+		text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+	}
+
+	.gallery-arrow {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 48px;
+		height: 48px;
+		/* 宽屏时箭头悬于页面底色上（±64px），需随主题反转：
+		   暗底白边白字 / 反转亮底深边深字 */
+		border: 1px solid var(--line-soft);
+		background: color-mix(in srgb, var(--paper) 55%, transparent);
+		backdrop-filter: blur(8px);
+		color: var(--ink-faint);
+		font-family: var(--font-mono);
+		font-size: 20px;
+		z-index: 5;
+		transition: background 0.3s var(--ease-soft), transform 0.3s var(--ease-back), color 0.3s;
+	}
+	.gallery-arrow:hover {
+		background: var(--pink);
+		border-color: var(--pink);
+		color: var(--photo-paper);
+		transform: translateY(-50%) scale(1.05);
+	}
+	.gallery-prev { left: -64px; }
+	.gallery-next { right: -64px; }
+	@media (max-width: 1100px) {
+		.gallery-prev { left: 8px; }
+		.gallery-next { right: 8px; }
+	}
+
+	.gallery-bottom {
+		width: min(960px, 86vw);
+		margin-top: 32px;
+		padding: 20px 0;
+		border-top: 1px solid var(--line-soft);
+		display: flex;
+		align-items: center;
+		gap: 32px;
+	}
+	.gallery-meta {
+		display: flex;
+		align-items: center;
+		gap: 24px;
+		flex-shrink: 0;
+	}
+	.gallery-counter {
+		font-family: var(--font-serif-jp);
+		font-weight: 200;
+		font-size: 32px;
+		letter-spacing: 0.02em;
+		color: var(--ink);
+	}
+	.gallery-counter .gallery-current { color: var(--pink); }
+	.gallery-counter .gallery-sep { color: var(--ink-faint); margin: 0 4px; }
+	.gallery-counter .gallery-total { color: var(--ink-faint); font-size: 20px; }
+	.gallery-title {
+		font-family: var(--font-serif-jp);
+		font-weight: 300;
+		font-size: 16px;
+		color: var(--ink);
+		margin-bottom: 2px;
+	}
+	.gallery-date {
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.2em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+	}
+
+	.gallery-thumbs {
+		display: flex;
+		gap: 8px;
+		overflow-x: auto;
+		flex: 1;
+		padding: 4px 0;
+	}
+	.gallery-thumb {
+		flex-shrink: 0;
+		width: 72px;
+		height: 54px;
+		background: linear-gradient(135deg, #2a2020 0%, #1a1414 100%);
+		background-size: cover;
+		background-position: center;
+		border: 1px solid rgba(245, 243, 238, 0.15);
+		padding: 0;
+		position: relative;
+		overflow: hidden;
+		transition: border-color 0.3s var(--ease-soft), transform 0.3s var(--ease-back);
+	}
+	.gallery-thumb:hover {
+		border-color: rgba(245, 243, 238, 0.4);
+		transform: translateY(-2px);
+	}
+	.gallery-thumb.active {
+		border-color: var(--pink);
+		box-shadow: 0 0 0 1px var(--pink);
+	}
+	.gallery-thumb.active::after {
+		content: "●";
+		position: absolute;
+		top: 4px;
+		right: 4px;
+		color: var(--pink);
+		font-size: 8px;
+		text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+	}
+
+	.gallery-back {
+		position: absolute;
+		top: 24px;
+		right: 32px;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 24px;
+		color: var(--ink-faint);
+		z-index: 50;
+		transition: color 0.3s var(--ease-soft), transform 0.3s var(--ease-back);
+	}
+	.gallery-back:hover {
+		color: var(--pink);
+		transform: rotate(90deg);
+	}
+
+	.photo-prose {
+		width: min(720px, 86vw);
+		margin-top: 80px;
+		font-family: var(--font-serif);
+		font-size: 16px;
+		line-height: 1.9;
+	}
+	.photo-prose :global(h1),
+	.photo-prose :global(h2),
+	.photo-prose :global(h3) {
+		color: var(--ink);
+		font-family: var(--font-serif-jp);
+		font-weight: 300;
+	}
+	.photo-prose :global(div) {
+		font-family: inherit !important;
+	}
+
+	@media (max-width: 700px) {
+		.gallery-bottom {
+			flex-direction: column;
+			gap: 16px;
+			align-items: stretch;
+		}
+		.gallery-back { top: 12px; right: 16px; }
+	}
+</style>

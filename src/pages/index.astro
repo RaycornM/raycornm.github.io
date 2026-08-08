@@ -1,266 +1,210 @@
 ---
 import BaseHead from "../components/BaseHead.astro";
 import CursorShadow from "../components/CursorShadow.astro";
+import Spotlight from "../components/Spotlight.astro";
+import PageChrome from "../components/PageChrome.astro";
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
-import IntroCard from "../components/IntroCard.astro";
 import DraggableWidget from "../components/DraggableWidget.astro";
+import CoverImg from "../components/CoverImg.astro";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
 import { getCollection } from "astro:content";
-import PostCard from "../components/PostCard.astro";
+import { readingTimeMinutes } from "../utils/reading-time";
 
-// Use import.meta.glob for blog posts
-type Post = {
-  url: string;
-  frontmatter: {
-    title: string;
-    pubDate: string;
-    description: string;
-    heroImage?: string;
-  };
-};
+const posts = (await getCollection("blog")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const latestPosts = posts.slice(0, 5);
 
-// 添加主题图片数组
-const themeImages = [
-  // 使用本地图片资源替代外部链接
-  "/assets/1d442f5857f54f17818bcb2bf6b53730.png",
-  "/assets/2025-10-17_183005_789.png",
-  "/assets/2025-10-17_185645_393.png",
-  "/assets/2025-10-17_185917_944.png",
-  "/assets/20250515202120.jpg",
-  "/assets/006mowZngy1fu2cf4xqszg307i048nk4.gif"
+const photos = (await getCollection("photo")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const latestPhotos = photos.slice(0, 5);
+
+function fmtDate(d: Date): string {
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${mm} · ${d.getFullYear()}`;
+}
+const ORD = ["st", "nd", "rd", "th", "th"];
+
+const marqueeItems = [
+  { num: "01", text: "RIMUCHAHUI" },
+  { num: "02", text: "新日暮里" },
+  { num: "03", text: "Masquerade" },
+  { num: "04", text: "Since MMXXIV" },
+  { num: "05", text: "茶会" },
+  { num: "06", text: "Photography & Code" },
+  { num: "07", text: "Quiet Hours" },
 ];
-
-const randomThemeImage = themeImages[Math.floor(Math.random() * themeImages.length)];
-
-const posts = await getCollection("blog");
-const sortedPosts = posts.sort(
-  (a, b) =>
-    new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime(),
-);
-const [latestPost, ...otherPosts] = sortedPosts.slice(0, 3);
-
-// 新增相册数据获取
-// NOTE: the collection is named `photo` in `src/content.config.ts`, not `photos`.
-const photoAlbum = await getCollection("photo");
-const sortedPhotos = photoAlbum.sort(
-  (a, b) =>
-    new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime(),
-);
-const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="zh-Hans">
   <head>
     <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- 终端打字动画 —— 全局样式，供 JS 动态注入的元素使用 -->
     <style is:global>
-      @keyframes terminal-type-fade {
-        0%   { opacity: 0; transform: translateY(6px); filter: blur(2px); }
-        40%  { opacity: 1; transform: translateY(0);   filter: blur(0); }
-        60%  { opacity: 0.7; transform: translateY(-1px); }
-        100% { opacity: 1; transform: translateY(0); }
-      }
-      @keyframes terminal-cursor-blink {
-        0%, 100% { opacity: 1; text-shadow: 0 0 6px #1a1a2e, 0 0 12px rgba(26,26,46,0.4); }
-        50%      { opacity: 0; text-shadow: none; }
-      }
-      .terminal-prompt,
-      .terminal-char {
-        display: inline-block;
-        opacity: 0;
-        animation: terminal-type-fade 0.12s ease forwards;
-      }
-      .terminal-char.space-char {
-        animation-duration: 0.01s;
-      }
-      .terminal-cursor {
-        display: inline-block;
-        opacity: 0;
-        animation: terminal-type-fade 0.12s ease forwards;
-        color: #1a1a2e;
-        margin-left: 2px;
-      }
-      .terminal-cursor.typing-done {
-        animation: terminal-cursor-blink 0.9s step-end infinite;
-        opacity: 1;
-      }
-
-      /* Hero subtitle typing */
-      .hero-subtitle-char {
-        display: inline-block;
-        opacity: 0;
-        animation: terminal-type-fade 0.1s ease forwards;
-      }
-
-      /* ====== Splash 入场屏（v7 · 终端清屏 + 就地欢迎）====== */
+      /* ====== Splash v4（浅色纸张 · 终端打字 + 就地欢迎）====== */
       .splash {
         position: fixed;
         inset: 0;
         z-index: 99999;
-        background: #000;
+        background: var(--paper);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        font-family: "IBM Plex Mono", "JetBrains Mono", "Courier New", monospace;
-        color: #fff;
         overflow: hidden;
       }
       .splash::after {
-        content: '';
+        content: "";
         position: absolute;
         inset: 0;
-        background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+        background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(26, 26, 26, 0.025) 2px, rgba(26, 26, 26, 0.025) 4px);
         pointer-events: none;
-        z-index: 100;
       }
-      .splash--done { opacity: 0; pointer-events: none; display: none; }
-
-      /* ---- 终端框 ---- */
-      .splash-console {
-        width: min(600px, 90vw);
-        padding: 32px 36px;
+      .splash.done {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s var(--ease-soft);
+      }
+      .splash-frame {
+        width: min(680px, 90vw);
+        min-height: 200px;
+        padding: 36px 44px;
+        border: 1px solid var(--hairline);
+        background: var(--paper);
         position: relative;
         z-index: 1;
-        border: 1px solid #2a2a2a;
-        min-height: 200px;
-        overflow: hidden;
+        box-shadow: 6px 6px 0 var(--paper-shadow);
       }
-
-      /* ---- 终端行 ---- */
-      .splash-lines { position: relative; z-index: 1; transition: opacity 0.2s ease; }
+      .splash-frame::before {
+        content: "RIMUCHAHUI SYSTEM  ·  Vol. 26  ·  2026";
+        position: absolute;
+        top: -10px;
+        left: 24px;
+        background: var(--paper);
+        padding: 0 12px;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+      }
+      .splash-frame::after {
+        content: "●  ●  ●";
+        position: absolute;
+        top: 14px;
+        right: 18px;
+        color: var(--ink-faint);
+        font-size: 10px;
+        letter-spacing: 4px;
+      }
+      .splash-lines { position: relative; z-index: 1; }
       .splash-line {
+        font-family: var(--font-mono);
         font-size: 13px;
         line-height: 2;
-        min-height: 2em;
-        color: #999;
-        letter-spacing: 0.05em;
+        min-height: 1.4em;
+        color: var(--ink-soft);
+        letter-spacing: 0.04em;
         white-space: pre-wrap;
-        position: relative;
       }
-      .splash-line .dim  { color: #777; }
-      .splash-line .pink { color: #ff5b9b; }
-      .splash-line .white { color: #eee; }
-
+      .splash-line .dim { color: var(--ink-faint); }
+      .splash-line .pink { color: var(--pink); }
+      .splash-line .ink { color: var(--ink); font-weight: 500; }
       .splash-cursor-trail {
         display: inline-block;
-        color: #ff5b9b;
+        color: var(--pink);
         animation: splash-blink 0.65s step-end infinite;
       }
-      @keyframes splash-blink {
-        0%, 100% { opacity: 1; }
-        50%      { opacity: 0; }
-      }
-
-      /* ---- 进度块（█ 字符）---- */
+      @keyframes splash-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
       .splash-load-bar {
         position: absolute;
-        bottom: 50px;
+        bottom: 48px;
         left: 50%;
         transform: translateX(-50%);
-        width: min(600px, 90vw);
-        padding: 0 36px;
+        width: min(680px, 90vw);
+        padding: 0 44px;
         box-sizing: border-box;
         z-index: 1;
         display: flex;
         gap: 3px;
         opacity: 0;
         transition: opacity 0.3s;
-        font-family: "IBM Plex Mono", monospace;
+        font-family: var(--font-mono);
         font-size: 11px;
-        line-height: 1;
       }
       .splash-load-bar.show { opacity: 1; }
-      .splash-load-block {
-        color: #333;
-        transition: color 0.2s ease;
-      }
-      .splash-load-block.done { color: #ff5b9b; text-shadow: 0 0 6px rgba(255,91,155,0.3); }
-
-      /* ---- 欢迎文字（终端内就地显示）---- */
-      .splash-welcome-inner {
+      .splash-load-block { color: var(--paper-shadow); transition: color 0.3s; }
+      .splash-load-block.done { color: var(--pink); }
+      .splash-welcome {
         position: absolute;
         inset: 0;
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-direction: column;
+        gap: 16px;
         opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.5s ease;
+        transition: opacity 0.5s var(--ease-expo);
         z-index: 2;
       }
-      .splash-welcome-inner.show { opacity: 1; pointer-events: auto; }
+      .splash-welcome.show { opacity: 1; }
+      .splash-welcome-jp {
+        font-family: var(--font-serif-jp);
+        font-weight: 200;
+        font-size: clamp(22px, 3vw, 32px);
+        letter-spacing: 0.04em;
+        color: var(--ink);
+        margin: 0;
+      }
+      .splash-welcome-en {
+        font-family: var(--font-deco);
+        font-style: italic;
+        font-size: clamp(14px, 1.5vw, 18px);
+        color: var(--pink);
+        letter-spacing: 0.1em;
+        margin: 0;
+      }
       .splash-welcome-sub {
         position: absolute;
-        top: 20px;
-        right: 30px;
-        font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
-        font-size: 14px;
-        color: #ff5b9b;
-        opacity: 0.7;
-        letter-spacing: 0.06em;
-      }
-      .splash-welcome-text {
-        font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
-        font-size: clamp(18px, 2.8vw, 22px);
-        color: #ff5b9b;
-        text-align: center;
-        line-height: 1.8;
-        margin: 0;
-        letter-spacing: 0.04em;
-        padding: 0 24px;
-        text-shadow: 0 0 16px rgba(255,91,155,0.45), 0 0 36px rgba(255,91,155,0.25);
+        top: 18px;
+        left: 18px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
       }
 
-      /* ---- CRT 关机退场 ---- */
-      .splash--shutdown {
-        animation: crt-poweroff 0.55s cubic-bezier(0.4, 0, 1, 1) forwards;
-      }
-      @keyframes crt-poweroff {
-        0%   { transform: scaleY(1); opacity: 1; filter: brightness(1); }
-        15%  { transform: scaleY(1); opacity: 1; filter: brightness(3); }
-        100% { transform: scaleY(0.015); opacity: 0.6; filter: brightness(4); }
-      }
-
-      /* ---- 主页 CRT 启动 ---- */
-      main {
+      /* main 入场 */
+      .main {
         opacity: 0;
-        transform: scaleY(0.01);
-        filter: brightness(3);
-        transition: none;
+        transition: opacity 0.5s var(--ease-expo) 0.1s;
       }
-      main.booted {
-        animation: crt-poweron 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-      }
-      @keyframes crt-poweron {
-        0%   { opacity: 0; transform: scaleY(0.01); filter: brightness(3); }
-        12%  { opacity: 1; filter: brightness(3); }
-        45%  { transform: scaleY(1); filter: brightness(1.15); }
-        75%  { filter: brightness(1); }
-        100% { transform: scaleY(1); filter: brightness(1); opacity: 1; }
-      }
+      .main.boot { opacity: 1; }
 
       @media (prefers-reduced-motion: reduce) {
-        .splash--shutdown { animation: none; opacity: 0; }
-        main.booted { animation: none; opacity: 1; transform: scaleY(1); filter: none; }
-        .splash-cursor-trail { animation: none; opacity: 0; }
+        .splash { display: none; }
+        .main { opacity: 1; }
       }
       @media (max-width: 480px) {
-        .splash-console { padding: 24px 18px; }
+        .splash-frame { padding: 24px 18px; }
         .splash-line { font-size: 11px; }
         .splash-load-bar { bottom: 36px; padding: 0 18px; font-size: 9px; gap: 2px; }
-        .splash-welcome-sub { top: 14px; right: 18px; font-size: 12px; }
       }
     </style>
+    <noscript>
+      <style>
+        .splash { display: none; }
+        .main { opacity: 1; }
+      </style>
+    </noscript>
   </head>
   <body>
-    <!-- ====== Splash 入场屏（v7 · 终端清屏 + 就地欢迎）====== -->
+    <!-- ====== Splash v4 ====== -->
     <div class="splash" id="splash">
-      <div class="splash-console" id="splash-console">
+      <div class="splash-frame">
         <div class="splash-lines" id="splash-lines">
           <div class="splash-line" id="splash-l0"></div>
           <div class="splash-line" id="splash-l1"></div>
@@ -271,1058 +215,840 @@ const [latestPhoto, ...otherPhotos] = sortedPhotos.slice(0, 3);
           <div class="splash-line" id="splash-l6"></div>
           <div class="splash-line" id="splash-l7"></div>
         </div>
-        <div class="splash-welcome-inner" id="splash-welcome-inner">
-          <p class="splash-welcome-text">…ようこそ。新日暮里の<ruby>世界へ<rt>マスカレード</rt></ruby></p>
+        <div class="splash-welcome" id="splash-welcome">
+          <span class="splash-welcome-sub">●  Vol. 26</span>
+          <p class="splash-welcome-jp">…ようこそ。新日暮里の世界へ</p>
+          <p class="splash-welcome-en">Welcome to the masquerade.</p>
         </div>
       </div>
       <div class="splash-load-bar" id="splash-load-bar"></div>
     </div>
 
     <CursorShadow />
-    <Header />
-    <main>
-      <!-- ====== Unified Frame（109ichiki 风格：贯穿全页的统一框架）====== -->
-      <div class="unified-frame">
+    <Spotlight />
+    <PageChrome />
 
-      <!-- ===== 1:09风格Hero区域 ===== -->
-      <section class="hero-section" id="hero-section">
-        <!-- 波浪网格背景容器 -->
-        <div class="wave-grid-container">
-          <canvas id="wave-grid" class="wave-grid"></canvas>
-        </div>
+    <div class="main" id="main">
+      <Header />
 
-        <!-- 可拖拽组件 -->
-        <!-- 第1个弹出的窗口 -->
-        <DraggableWidget
-          id="widget-1"
-          title="CORN.exe"
-          index={0}
-          initialX={350}
-          initialY={180}
-          initialWidth={400}
-          initialHeight={400}
-        >
-          <img
-            src="/assets/meme-thumb.png"
-            alt="meme"
-            style="width: 400px; height: 400px; object-fit: contain;"
-          />
-        </DraggableWidget>
-        <!-- 第2个弹出的窗口（等待250ms后弹出） -->
-        <DraggableWidget
-          id="widget-2"
-          title="CORN.bat"
-          index={1}
-          initialX={80}
-          initialY={100}
-          initialWidth={250}
-          initialHeight={150}
-          magnifierScale={1}
-        />
+      <main>
+        <!-- ===== HERO · 极简（大量留白 + 单焦点角色立绘）===== -->
+        <section class="hero" id="hero-section">
+          <div class="hero-meta-tl">RIMUCHAHUI · <span class="vol">VOL. 26</span></div>
+          <div class="hero-meta-tr">SCROLL</div>
 
-        <!-- 第3个弹出的窗口（等待500ms后弹出） -->
-        <DraggableWidget
-          id="widget-3"
-          title="CORN.dll"
-          index={2}
-          initialX={700}
-          initialY={250}
-          initialWidth={180}
-          initialHeight={140}
-          magnifierScale={1}
-        />
-
-        <!-- 角色 -->
-        <div class="hero-character">
-          <img
-            src="/assets/hero-character.png"
-            alt="Hero Character"
-            class="character-img"
-          />
-        </div>
-
-        <!-- 左侧内容 -->
-        <div class="hero-content">
-          <h1 class="hero-title" id="beijing-time"></h1>
-          <p class="hero-subtitle hero-subtitle--typing" data-text="Welcome"></p>
-          <p class="hero-subtitle hero-subtitle--typing" data-text="Have a tea？"></p>
-          <span
-            class="barcode"
-            aria-hidden="true"
-            translate="no"
-            data-text="rimuchahui">rimuchahui</span
+          <!-- 可拖拽窗口（围绕角色，缩小不抢戏） -->
+          <DraggableWidget
+            id="widget-1"
+            title="CORN.exe"
+            index={5}
+            initialX="calc(64% - 210px)"
+            initialY="14%"
+            initialWidth={200}
+            initialHeight={200}
+            magnifierScale={1}
           >
-        </div>
-      </section>
+            <img
+              src="/assets/meme-thumb.png"
+              alt="meme"
+              loading="lazy"
+              decoding="async"
+            />
+          </DraggableWidget>
+          <DraggableWidget
+            id="widget-2"
+            title="CORN.bat"
+            index={6}
+            initialX="calc(96% - 230px)"
+            initialY="60%"
+            initialWidth={200}
+            initialHeight={60}
+            magnifierScale={1}
+            noResize={true}
+          >
+            <p class="widget-note">実行中… have a tea?</p>
+          </DraggableWidget>
+          <DraggableWidget
+            id="widget-3"
+            title="CORN.dll"
+            index={7}
+            initialX="calc(70% - 230px)"
+            initialY="80%"
+            initialWidth={200}
+            initialHeight={60}
+            magnifierScale={1}
+            noResize={true}
+          >
+            <p class="widget-note">loaded · 日暮茶会</p>
+          </DraggableWidget>
 
-      <hr class="section-divider hero-divider" />
+          <!-- 角色立绘（居中右 + 同心圆） -->
+          <div class="character">
+            <span class="character-caption">MASQUERADE</span>
+            <img
+              src="/assets/hero-character.png"
+              alt="Hero Character"
+              class="character-img"
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+            />
+          </div>
 
-      <!-- ====== Desktop Surface ====== -->
-      <div class="desktop-surface">
-
-        <!-- Theme carousel as scatter print -->
-        <div class="theme-carousel-scatter">
-          <img
-            src={randomThemeImage}
-            alt="网站主题图片"
-            class="carousel-image"
-            loading="eager"
-            decoding="async"
-            fetchpriority="high"
-          />
-        </div>
-
-        <!-- Intro card as scatter sticky note -->
-        <div class="intro-card-scatter">
-          <p class="intro-desc">
-            …ようこそ。新日暮里の<ruby>世界へ<rt>マスカレード</rt></ruby>
-          </p>
-        </div>
-
-        <hr class="section-divider" />
-
-        <!-- Post pile -->
-        <section class="scatter-section scatter-section--posts">
-          <div class="terminal-label" data-text="cat ~/posts/recent.log"></div>
-          {
-            latestPost && (
-              <article class="scatter-card scatter-card--featured scatter-card--post" style="--scatter-rotate: 0.75deg; --scatter-x: 7px; --scatter-y: -4px;">
-                <PostCard post={latestPost} variant="scatter-featured" />
-              </article>
-            )
-          }
-          {
-            otherPosts.map((post, i) => (
-              <article class="scatter-card scatter-card--post" style={`--scatter-rotate: ${[1.5, -0.9, 0.25, -1.1, 0.6][i % 5]}deg; --scatter-x: ${[10, -7, 15, -12, 5][i % 5]}px; --scatter-y: ${[-5, 6, -2, 4, -7][i % 5]}px; --scatter-delay: ${i * 0.08}s;`}>
-                <PostCard post={post} variant="scatter" />
-              </article>
-            ))
-          }
+          <!-- 左下角 BEIJING LIVE 元数据 -->
+          <div class="hero-meta-bl">
+            <span class="dot">●</span>
+            <span class="city">BEIJING LIVE</span>
+            <span class="time" id="hero-time">--:--</span>
+            <span class="sep">/</span>
+            <span>UTC+8</span>
+          </div>
         </section>
 
-        <hr class="section-divider" />
+        <!-- ===== Meta strip ===== -->
+        <div class="meta-strip">
+          <div class="meta-strip-left">
+            <span class="live">LIVE — 日暮茶会</span>
+            <span class="vol">VOL. 26 — 2026</span>
+          </div>
+          <div class="meta-strip-right">
+            <span>PHOTOGRAPHY &amp; CODE</span>
+            <span class="barcode" aria-hidden="true" translate="no">rimuchahui</span>
+          </div>
+        </div>
 
-        <!-- Album pile -->
-        <section class="scatter-section scatter-section--photos">
-          <div class="terminal-label" data-text="cat ~/photos/recent.log"></div>
-          {
-            latestPhoto && (
-              <article class="scatter-card scatter-card--featured scatter-card--album" style="--scatter-rotate: -0.6deg; --scatter-x: -6px; --scatter-y: 2px;">
-                <PostCard post={latestPhoto} prefix="/photo" variant="scatter-featured" />
-              </article>
-            )
-          }
-          {
-            otherPhotos.map((photo, i) => (
-              <article class="scatter-card scatter-card--album" style={`--scatter-rotate: ${[-1.25, 0.9, -0.35, 1.6, -0.75][i % 5]}deg; --scatter-x: ${[-14, 9, -4, 17, -10][i % 5]}px; --scatter-y: ${[4, -3, 7, -6, 2][i % 5]}px; --scatter-delay: ${i * 0.08}s;`}>
-                <PostCard post={photo} prefix="/photo" variant="scatter" />
-              </article>
-            ))
-          }
+        <!-- ===== Marquee ===== -->
+        <div class="marquee" aria-hidden="true">
+          <div class="marquee-track">
+            {marqueeItems.map((i) => (
+              <span class="marquee-item"><span class="num">{i.num}</span>{i.text}<span class="sep">◆</span></span>
+            ))}
+          </div>
+          <div class="marquee-track">
+            {marqueeItems.map((i) => (
+              <span class="marquee-item"><span class="num">{i.num}</span>{i.text}<span class="sep">◆</span></span>
+            ))}
+          </div>
+        </div>
+
+        <!-- ===== SECTION · PHOTO（暗色影集）===== -->
+        <section class="mag-section section-photo" id="section-photo">
+          <div class="mag-eyebrow-row">
+            <span class="num-circle">C</span>
+            <span class="divider"></span>
+            <span class="label">Album</span>
+            <span>·</span>
+            <span>影集 / 摄影</span>
+          </div>
+
+          <p class="stagger-eyebrow pink-soft">No. 03 — Photographs from the quiet hours.</p>
+
+          <h2 class="stagger-title" data-stagger>… photograph.</h2>
+
+          <h3 class="mask-title">
+            <span class="mask-line"><span>记录光</span></span>
+            <span class="mask-line"><span>的形状</span></span>
+          </h3>
+
+          <div class="photo-grid">
+            {latestPhotos.map((photo, i) => (
+              <a class={`photo-card p${i + 1}`} href={`/photo/${photo.id}/`}>
+                <CoverImg src={photo.data.heroImage} alt={photo.data.title} zoom />
+                <span class="photo-card-no">No. {String(i + 1).padStart(2, "0")}</span>
+                <span class="photo-card-tag">Album</span>
+                <div class="photo-card-overlay">
+                  <div class="photo-card-meta">
+                    <div class="photo-card-title">{photo.data.title}</div>
+                    <div class="photo-card-date">{fmtDate(photo.data.pubDate)}</div>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          <a class="photo-cta" href="/photo">
+            <span class="photo-cta-line"></span>
+            <span class="photo-cta-text">Browse the <em>album</em></span>
+            <span class="photo-cta-arrow">→</span>
+            <span class="photo-cta-line"></span>
+          </a>
         </section>
 
-        <!-- Spacer for breathing room -->
-        <div class="desktop-spacer"></div>
+        <!-- ===== SECTION · BLOG ===== -->
+        <section class="mag-section section-blog" id="section-blog">
+          <div class="mag-eyebrow-row">
+            <span class="num-circle">B</span>
+            <span class="divider"></span>
+            <span class="label">Notes</span>
+            <span>·</span>
+            <span>笔记 / 教程 / 制图 / 软件</span>
+          </div>
 
-      </div>
+          <p class="stagger-eyebrow pink">No. 02 — Dispatches from the workbench.</p>
 
-      <div class="section-divider"></div>
+          <h2 class="stagger-title" data-stagger>… notebook.</h2>
+
+          <h3 class="mask-title">
+            <span class="mask-line"><span>工作台</span></span>
+            <span class="mask-line"><span>上的笔记</span></span>
+          </h3>
+
+          <div class="blog-list">
+            {latestPosts.map((post, i) => (
+              <a class="blog-item" href={`/blog/${post.id}/`}>
+                <span class="blog-item-no">{String(i + 1).padStart(2, "0")}<span class="small">{ORD[i] ?? "th"}</span></span>
+                <div class="blog-item-body">
+                  <span class="blog-item-tag">Notes · {post.data.tags[0] ?? "笔记"}</span>
+                  <h4 class="blog-item-title">{post.data.title}</h4>
+                  <p class="blog-item-desc">{post.data.description}</p>
+                </div>
+                <div class="blog-item-meta">
+                  <span class="blog-item-date">{fmtDate(post.data.pubDate)}</span>
+                  <span>{readingTimeMinutes(post.body)} min</span>
+                  <span class="blog-item-arrow">→</span>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          <a class="blog-cta" href="/blog">
+            <span class="blog-cta-line"></span>
+            <span class="blog-cta-text">Read all <em>notes</em></span>
+            <span class="blog-cta-arrow">→</span>
+            <span class="blog-cta-line"></span>
+          </a>
+        </section>
+      </main>
 
       <Footer />
+    </div>
 
-      </div><!-- /unified-frame -->
-    </main>
-
-    <script is:inline>
-      // Hero subtitle typing —— 首屏立即触发
-      document.addEventListener('DOMContentLoaded', () => {
-        const heroSubtitles = document.querySelectorAll('.hero-subtitle--typing');
-        heroSubtitles.forEach((el, idx) => {
-          const text = el.dataset.text;
-          if (!text) return;
-          el.textContent = '';
-          for (let i = 0; i < text.length; i++) {
-            const span = document.createElement('span');
-            span.className = 'hero-subtitle-char';
-            span.textContent = text[i] === ' ' ? '\u00A0' : text[i];
-            span.style.animationDelay = `${idx * 400 + i * 50}ms`;
-            el.appendChild(span);
-          }
-        });
-
-        // 散落卡片入场动画
-        const cards = document.querySelectorAll('.scatter-card');
-        cards.forEach((card, i) => {
-          card.style.setProperty('--scatter-delay', `${i * 0.06}s`);
-        });
-
-        // 桌面表面滚动渐显
-        const surface = document.querySelector('.desktop-surface');
-        const surfaceObserver = new IntersectionObserver(
-          ([entry]) => {
-            if (entry.isIntersecting) {
-              surface.classList.add('surface-visible');
-              surfaceObserver.unobserve(entry.target);
-
-              // 终端标签逐字打字 —— 延迟 10ms 确保入场动画先播完
-              setTimeout(() => {
-                document.querySelectorAll('.terminal-label').forEach(label => {
-                  const text = label.dataset.text;
-                  if (!text) return;
-                  let chars = '<span class="terminal-prompt" style="animation-delay:200ms">&gt;</span>';
-                  for (let i = 0; i < text.length; i++) {
-                    const isSpace = text[i] === ' ';
-                    const ch = isSpace ? '&nbsp;' : text[i];
-                    const spaceClass = isSpace ? ' space-char' : '';
-                    chars += `<span class="terminal-char${spaceClass}" style="animation-delay:${i * 60 + 300}ms">${ch}</span>`;
-                  }
-                  const cursorDelay = text.length * 60 + 500;
-                  chars += `<span class="terminal-cursor" style="animation-delay:${cursorDelay}ms">█</span>`;
-                  label.innerHTML = chars;
-                  setTimeout(() => {
-                    label.querySelector('.terminal-cursor')?.classList.add('typing-done');
-                  }, cursorDelay + 200);
-                });
-              }, 10);
-            }
-          },
-          { threshold: 0.05 }
-        );
-        if (surface) surfaceObserver.observe(surface);
-      });
-    </script>
-    <!-- ====== Splash 动画（v7 · 终端清屏 + 就地欢迎）====== -->
+    <!-- ====== Splash 脚本（v4）====== -->
     <script is:inline>
       (function runSplash() {
-        var splash    = document.getElementById('splash');
-        var consoleEl = document.getElementById('splash-console');
-        var linesEl   = document.getElementById('splash-lines');
-        var loadBar   = document.getElementById('splash-load-bar');
-        var welcome   = document.getElementById('splash-welcome-inner');
-        if (!splash) return;
+        var splash = document.getElementById("splash");
+        var linesEl = document.getElementById("splash-lines");
+        var loadBar = document.getElementById("splash-load-bar");
+        var welcome = document.getElementById("splash-welcome");
+        var main = document.getElementById("main");
+        if (!splash || !main) return;
 
-        // sessionStorage 检查：同一标签会话内已播过则跳过 splash
-        if (sessionStorage.getItem('splash-shown')) {
-          splash.style.display = 'none';
-          var mainEl = document.querySelector('main');
-          if (mainEl) { mainEl.style.opacity = '1'; mainEl.style.transform = 'scaleY(1)'; mainEl.style.filter = 'brightness(1)'; }
+        if (sessionStorage.getItem("splash-shown-v4")) {
+          splash.style.display = "none";
+          main.classList.add("boot");
           return;
         }
 
         var lines = [
-          { id: 'splash-l0', plain: 'RIMUCHAHUI SYSTEM  Ver 1.09',       html: '<span class="dim">RIMUCHAHUI SYSTEM</span>  <span class="pink">Ver 1.09</span>',            speed: [16, 31] },
-          { id: 'splash-l1', plain: '(C) 2024 RIMUCHAHUI Project.',       html: '<span class="dim">(C) 2024 RIMUCHAHUI Project.</span>',                                    speed: [14, 25] },
-          { id: 'splash-l2', plain: '',                                    html: '',                                                                                         speed: [0, 0], gap: 125 },
-          { id: 'splash-l3', plain: 'MEMORY  TEST ........ 65536K OK',    html: '<span class="dim">MEMORY  TEST ........</span> <span class="white">65536K OK</span>',        speed: [13, 24] },
-          { id: 'splash-l4', plain: 'DISK    CHECK ....... OK',           html: '<span class="dim">DISK    CHECK .......</span> <span class="white">OK</span>',              speed: [14, 28] },
-          { id: 'splash-l5', plain: 'SYSTEM  INIT  ....... OK',           html: '<span class="dim">SYSTEM  INIT  .......</span> <span class="white">OK</span>',              speed: [14, 28] },
-          { id: 'splash-l6', plain: '',                                    html: '',                                                                                         speed: [0, 0], gap: 100 },
-          { id: 'splash-l7', plain: 'LOADING',                             html: '<span class="white">LOADING</span>',                                                       speed: [20, 38] },
+          { id: "splash-l0", plain: "RIMUCHAHUI SYSTEM   Ver 1.26", html: '<span class="dim">RIMUCHAHUI SYSTEM</span>   <span class="pink">Ver 1.26</span>' },
+          { id: "splash-l1", plain: "(C) 2024 — 2026  RIMUCHAHUI Project", html: '<span class="dim">(C) 2024 — 2026  RIMUCHAHUI Project</span>' },
+          { id: "splash-l2", plain: "Built with Astro + CSS · Quiet Practice", html: '<span class="dim">Built with</span> <span class="ink">Astro + CSS</span> <span class="dim">· Quiet Practice</span>' },
+          { id: "splash-l3", plain: "", gap: 80 },
+          { id: "splash-l4", plain: "MEMORY  TEST ........ 65536K OK", html: '<span class="dim">MEMORY  TEST ........</span> <span class="ink">65536K OK</span>' },
+          { id: "splash-l5", plain: "DISK    CHECK ....... OK", html: '<span class="dim">DISK    CHECK .......</span> <span class="ink">OK</span>' },
+          { id: "splash-l6", plain: "SYSTEM  INIT  ....... OK", html: '<span class="dim">SYSTEM  INIT  .......</span> <span class="ink">OK</span>' },
+          { id: "splash-l7", plain: "LOADING", html: '<span class="ink">LOADING</span>' },
         ];
-
         var totalChars = 0;
-        lines.forEach(function(l) { totalChars += l.plain.length; });
-
-        var BLOCKS = 42;
-        var frag = '';
-        for (var b = 0; b < BLOCKS; b++) {
-          frag += '<span class="splash-load-block" id="splash-bk' + b + '">&#x2588;</span>';
-        }
+        lines.forEach(function (l) { totalChars += l.plain.length; });
+        var BLOCKS = 28;
+        var frag = "";
+        for (var b = 0; b < BLOCKS; b++) frag += '<span class="splash-load-block" id="splash-bk' + b + '">&#x2588;</span>';
         loadBar.innerHTML = frag;
-        loadBar.classList.add('show');
+        loadBar.classList.add("show");
 
-        var typedCount = 0;
-        var lineIdx    = 0;
-        var charIdx    = 0;
-
+        var typedCount = 0, lineIdx = 0, charIdx = 0;
         function rand(min, max) { return min + Math.random() * (max - min); }
-
         function advanceBlocks() {
           var target = Math.floor((typedCount / Math.max(totalChars, 1)) * BLOCKS);
           target = Math.min(target, BLOCKS - 1);
           for (var b = 0; b <= target; b++) {
-            var blk = document.getElementById('splash-bk' + b);
-            if (blk && !blk.classList.contains('done')) blk.classList.add('done');
+            var blk = document.getElementById("splash-bk" + b);
+            if (blk && !blk.classList.contains("done")) blk.classList.add("done");
           }
         }
-
-        function flickerLine(i) {
-          var el = document.getElementById(lines[i].id);
-          if (!el || !el.textContent.trim()) return;
-          el.style.opacity = '0.35';
-          setTimeout(function() { el.style.opacity = '1'; }, 28 + Math.random() * 20);
-        }
-
         function finishLineThenAdvance() {
           var ln = lines[lineIdx];
           var el = document.getElementById(ln.id);
           if (el && ln.html) el.innerHTML = ln.html;
-
-          flickerLine(lineIdx);
-          lineIdx++;
-          charIdx = 0;
-          typedCount += 1;
+          lineIdx++; charIdx = 0; typedCount += 1;
           advanceBlocks();
-
-          setTimeout(typeChar, lineIdx < lines.length ? rand(65, 160) : 15);
+          setTimeout(typeChar, lineIdx < lines.length ? rand(50, 120) : 20);
         }
-
         function typeChar() {
-          if (lineIdx >= lines.length) {
-            finishTyping();
-            return;
-          }
-
+          if (lineIdx >= lines.length) { finishTyping(); return; }
           var ln = lines[lineIdx];
           var el = document.getElementById(ln.id);
-
           if (ln.plain.length === 0) {
-            if (el) { el.innerHTML = '&nbsp;'; el.style.opacity = '1'; }
+            if (el) el.innerHTML = "&nbsp;";
             lineIdx++;
-            charIdx = 0;
             setTimeout(typeChar, ln.gap || 60);
             return;
           }
-
-          if (!el) { lineIdx++; charIdx = 0; typeChar(); return; }
-
-          if (charIdx === 0 && lineIdx > 0) {
-            flickerLine(lineIdx - 1);
-          }
-
+          if (!el) { lineIdx++; typeChar(); return; }
           el.innerHTML = ln.plain.substring(0, charIdx + 1) + '<span class="splash-cursor-trail">_</span>';
-          typedCount++;
-          charIdx++;
+          typedCount++; charIdx++;
           advanceBlocks();
-
-          if (charIdx < ln.plain.length) {
-            setTimeout(typeChar, rand(ln.speed[0], ln.speed[1]));
-          } else {
-            finishLineThenAdvance();
-          }
+          if (charIdx < ln.plain.length) setTimeout(typeChar, rand(8, 18));
+          else finishLineThenAdvance();
         }
-
         function finishTyping() {
-          loadBar.classList.remove('show');
-
-          // 终端清屏：极短淡出 → 消失
-          setTimeout(function() {
-            linesEl.style.opacity = '0';
-            setTimeout(function() { linesEl.style.display = 'none'; }, 150);
-          }, 300);
-
-          // 空窗口停顿 500ms → 欢迎淡入
-          setTimeout(function() {
-            welcome.classList.add('show');
-          }, 900);
-
-          // 欢迎停留 → CRT 关机
-          setTimeout(function() {
-            welcome.classList.remove('show');
-            setTimeout(function() {
-              splash.classList.add('splash--shutdown');
-              splash.addEventListener('animationend', function handler() {
-                splash.removeEventListener('animationend', handler);
-                splash.classList.add('splash--done');
-                var mainEl2 = document.querySelector('main');
-                if (mainEl2) { mainEl2.classList.add('booted'); sessionStorage.setItem('splash-shown', '1'); }
-              }, { once: true });
-            }, 250);
-          }, 2500);
+          loadBar.classList.remove("show");
+          setTimeout(function () {
+            linesEl.style.transition = "opacity 0.2s";
+            linesEl.style.opacity = "0";
+            setTimeout(function () { linesEl.style.display = "none"; }, 220);
+          }, 200);
+          setTimeout(function () { welcome.classList.add("show"); }, 550);
+          setTimeout(function () {
+            welcome.classList.remove("show");
+            setTimeout(function () {
+              splash.classList.add("done");
+              setTimeout(function () {
+                splash.style.display = "none";
+                main.classList.add("boot");
+                sessionStorage.setItem("splash-shown-v4", "1");
+              }, 400);
+            }, 120);
+          }, 1500);
         }
-
         typeChar();
       })();
     </script>
-    <script is:inline src="/scripts/beijing-time.js"></script>
-    <script is:inline src="/scripts/wave-grid.js"></script>
-    <script is:inline src="/scripts/carousel.js"></script>
-    <script is:inline src="/scripts/win-box.js"></script>
+
+    <!-- ====== 杂志区块 reveal + 逐字标题 + 北京时间 ====== -->
+    <script is:inline>
+      (function () {
+        // IntersectionObserver → .in-view
+        var obs = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (e) {
+              if (e.isIntersecting) {
+                e.target.classList.add("in-view");
+                obs.unobserve(e.target);
+              }
+            });
+          },
+          { threshold: 0.15, rootMargin: "0px 0px -8% 0px" }
+        );
+        document.querySelectorAll(".mag-section, .reveal").forEach(function (el) { obs.observe(el); });
+
+        // 逐字标题（SSR 已有文本，这里拆成 char spans）
+        document.querySelectorAll("[data-stagger]").forEach(function (el) {
+          var text = el.textContent || "";
+          el.innerHTML = "";
+          for (var i = 0; i < text.length; i++) {
+            var span = document.createElement("span");
+            span.className = "char";
+            if (text[i] === " ") span.innerHTML = "&nbsp;";
+            else span.textContent = text[i];
+            span.style.transitionDelay = (i * 0.04) + "s";
+            el.appendChild(span);
+          }
+        });
+
+        // 北京时间
+        var timeEl = document.getElementById("hero-time");
+        function updateTime() {
+          if (!timeEl) return;
+          var now = new Date();
+          var bj = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Shanghai" }));
+          timeEl.textContent =
+            String(bj.getHours()).padStart(2, "0") + ":" + String(bj.getMinutes()).padStart(2, "0");
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+      })();
+    </script>
   </body>
 </html>
 
 <style>
-  @import url("https://fonts.googleapis.com/css2?family=Libre+Barcode+128&display=swap");
-
-  @font-face {
-    font-family: "Smiley Sans Oblique";
-    src: url("https://cdn.jsdelivr.net/gh/xue-ding-e/smiley-sans-online/SmileySans-Oblique.ttf.woff2") format("woff2");
-    font-weight: 400 700;
-    font-style: oblique;
-    font-display: swap;
-  }
-
-  :root {
-    --font-barcode: "Libre Barcode 128", system-ui;
-  }
-  /* ====== 全页固定布局 ====== */
-  :global(html),
-  :global(body) {
-    height: 100%;
-    overflow: hidden;
-  }
-
-  :global(body) {
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* main 区域 —— 撑满 Header 下方，居中容纳框架 */
-  main {
-    flex: 1;
-    min-height: 0;
-    width: 100%;
-    max-width: none;
-    margin: 0;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-  }
-
-  /* ====== Unified Frame（固定框架 + 内部滚动）====== */
-  .unified-frame {
-    width: 100%;
-    max-width: 1880px;
-    height: 100%;
-    background: #fff;
-    border: 2px solid #7c7c7d;
-    border-radius: 8px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    scroll-behavior: smooth;
-  }
-
-  /* ===== Hero区域样式 ===== */
-  .hero-section {
+  /* ===== HERO ===== */
+  .hero {
     position: relative;
-    height: calc(100% - 2px);
-    min-height: auto;
-    overflow: visible;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: calc(100svh - 54px);
+    min-height: 600px;
+    overflow: hidden;
+    background: var(--paper);
   }
 
-  /* 波浪网格背景容器 */
-  .wave-grid-container {
+  .hero-meta-tl,
+  .hero-meta-tr,
+  .hero-meta-bl {
     position: absolute;
-    left: 50%;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    z-index: 5;
+    opacity: 0;
+    animation: heroFadeIn 1s var(--ease-expo) forwards;
+  }
+  .hero-meta-tl { top: 32px; left: 32px; animation-delay: 0.2s; }
+  .hero-meta-tl::before { content: "● "; color: var(--pink); }
+  .hero-meta-tl .vol { color: var(--ink); }
+  .hero-meta-tr { top: 32px; right: 32px; animation-delay: 0.4s; }
+  .hero-meta-tr::before { content: "↓ "; }
+  .hero-meta-bl {
+    bottom: 32px;
+    left: 32px;
+    animation-delay: 0.6s;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .hero-meta-bl .dot { color: var(--pink); font-size: 14px; }
+  .hero-meta-bl .city { color: var(--ink); }
+  .hero-meta-bl .time { color: var(--ink-soft); }
+  .hero-meta-bl .sep { color: var(--ink-faint); }
+
+  @keyframes heroFadeIn { to { opacity: 1; } }
+
+  /* 角色立绘 */
+  .character {
+    position: absolute;
     top: 50%;
-    border: 1px solid #afafaf;
-    transform: translate(-50%, -50%);
-    width: 1500px;
-    height: 460px;
-    overflow: hidden;
-  }
-
-  /* 波浪网格背景 */
-  .wave-grid {
-    width: 100%;
-    height: 100%;
-    opacity: 0.4;
-    will-change: contents;
-  }
-
-  /* 浮动窗口容器 */
-  .windows-container {
-    position: absolute;
-    inset: 0;
-    z-index: 50;
-  }
-
-  /* Windows风格窗口 */
-  .win-box {
-    position: absolute;
-    background: white;
-    border: 1px solid #999;
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .win-box:hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-  }
-
-  .win-header {
-    height: 28px;
-    background: linear-gradient(180deg, #f5f5f5 0%, #e0e0e0 100%);
-    border-bottom: 1px solid #ccc;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 8px;
-    cursor: grab;
-    user-select: none;
-  }
-
-  .win-header:active {
-    cursor: grabbing;
-  }
-
-  .win-header-title {
-    font-size: 12px;
-    color: #333;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .win-close-btn {
-    width: 18px;
-    height: 18px;
-    border: none;
-    background: transparent;
-    color: #666;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    line-height: 1;
-  }
-
-  .win-close-btn:hover {
-    background: #e81123;
-    color: white;
-  }
-
-  .win-body {
-    flex: 1;
-    padding: 4px;
-    overflow: hidden;
-  }
-
-  .win-body img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 3px;
-  }
-
-  /* Popup animation - fade in & scale for windows on page load */
-  @keyframes popIn {
-    from {
-      opacity: 0;
-      transform: scale(0.92);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  .win-box.pop-in,
-  .draggable-widget.pop-in {
-    animation: popIn 420ms cubic-bezier(0.2, 0.85, 0.25, 1) both;
-    will-change: transform, opacity;
-  }
-
-  /* 角色 */
-  .hero-character {
-    position: absolute;
-    right: 18%;
-    bottom: -12%;
-    width: 45.5%;
-    max-width: 390px;
-    z-index: 10;
-    animation: float 4s ease-in-out infinite;
+    right: 12%;
+    transform: translateY(-50%);
+    width: clamp(280px, 30vw, 420px);
+    z-index: 5;
+    opacity: 0;
+    animation:
+      charReveal 1.4s var(--ease-expo) 0.5s forwards,
+      kenburns 36s var(--ease-soft) infinite 1.9s;
     will-change: transform;
-    background: transparent;
   }
-
+  .character::before,
+  .character::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .character::before {
+    width: 110%;
+    height: 75%;
+    border: 1px solid var(--hairline);
+    transform: translate(-50%, -50%);
+    animation: rotateSlow 40s linear infinite;
+  }
+  .character::after {
+    width: 130%;
+    height: 90%;
+    border: 1px dashed var(--line-soft);
+    transform: translate(-50%, -50%);
+    animation: rotateSlow 60s linear infinite reverse;
+  }
   .character-img {
     width: 100%;
     height: auto;
-    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.2));
+    filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.18));
     background: transparent;
-    mix-blend-mode: normal;
   }
-
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-15px);
-    }
-  }
-
-  /* 左侧内容 */
-  .hero-content {
+  .character-caption {
     position: absolute;
-    left: 5%;
-    bottom: 12%;
-    z-index: 10;
+    top: -32px;
+    right: 0;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    writing-mode: vertical-rl;
+  }
+  .character-caption::before { content: "● "; color: var(--pink); }
+
+  @keyframes charReveal {
+    from { opacity: 0; transform: translateY(-50%) scale(0.96); }
+    to   { opacity: 1; transform: translateY(-50%) scale(1); }
+  }
+  @keyframes kenburns {
+    0%, 100% { transform: translateY(-50%) scale(1); }
+    50%      { transform: translateY(-50%) scale(1.04); }
+  }
+  @keyframes rotateSlow { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+  /* 窗口内便签文字 */
+  .widget-note {
+    margin: 0;
+    padding: 10px 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
   }
 
-  .hero-title {
-    font-size: 3.5rem;
-    font-family:
-      "Noto Sans JP",
-      -apple-system,
-      BlinkMacSystemFont,
-      "Segoe UI",
-      sans-serif;
-    font-weight: 700;
-    color: #1a1a2e;
-    margin: 0 0 0.5rem 0;
-    line-height: 1;
+  /* ===== Meta strip ===== */
+  .meta-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 32px;
+    border-top: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
   }
-
-  .hero-subtitle {
-    font-size: 1rem;
-    color: #4a4a6a;
-    margin: 0.2rem 0;
-    font-family:
-      var(--font-ibm, "IBM Plex Mono"),
-      var(--font-ja, "Hiragino Kaku Gothic ProN", "Hiragino Sans"), sans-serif;
+  .meta-strip-left,
+  .meta-strip-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
   }
-
-  /* 条形码 */
-  .barcode {
-    display: inline-block;
-    margin-top: 1rem;
+  .meta-strip .live::before { content: "● "; color: var(--pink); }
+  .meta-strip .vol { color: var(--ink); }
+  .meta-strip .barcode {
     font-family: var(--font-barcode);
-    font-size: 48px;
+    font-size: 28px;
     line-height: 1;
-    color: #1a1a2e;
     letter-spacing: 0.02em;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    color: var(--ink);
+    text-transform: none;
   }
 
-  /* 右上角Logo */
-  .hero-logo {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 20;
-    font-family: monospace;
-    font-size: 0.9rem;
-    color: #4a4a6a;
-  }
-
-  .hero-logo span {
-    margin: 0 1px;
-  }
-
-  /* 响应式 */
-  @media (max-width: 1900px) {
-    .hero-section {
-      min-height: 600px;
-    }
-
-    .wave-grid-container {
-      width: 80vw;
-      height: 350px;
-    }
-  }
-
-  @media (max-width: 768px) {
-    main {
-      padding: 0 0.5rem;
-    }
-
-    .hero-section {
-      min-height: 500px;
-      padding: 10px;
-    }
-
-    .win-box {
-      display: none !important;
-    }
-
-    .win-box:first-child {
-      display: flex !important;
-      width: 180px !important;
-      height: 130px !important;
-      left: 50% !important;
-      top: 20% !important;
-      transform: translateX(-50%);
-    }
-
-    .hero-section {
-      min-height: 400px;
-    }
-
-    .wave-grid-container {
-      width: 95%;
-      height: 250px;
-    }
-
-    .hero-character {
-      width: 52%;
-      max-width: 260px;
-      right: 2%;
-    }
-
-    .hero-title {
-      font-size: 2rem;
-    }
-
-    .hero-content {
-      left: 5%;
-      bottom: 15%;
-    }
-  }
-
-  /* ====== Theme Carousel Scatter ====== */
-  .theme-carousel-scatter {
-    max-width: 540px;
-    margin: 0 auto 80px;
-    opacity: 0;
-    transform: rotate(-0.3deg) translateY(20px) scale(0.96);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.1));
-    border-radius: 8px;
+  /* ===== Marquee ===== */
+  .marquee {
     overflow: hidden;
-    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--line-soft);
+    padding: 22px 0;
+    display: flex;
+  }
+  .marquee-track {
+    display: inline-flex;
+    gap: 48px;
+    animation: marquee 50s linear infinite;
+    align-items: center;
+    padding-right: 48px;
+    flex-shrink: 0;
+  }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+  .marquee-item {
+    font-family: var(--font-serif-jp);
+    font-weight: 300;
+    font-size: clamp(24px, 3vw, 42px);
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    color: var(--ink);
+  }
+  .marquee-item .num {
+    font-family: var(--font-mono);
+    font-size: 0.45em;
+    vertical-align: middle;
+    color: var(--pink);
+    margin-right: 16px;
+    letter-spacing: 0.18em;
+  }
+  .marquee-item .sep { color: var(--ink-faint); margin: 0 12px; }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-100%); }
   }
 
-  .desktop-surface.surface-visible .theme-carousel-scatter {
-    opacity: 1;
-    transform: rotate(-0.3deg) translateY(0) scale(1);
-    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s;
-  }
+  /* ===== 杂志 section 通用 ===== */
+  .mag-section { padding: 140px 48px; }
 
-  .desktop-surface.surface-visible .theme-carousel-scatter:hover {
-    transform: rotate(0deg) translateY(-6px) scale(1.02);
-    filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.15));
-    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.35s ease;
+  /* ===== SECTION · PHOTO ===== */
+  .section-photo {
+    background: var(--photo-bg);
+    color: var(--photo-paper);
   }
+  .section-photo .mag-eyebrow-row { color: rgba(245, 243, 238, 0.5); }
+  .section-photo .mag-eyebrow-row .label { color: var(--photo-paper); }
+  .section-photo .mask-title { color: var(--photo-paper); }
+  .section-photo .stagger-title { color: var(--photo-paper); }
 
-  .theme-carousel-scatter .carousel-image {
-    display: block;
-    width: 100%;
-    height: auto;
-    border-radius: 0;
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: 240px 240px;
+    gap: 16px;
+    margin-top: 80px;
   }
-
-  /* ====== Section Divider ====== */
-  .section-divider {
-    border: none;
-    border-top: 2px solid #7c7c7d;
-    margin: 0 -40px;
-    width: auto;
-  }
-
-  /* hero区域与内容区之间的分隔线 */
-  .hero-divider {
-    margin: 0;
-    width: 100%;
-  }
-
-  /* ====== Desktop Surface ====== */
-  .desktop-surface {
+  .photo-card {
     position: relative;
-    max-width: 100%;
-    margin: 0;
-    padding: 60px 40px 40px;
+    background: linear-gradient(135deg, #2a2020 0%, #1a1414 100%);
+    border: 1px solid rgba(245, 243, 238, 0.15);
+    box-shadow: 6px 6px 0 var(--photo-shadow);
     overflow: hidden;
-    background:
-      radial-gradient(ellipse at 20% 50%, rgba(200, 200, 210, 0.15) 0%, transparent 70%),
-      radial-gradient(ellipse at 80% 30%, rgba(190, 195, 205, 0.12) 0%, transparent 70%);
     opacity: 0;
     transform: translateY(40px);
-    transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+    transition:
+      opacity 1s var(--ease-expo),
+      transform 1s var(--ease-expo),
+      box-shadow 0.4s var(--ease-soft);
+    display: block;
+  }
+  .section-photo.in-view .photo-card { opacity: 1; transform: translateY(0); }
+  .section-photo.in-view .photo-card:nth-child(1) { transition-delay: 0.1s; }
+  .section-photo.in-view .photo-card:nth-child(2) { transition-delay: 0.2s; }
+  .section-photo.in-view .photo-card:nth-child(3) { transition-delay: 0.3s; }
+  .section-photo.in-view .photo-card:nth-child(4) { transition-delay: 0.4s; }
+  .section-photo.in-view .photo-card:nth-child(5) { transition-delay: 0.5s; }
+  .photo-card:hover {
+    box-shadow: 10px 10px 0 var(--photo-shadow);
+    transform: translate(-2px, -2px);
+  }
+  .photo-card.p1 { grid-column: span 2; grid-row: span 2; }
+  .photo-card.p2 { grid-column: span 2; }
+  .photo-card.p3 { grid-column: span 2; }
+  .photo-card.p4 { grid-column: span 3; }
+  .photo-card.p5 { grid-column: span 3; }
+
+  .photo-card .cover-img {
+    /* 尺寸/定位由 CoverImg 组件提供，这里只保留 hover 放大 */
+  }
+  .photo-card:hover .cover-img { transform: scale(1.06); }
+  .photo-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(15, 23, 36, 0.85) 100%);
+    display: flex;
+    align-items: flex-end;
+    padding: 20px;
+  }
+  .photo-card-no {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: rgba(245, 243, 238, 0.7);
+  }
+  .photo-card-no::before { content: "●  "; color: var(--pink); }
+  .photo-card-tag {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(245, 243, 238, 0.6);
+    writing-mode: vertical-rl;
+  }
+  .photo-card-meta { width: 100%; }
+  .photo-card-title {
+    font-family: var(--font-serif-jp);
+    font-weight: 300;
+    font-size: 22px;
+    color: var(--photo-paper);
+    margin-bottom: 4px;
+  }
+  .photo-card.p1 .photo-card-title { font-size: 32px; }
+  .photo-card-date {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245, 243, 238, 0.6);
   }
 
-  .desktop-surface.surface-visible {
-    opacity: 1;
-    transform: translateY(0);
+  .photo-cta {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid var(--photo-line);
+    color: var(--photo-paper);
+  }
+  .photo-cta-line { flex: 1; height: 1px; background: var(--photo-line); }
+  .photo-cta-text {
+    font-family: var(--font-serif-jp);
+    font-weight: 200;
+    font-size: clamp(28px, 3.5vw, 48px);
+    letter-spacing: 0.04em;
+  }
+  .photo-cta-text em {
+    font-family: var(--font-deco);
+    font-style: italic;
+    color: var(--pink-soft);
+  }
+  .photo-cta-arrow {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    transition: transform 0.4s var(--ease-back);
+  }
+  .photo-cta:hover .photo-cta-arrow { transform: translateX(8px); }
+
+  /* 暗色模式下影集区块反转为纸张亮色（与 photo 页反转规则一致） */
+  :global(html[data-theme="dark"]) .section-photo {
+    background: var(--paper);
+    color: var(--ink);
+  }
+  :global(html[data-theme="dark"]) .section-photo .mag-eyebrow-row { color: var(--ink-faint); }
+  :global(html[data-theme="dark"]) .section-photo .mag-eyebrow-row .label { color: var(--ink); }
+  :global(html[data-theme="dark"]) .section-photo .mask-title { color: var(--ink); }
+  :global(html[data-theme="dark"]) .section-photo .stagger-title { color: var(--ink); }
+  :global(html[data-theme="dark"]) .photo-card {
+    border-color: var(--line-soft);
+    box-shadow: 6px 6px 0 var(--paper-shadow);
+  }
+  :global(html[data-theme="dark"]) .photo-card:hover {
+    box-shadow: 10px 10px 0 var(--paper-shadow);
+  }
+  :global(html[data-theme="dark"]) .photo-card-title { color: var(--photo-paper); }
+  :global(html[data-theme="dark"]) .photo-cta {
+    border-top-color: var(--line-soft);
+    color: var(--ink);
+  }
+  :global(html[data-theme="dark"]) .photo-cta-line { background: var(--line-soft); }
+
+  /* ===== SECTION · BLOG ===== */
+  .section-blog {
+    background: var(--paper);
+    color: var(--ink);
+    max-width: 1320px;
+    margin: 0 auto;
   }
 
-  /* ====== Scatter Section ====== */
-  .scatter-section {
-    position: relative;
-    padding: 40px 0 30px;
-    margin-bottom: 20px;
-  }
-
-  .scatter-section--posts {
+  .blog-list {
+    margin-top: 80px;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
   }
-
-  .scatter-section--posts .terminal-label {
-    text-align: left;
-    width: 50%;
+  .blog-item {
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    gap: 40px;
+    align-items: baseline;
+    padding: 40px 0;
+    border-top: 1px solid var(--line-soft);
+    color: inherit;
+    opacity: 0;
+    transform: translateY(30px);
+    transition:
+      opacity 0.9s var(--ease-expo), transform 0.9s var(--ease-expo),
+      background 0.4s var(--ease-soft), padding 0.4s var(--ease-soft);
   }
+  .blog-item:last-child { border-bottom: 1px solid var(--line-soft); }
+  .section-blog.in-view .blog-item { opacity: 1; transform: translateY(0); }
+  .section-blog.in-view .blog-item:nth-child(1) { transition-delay: 0.1s; }
+  .section-blog.in-view .blog-item:nth-child(2) { transition-delay: 0.2s; }
+  .section-blog.in-view .blog-item:nth-child(3) { transition-delay: 0.3s; }
+  .section-blog.in-view .blog-item:nth-child(4) { transition-delay: 0.4s; }
+  .section-blog.in-view .blog-item:nth-child(5) { transition-delay: 0.5s; }
 
-  .scatter-section--photos .terminal-label {
-    text-align: right;
-    width: 50%;
-    align-self: flex-end;
+  .blog-item:hover { background: var(--paper-deep); padding-left: 16px; padding-right: 16px; }
+  .blog-item:hover .blog-item-title { color: var(--pink); transform: translateX(8px); }
+  .blog-item:hover .blog-item-arrow { transform: translateX(12px); color: var(--pink); }
+
+  .blog-item-no {
+    font-family: var(--font-serif-jp);
+    font-weight: 200;
+    font-size: 64px;
+    line-height: 0.8;
+    letter-spacing: -0.04em;
+    color: var(--ink);
   }
-
-  .scatter-section--posts .scatter-card--featured,
-  .scatter-section--photos .scatter-card--featured {
-    width: 50%;
-    max-width: 50%;
-    margin: 0 0 16px;
+  .blog-item-no .small {
+    font-size: 0.4em;
+    color: var(--ink-faint);
+    font-style: italic;
+    font-family: var(--font-deco);
+    vertical-align: super;
+    margin-left: 2px;
   }
-
-  .scatter-section--posts .scatter-card {
-    width: 50%;
-    max-width: 50%;
+  .blog-item-body { min-width: 0; }
+  .blog-item-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 8px;
+    display: block;
   }
-
-  .scatter-section--photos {
+  .blog-item-title {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: clamp(22px, 2.5vw, 32px);
+    line-height: 1.3;
+    color: var(--ink);
+    margin: 0;
+    transition: color 0.4s var(--ease-soft), transform 0.4s var(--ease-soft);
+  }
+  .blog-item-desc {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin: 8px 0 0;
+    max-width: 580px;
+  }
+  .blog-item-meta {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-align: right;
+  }
+  .blog-item-date { color: var(--ink); }
+  .blog-item-arrow {
+    font-size: 24px;
+    color: var(--ink-faint);
+    transition: transform 0.4s var(--ease-back), color 0.4s var(--ease-soft);
   }
 
-  .scatter-section--photos .scatter-card {
-    width: 50%;
-    max-width: 50%;
-  }
-
-  /* ====== Terminal Label ====== */
-  .terminal-label {
-    font-family: "Smiley Sans Oblique", "SmileySans", var(--font-ja, sans-serif);
-    font-size: 1.21rem;
-    font-weight: 900;
-    margin-bottom: 2.5rem;
-    padding-left: 4px;
-    letter-spacing: 0.02em;
-  }
-
-  .terminal-prompt {
-    color: #777;
-    margin-right: 6px;
-  }
-
-  .terminal-char {
-    color: #1a1a2e;
-  }
-
-  /* ====== Scatter Card ====== */
-  .scatter-card {
-    display: inline-block;
-    vertical-align: top;
-    margin: 8px;
-    opacity: 0;
-    transform:
-      rotate(var(--scatter-rotate, 0deg))
-      translate(var(--scatter-x, 0px), var(--scatter-y, 0px))
-      scale(0.97);
-    transition:
-      opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
-      transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
-      box-shadow 0.3s ease;
-    transition-delay: var(--scatter-delay, 0s);
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
-    cursor: pointer;
-    position: relative;
-    z-index: 1;
-  }
-
-  .desktop-surface.surface-visible .scatter-card {
-    opacity: 1;
-    transform:
-      rotate(var(--scatter-rotate, 0deg))
-      translate(var(--scatter-x, 0px), var(--scatter-y, 0px))
-      scale(1);
-  }
-
-  .desktop-surface.surface-visible .scatter-card:hover {
-    transform:
-      rotate(var(--scatter-rotate, 0deg))
-      translate(var(--scatter-x, 0px), calc(var(--scatter-y, 0px) - 8px))
-      scale(1.02);
-    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.14));
-    z-index: 10;
-    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.35s ease;
-  }
-
-  /* ====== Featured Card ====== */
-  .scatter-card--featured {
-    display: block;
-    max-width: 680px;
-    margin: 0 auto 16px;
-    transform:
-      rotate(var(--scatter-rotate, 0deg))
-      scale(0.97);
-    filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.1));
-  }
-
-  .desktop-surface.surface-visible .scatter-card--featured {
-    transform:
-      rotate(var(--scatter-rotate, 0deg))
-      scale(1);
-  }
-
-  .desktop-surface.surface-visible .scatter-card--featured:hover {
-    transform:
-      rotate(var(--scatter-rotate, 0deg))
-      translateY(-6px)
-      scale(1.03);
-    filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.15));
-    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.35s ease;
-  }
-
-  /* ====== Album vs Post tint ====== */
-  .scatter-card--album {
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.06)) sepia(0.05);
-  }
-
-  /* ====== PostCard internal override ====== */
-  .scatter-card :global(.post-card) {
-    box-shadow: none !important;
-    border: 1px solid #e8e8e8;
-    background: #fff;
-  }
-
-  /* ====== Intro Card Scatter ====== */
-  .intro-card-scatter {
-    max-width: 480px;
-    margin: 40px auto 80px;
-    padding: 32px 36px;
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    opacity: 0;
-    transform: rotate(0.8deg) translateY(20px) scale(0.95);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.06));
-    position: relative;
-    cursor: default;
-  }
-
-  .intro-card-scatter::after {
-    content: '';
-    position: absolute;
-    top: -1px;
-    right: -1px;
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.04) 50%);
-  }
-
-  .desktop-surface.surface-visible .intro-card-scatter {
-    opacity: 1;
-    transform: rotate(0.8deg) translateY(0) scale(1);
-    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s;
-  }
-
-  .desktop-surface.surface-visible .intro-card-scatter:hover {
-    transform: rotate(0deg) translateY(-4px) scale(1.01);
-    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.1));
-    border-color: #c0c0c0;
-    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.35s ease, border-color 0.35s ease;
-  }
-
-  /* ====== Desktop Spacer ====== */
-  .desktop-spacer {
-    height: 40px;
-  }
-
-  /* ====== Intro Desc (keep ruby styles) ====== */
-  .intro-desc {
-    margin: 0.25rem 0 0;
-    color: #555;
-    line-height: 1.2;
-    font-size: 1rem;
-    text-align: center;
-  }
-
-  .intro-desc ruby {
-    display: inline-block;
-    position: relative;
-    line-height: 1;
-    vertical-align: middle;
-  }
-
-  .intro-desc rt {
-    position: absolute;
-    left: 50%;
-    top: 0;
-    transform: translate(-50%, -120%);
-    display: block;
-    font-size: 0.65em;
-    white-space: nowrap;
-    color: rgba(0, 0, 0, 0.75);
-    pointer-events: none;
-    line-height: 1;
-    z-index: 2;
-  }
-
-  /* ====== Post-row (keep for backward compat) ====== */
-  .post-row {
+  .blog-cta {
     display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 2rem;
+    align-items: center;
+    gap: 32px;
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line-soft);
+    color: var(--ink);
   }
-
-  .post-row > :global(*) {
-    flex: 1 1 300px;
-    max-width: 48%;
+  .blog-cta-line { flex: 1; height: 1px; background: var(--line-soft); }
+  .blog-cta-text {
+    font-family: var(--font-serif-jp);
+    font-weight: 200;
+    font-size: clamp(28px, 3.5vw, 48px);
+    letter-spacing: 0.04em;
   }
+  .blog-cta-text em {
+    font-family: var(--font-deco);
+    font-style: italic;
+    color: var(--pink);
+  }
+  .blog-cta-arrow {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    transition: transform 0.4s var(--ease-back);
+  }
+  .blog-cta:hover .blog-cta-arrow { transform: translateX(8px); }
 
-  /* ====== Responsive ====== */
+  /* ===== 响应式 ===== */
+  @media (max-width: 900px) {
+    .character { right: 4%; width: 60%; }
+    .hero :global(.draggable-widget) { display: none; }
+    .hero-meta-tl, .hero-meta-tr, .hero-meta-bl { font-size: 10px; }
+    .photo-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: auto; }
+    .photo-card.p1 { grid-column: span 2; }
+    .photo-card.p2, .photo-card.p3, .photo-card.p4, .photo-card.p5 { grid-column: span 1; }
+    .blog-item { grid-template-columns: 64px 1fr; }
+    .blog-item-meta { display: none; }
+    .blog-item-no { font-size: 40px; }
+  }
   @media (max-width: 768px) {
-    main {
-      padding: 4px;
-      height: 100dvh;
-    }
-
-    .unified-frame {
-      border-radius: 0;
-    }
-
-    .section-divider {}
-
-    .scatter-section {
-      padding: 40px 16px 40px;
-    }
-
-    .terminal-label {
-      padding-left: 16px;
-    }
-
-    .scatter-card {
-      display: block;
-      margin: 0 auto 20px;
-      max-width: 100%;
-      --scatter-x: 0 !important;
-    }
-
-    .desktop-surface.surface-visible .scatter-card:hover {
-      transform: rotate(var(--scatter-rotate, 0deg)) translateY(-4px) scale(1.01) !important;
-    }
-
-    .desktop-surface {
-      padding: 40px 16px 80px;
-    }
-
-    .intro-card-scatter {
-      max-width: 100%;
-      margin: 24px 16px 60px;
-    }
-  }
-
-  @media (max-width: 800px) {
-    .post-row {
-      flex-direction: column;
-    }
-    .post-row > :global(*) {
-      max-width: 100%;
-    }
+    .mag-section { padding: 100px 24px; }
+    .meta-strip { padding: 12px 16px; }
+    .meta-strip .barcode { display: none; }
+    .blog-item { gap: 20px; padding: 28px 0; }
   }
 </style>

@@ -1,144 +1,526 @@
 ---
-import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import CursorShadow from '../../components/CursorShadow.astro';
+import Spotlight from '../../components/Spotlight.astro';
+import PageChrome from '../../components/PageChrome.astro';
 import Footer from '../../components/Footer.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import CoverImg from '../../components/CoverImg.astro';
+import { readingTimeMinutes } from '../../utils/reading-time';
 
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+const [featured, ...rest] = posts;
+// 首屏：featured + 4 篇 grid = 5 篇；其余默认隐藏，点击"加载更多"每次再显示 5 篇
+const FIRST_GRID = 4;
+const LOAD_STEP = 5;
+
+function fmtDate(d: Date): string {
+	const mm = String(d.getMonth() + 1).padStart(2, '0');
+	return `${mm} · ${d.getFullYear()}`;
+}
+
+// 标签云数据（真实 collection 数据）
+const tagCounts = new Map<string, number>();
+posts.forEach((p) => p.data.tags.forEach((t) => tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1)));
+const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
+
+const searchIndex = posts.map((p, i) => ({
+	no: String(i + 1).padStart(2, '0'),
+	id: p.id,
+	title: p.data.title,
+	date: fmtDate(p.data.pubDate),
+	tags: p.data.tags,
+}));
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="zh-Hans">
 	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<style>
-			main {
-				max-width: 960px;
-				width: 100%;
-				margin: 0 auto;
-				padding: 0 1rem;
-			}
-			ul {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 2rem;
-				list-style-type: none;
-				margin: 0;
-				padding: 0;
-			}
-			ul li {
-				width: calc(50% - 1rem);
-			}
-			ul li * {
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			ul li:first-child {
-				width: 100%;
-				margin-bottom: 1rem;
-				text-align: center;
-			}
-				ul li:first-child img {
-					width: 100%;
-					height: auto;
-				}
-			ul li:first-child .title {
-				font-size: 2.369rem;
-			}
-				ul li img {
-					margin-bottom: 0.5rem;
-					border-radius: 12px;
-					width: 100%;
-					height: auto;
-					object-fit: cover;
-					aspect-ratio: 447 / 224;
-				}
-			ul li a {
-				display: block;
-			}
-			.title {
-				font-family: "SmileySans-Oblique";
-				margin: 0;
-				color: rgb(var(--black));
-				line-height: 1;
-			}
-			.date {
-				margin: 0;
-				color: rgb(var(--gray));
-			}
-			ul li a:hover h4,
-			ul li a:hover .date {
-				color: rgb(var(--accent));
-			}
-			ul a:hover img {
-				box-shadow: var(--box-shadow);
-			}
-			@media (max-width: 720px) {
-				ul {
-					gap: 0.5em;
-				}
-				ul li {
-					width: 100%;
-					text-align: center;
-				}
-				ul li:first-child {
-					margin-bottom: 0;
-				}
-				ul li:first-child .title {
-					font-size: 1.563em;
-				}
-			}
-		</style>
+		<BaseHead title={`Blog · ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
 	</head>
 	<body>
 		<CursorShadow />
+		<Spotlight />
+		<PageChrome />
 		<Header />
-		<main>
-			<section>
-				<ul>
-					{
-						posts.map((post, i) => (
-							<li>
-								<a href={`/blog/${post.id}/`}>
-									{post.data.heroImage && (
-										i === 0 ? (
-											<Image 
-												width={720} 
-												height={360} 
-												src={post.data.heroImage} 
-												alt="" 
-												loading="lazy"
-												decoding="async"
-											/>
-										) : (
-											<Image 
-												width={447}
-												height={224}
-												src={post.data.heroImage}
-												alt=""
-												loading="lazy"
-												decoding="async"
-												class="post-thumb"
-											/>
-										)
-									)}
-									<h4 class="title">{post.data.title}</h4>
-									<p class="date">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</a>
-							</li>
-						))
-					}
-				</ul>
-			</section>
+		<main class="page-reveal">
+			<div class="page-inner">
+				<div class="mag-eyebrow-row">
+					<span class="num-circle">B</span>
+					<span class="divider"></span>
+					<span class="label">Notes</span>
+					<span>·</span>
+					<span>笔记 / 教程 / 制图 / 软件</span>
+				</div>
+
+				<p class="stagger-eyebrow pink">No. 02 — Dispatches from the workbench.</p>
+
+				<h2 class="stagger-title" data-stagger>… notebook.</h2>
+
+				<h3 class="mask-title">
+					<span class="mask-line"><span>工作台</span></span>
+					<span class="mask-line"><span>上的笔记</span></span>
+				</h3>
+
+				{featured && (
+					<a class="featured-post" href={`/blog/${featured.id}/`}>
+						<div class="featured-post-image">
+							<CoverImg src={featured.data.heroImage} alt={featured.data.title} loading="eager" />
+						</div>
+						<div class="featured-post-body">
+							<div class="featured-post-tag">Featured · {featured.data.tags[0] ?? '笔记'}</div>
+							<h4 class="featured-post-title">{featured.data.title}</h4>
+							<p class="featured-post-desc">{featured.data.description}</p>
+							<div class="featured-post-meta">
+								<span class="accent">{fmtDate(featured.data.pubDate)}</span>
+								<span>{readingTimeMinutes(featured.body)} min</span>
+								<span>Notes</span>
+							</div>
+						</div>
+					</a>
+				)}
+
+				<div class="post-grid" id="post-grid">
+					{rest.map((post, i) => (
+						<a
+							class:list={['post-card-mini', { 'post-extra': i >= FIRST_GRID }]}
+							href={`/blog/${post.id}/`}
+						>
+							<div class="post-card-mini-image">
+								<CoverImg src={post.data.heroImage} alt={post.data.title} />
+							</div>
+							<span class="post-card-mini-tag">Notes · {post.data.tags[0] ?? '笔记'}</span>
+							<h4 class="post-card-mini-title">{post.data.title}</h4>
+							<div class="post-card-mini-meta">
+								{fmtDate(post.data.pubDate)} · {readingTimeMinutes(post.body)} min
+							</div>
+						</a>
+					))}
+				</div>
+
+				{rest.length > FIRST_GRID && (
+					<div class="load-more-wrap">
+						<button class="load-more-btn" id="load-more-btn" type="button" data-step={LOAD_STEP}>
+							加载更多 · <em>Load more</em>
+						</button>
+						<span class="load-more-hint" id="load-more-hint"></span>
+					</div>
+				)}
+
+				{tags.length > 0 && (
+					<section class="tag-index">
+						<div class="tag-index-head">
+							<span class="tag-index-label">Tag Index</span>
+							<span class="tag-index-divider"></span>
+							<span class="tag-index-hint">点击标签过滤文章</span>
+						</div>
+						<div class="tag-cloud" id="tag-cloud">
+							{tags.map(([name, count]) => (
+								<button class="tag-cloud-item" data-tag={name} type="button">
+									{name}<span class="count">{count}</span>
+								</button>
+							))}
+						</div>
+						<div class="tag-filtered" id="tag-filtered-list">
+							<p class="tag-filtered-empty">点击上方标签查看相关文章</p>
+						</div>
+						<script type="application/json" id="tag-posts-data" set:html={JSON.stringify(searchIndex)} />
+					</section>
+				)}
+			</div>
 		</main>
 		<Footer />
+		<script is:inline src="/scripts/reveal.js"></script>
+		<script is:inline>
+			(function () {
+				var dataEl = document.getElementById('tag-posts-data');
+				var cloud = document.getElementById('tag-cloud');
+				var list = document.getElementById('tag-filtered-list');
+				if (!dataEl || !cloud || !list) return;
+
+				var POSTS = [];
+				try { POSTS = JSON.parse(dataEl.textContent || '[]'); } catch (e) { return; }
+
+				var activeTag = null;
+
+				function render(tag) {
+					if (!tag) {
+						list.innerHTML = '<p class="tag-filtered-empty">点击上方标签查看相关文章</p>';
+						return;
+					}
+					var filtered = POSTS.filter(function (p) { return p.tags.indexOf(tag) !== -1; });
+					if (!filtered.length) {
+						list.innerHTML = '<p class="tag-filtered-empty">这个标签下暂时没有文章</p>';
+						return;
+					}
+					list.innerHTML = filtered.map(function (p) {
+						return (
+							'<a class="tag-post-item" href="/blog/' + p.id + '/">' +
+							'<span class="tag-post-no">' + p.no + '</span>' +
+							'<div class="tag-post-body">' +
+							'<div class="tag-post-title">' + p.title + '</div>' +
+							'<div class="tag-post-meta">' + p.date + ' · ' + p.tags.join(' · ') + '</div>' +
+							'</div></a>'
+						);
+					}).join('');
+				}
+
+				cloud.addEventListener('click', function (e) {
+					var btn = e.target.closest('.tag-cloud-item');
+					if (!btn) return;
+					var tag = btn.getAttribute('data-tag');
+					if (activeTag === tag) {
+						activeTag = null;
+						cloud.querySelectorAll('.tag-cloud-item').forEach(function (b) { b.classList.remove('active'); });
+						render(null);
+					} else {
+						activeTag = tag;
+						cloud.querySelectorAll('.tag-cloud-item').forEach(function (b) {
+							b.classList.toggle('active', b.getAttribute('data-tag') === tag);
+						});
+						render(tag);
+					}
+				});
+			})();
+		</script>
+		<script is:inline>
+			// 加载更多：每次再显示 5 篇更早的文章
+			(function () {
+				var btn = document.getElementById('load-more-btn');
+				var hint = document.getElementById('load-more-hint');
+				if (!btn) return;
+				var step = parseInt(btn.getAttribute('data-step') || '5', 10);
+
+				function extras() {
+					return Array.prototype.slice.call(document.querySelectorAll('.post-card-mini.post-extra'));
+				}
+				function updateHint() {
+					var hidden = extras().filter(function (el) { return el.classList.contains('post-extra-hidden'); });
+					if (hint) hint.textContent = hidden.length > 0 ? '还有 ' + hidden.length + ' 篇更早的笔记' : '';
+					if (hidden.length === 0) btn.style.display = 'none';
+				}
+				// 初始隐藏
+				extras().forEach(function (el) { el.classList.add('post-extra-hidden'); });
+				updateHint();
+
+					btn.addEventListener('click', function () {
+					var hidden = extras().filter(function (el) { return el.classList.contains('post-extra-hidden'); });
+					hidden.slice(0, step).forEach(function (el, i) {
+						el.classList.remove('post-extra-hidden');
+						el.classList.add('post-extra-shown');
+						el.style.animationDelay = (i * 0.08) + 's';
+					});
+					updateHint();
+				});
+			})();
+		</script>
 	</body>
 </html>
+
+<style>
+	.page-inner {
+		max-width: 1320px;
+		margin: 0 auto;
+		padding: 100px 48px 120px;
+	}
+
+	/* ===== Featured ===== */
+	.featured-post {
+		display: grid;
+		grid-template-columns: 1.4fr 1fr;
+		gap: 60px;
+		align-items: center;
+		margin: 80px 0 100px;
+		color: inherit;
+		opacity: 0;
+		transform: translateY(40px);
+		transition: opacity 1s var(--ease-expo) 0.2s, transform 1s var(--ease-expo) 0.2s;
+	}
+	.in-view .featured-post { opacity: 1; transform: translateY(0); }
+
+	.featured-post-image {
+		aspect-ratio: 16/10;
+		background: linear-gradient(135deg, #1a1a2e 0%, #0a0a1a 100%);
+		background-size: cover;
+		background-position: center;
+		border: 1px solid var(--hairline);
+		box-shadow: 8px 8px 0 var(--paper-shadow);
+		position: relative;
+		overflow: hidden;
+		transition: box-shadow 0.4s var(--ease-soft), transform 0.4s var(--ease-back);
+	}
+	.featured-post:hover .featured-post-image {
+		box-shadow: 12px 12px 0 var(--paper-shadow);
+		transform: translate(-2px, -2px);
+	}
+	.featured-post-image::after {
+		content: "No. 01";
+		position: absolute;
+		top: 16px;
+		left: 16px;
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.22em;
+		text-transform: uppercase;
+		color: rgba(245, 243, 238, 0.7);
+		text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+	}
+
+	.featured-post-body { padding: 20px 0; }
+	.featured-post-tag {
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.22em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+		margin-bottom: 16px;
+	}
+	.featured-post-tag::before { content: "● "; color: var(--pink); }
+	.featured-post-title {
+		font-family: var(--font-serif);
+		font-weight: 400;
+		font-size: clamp(32px, 4vw, 56px);
+		line-height: 1.2;
+		margin: 0 0 24px;
+		transition: color 0.4s var(--ease-soft);
+	}
+	.featured-post:hover .featured-post-title { color: var(--pink); }
+	.featured-post-desc {
+		font-size: 16px;
+		line-height: 1.8;
+		color: var(--ink-soft);
+		max-width: 480px;
+		margin: 0 0 24px;
+	}
+	.featured-post-meta {
+		display: flex;
+		gap: 24px;
+		font-family: var(--font-mono);
+		font-size: 11px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+	}
+	.featured-post-meta .accent { color: var(--ink); }
+
+	/* ===== Mini grid ===== */
+	.post-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 48px 40px;
+	}
+
+	.post-card-mini {
+		color: inherit;
+		opacity: 0;
+		transform: translateY(30px);
+		transition: opacity 0.9s var(--ease-expo), transform 0.9s var(--ease-expo);
+		display: block;
+	}
+	.post-card-mini.post-extra-hidden { display: none; }
+	.post-card-mini.post-extra-shown {
+		animation: postExtraIn 0.7s var(--ease-expo) both;
+	}
+	@keyframes postExtraIn {
+		from { opacity: 0; transform: translateY(24px); }
+		to   { opacity: 1; transform: translateY(0); }
+	}
+	.in-view .post-card-mini { opacity: 1; transform: translateY(0); }
+	.in-view .post-card-mini:nth-child(1) { transition-delay: 0s; }
+	.in-view .post-card-mini:nth-child(2) { transition-delay: 0.1s; }
+	.in-view .post-card-mini:nth-child(3) { transition-delay: 0.2s; }
+	.in-view .post-card-mini:nth-child(4) { transition-delay: 0.3s; }
+
+	.post-card-mini-image {
+		aspect-ratio: 16/10;
+		background: linear-gradient(135deg, #2a2020 0%, #1a1414 100%);
+		border: 1px solid var(--hairline);
+		box-shadow: 4px 4px 0 var(--paper-shadow);
+		margin-bottom: 20px;
+		overflow: hidden;
+		position: relative;
+		transition: box-shadow 0.4s var(--ease-soft), transform 0.4s var(--ease-back);
+	}
+	.post-card-mini:hover .post-card-mini-image {
+		box-shadow: 8px 8px 0 var(--paper-shadow);
+		transform: translate(-2px, -2px);
+	}
+
+	/* ===== 加载更多 ===== */
+	.load-more-wrap {
+		margin-top: 64px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 14px;
+	}
+	.load-more-btn {
+		appearance: none;
+		background: var(--paper);
+		border: 1px solid var(--hairline);
+		box-shadow: 4px 4px 0 var(--paper-shadow);
+		padding: 14px 36px;
+		font-family: var(--font-mono);
+		font-size: 12px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--ink);
+		transition: box-shadow 0.3s var(--ease-soft), transform 0.3s var(--ease-back), color 0.3s var(--ease-soft);
+	}
+	.load-more-btn em {
+		font-family: var(--font-deco);
+		font-style: italic;
+		text-transform: none;
+		letter-spacing: 0.04em;
+		color: var(--pink);
+	}
+	.load-more-btn:hover {
+		box-shadow: 7px 7px 0 var(--paper-shadow);
+		transform: translate(-2px, -2px);
+	}
+	.load-more-hint {
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+	}
+	.post-card-mini-tag {
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.22em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+		margin-bottom: 8px;
+		display: block;
+	}
+	.post-card-mini-title {
+		font-family: var(--font-serif);
+		font-weight: 400;
+		font-size: 22px;
+		line-height: 1.3;
+		color: var(--ink);
+		margin: 0;
+		transition: color 0.4s var(--ease-soft);
+	}
+	.post-card-mini:hover .post-card-mini-title { color: var(--pink); }
+	.post-card-mini-meta {
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+		margin-top: 8px;
+	}
+
+	/* ===== Tag Index ===== */
+	.tag-index {
+		margin-top: 120px;
+		padding-top: 60px;
+		border-top: 1px solid var(--line-soft);
+	}
+	.tag-index-head {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+		margin-bottom: 40px;
+		font-family: var(--font-mono);
+		font-size: 11px;
+		letter-spacing: 0.22em;
+		text-transform: uppercase;
+	}
+	.tag-index-label { color: var(--ink); }
+	.tag-index-label::before { content: "● "; color: var(--pink); }
+	.tag-index-divider { width: 60px; height: 1px; background: var(--ink-faint); }
+	.tag-index-hint { color: var(--ink-faint); }
+
+	.tag-cloud {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+		margin-bottom: 40px;
+	}
+	.tag-cloud-item {
+		appearance: none;
+		background: var(--paper-deep);
+		border: 1px solid var(--line-soft);
+		padding: 10px 18px;
+		font-family: var(--font-serif);
+		font-size: 14px;
+		color: var(--ink-soft);
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.3s var(--ease-soft);
+	}
+	.tag-cloud-item .count {
+		font-family: var(--font-mono);
+		font-size: 10px;
+		color: var(--ink-faint);
+	}
+	.tag-cloud-item:hover {
+		border-color: var(--ink);
+		color: var(--ink);
+		box-shadow: 3px 3px 0 var(--paper-shadow);
+	}
+	.tag-cloud-item.active {
+		background: var(--ink);
+		border-color: var(--ink);
+		color: var(--paper);
+	}
+	.tag-cloud-item.active .count { color: var(--pink-soft); }
+
+	.tag-post-item {
+		display: flex;
+		gap: 24px;
+		align-items: baseline;
+		padding: 20px 0;
+		border-bottom: 1px solid var(--line-soft);
+		color: inherit;
+		transition: background 0.3s var(--ease-soft), padding 0.3s var(--ease-soft);
+	}
+	.tag-post-item:hover {
+		background: var(--paper-deep);
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+	.tag-post-no {
+		font-family: var(--font-serif-jp);
+		font-weight: 200;
+		font-size: 32px;
+		color: var(--ink-faint);
+		line-height: 1;
+	}
+	.tag-post-title {
+		font-family: var(--font-serif);
+		font-size: 18px;
+		color: var(--ink);
+	}
+	.tag-post-item:hover .tag-post-title { color: var(--pink); }
+	.tag-post-meta {
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+		margin-top: 4px;
+	}
+	.tag-filtered-empty {
+		color: var(--ink-faint);
+		font-size: 14px;
+		padding: 20px 0;
+		margin: 0;
+	}
+
+	@media (max-width: 900px) {
+		.featured-post { grid-template-columns: 1fr; gap: 24px; margin: 60px 0 80px; }
+	}
+	@media (max-width: 700px) {
+		.page-inner { padding: 80px 24px 100px; }
+		.post-grid { grid-template-columns: 1fr; }
+	}
+</style>
