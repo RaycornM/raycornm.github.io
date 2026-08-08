@@ -20,6 +20,9 @@ export default defineConfig({
 				format: 'webp',
 			},
 		},
+		// 注意：不开 remotePatterns。正文远程图在构建期抓取不可控
+		// （xu5.net 拒连、byteimg 签名 URL 会过期，任一失败都会中断构建）。
+		// 远程图的防盗链问题由 CoverImg 的 referrerpolicy="no-referrer" 解决。
 	},
 	// 构建优化
 	build: {
