@@ -2,6 +2,7 @@
 title: '配置与开始WordPress'
 description: 'wordpress部署配置'
 pubDate: 'Mar 07 2025'
+tags: [WordPress, 建站, 教程]
 heroImage: 'https://gh-proxy.com/https://github.com/RaycornM/person-picture-bed/blob/main/img/image-1024x493.png'
 ---
 

@@ -2,6 +2,7 @@
 title: 'SolidWorks 快速开始'
 description: 'SolidWorks 功能快速上手'
 pubDate: 'Feb 25 2026'
+tags: [solidworks, 教程]
 heroImage: 'https://loonylabs.files.wordpress.com/2020/06/solidworks-diamention.jpg?w=590'
 ---
 

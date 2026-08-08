@@ -2,6 +2,7 @@
 title: 'AutoCAD疑难杂症与设置'
 description: '记录使用CAD遇到的问题和一些基础设置'
 pubDate: 'Nov 17 2025'
+tags: [AutoCAD, 教程]
 heroImage: 'https://damassets.autodesk.net/content/dam/autodesk/www/products/autocad/fy26/features/images/key-features-of-autocad-2026-thumb-1920x1080.jpg'
 ---
 

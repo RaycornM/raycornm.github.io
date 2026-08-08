@@ -2,6 +2,7 @@
 title: 'IPTV播放源制作格式'
 description: 'IPTV直播源有两种播放文件格式——m3u & txt，分别可以在pc、手机和智能电视的播放软件上本地或在线加载播放'
 pubDate: 'Mar 24 2025'
+tags: [iptv, NAS, 教程]
 heroImage: 'https://gh-proxy.com/https://github.com/RaycornM/person-picture-bed/blob/main/img/image-17-1024x550.png'
 ---
 

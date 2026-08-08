@@ -2,6 +2,7 @@
 title: 'Memos笔记工具'
 description: 'Memos是一个开源、自托管的笔记记录解决方案，专为无缝部署和多平台访问而设计。'
 pubDate: 'Jun 01 2025'
+tags: [笔记, 自托管, 工具, NAS]
 heroImage: 'https://gh-proxy.com/https://github.com/RaycornM/person-picture-bed/blob/main/img/20251014134406912.png'
 ---
 
