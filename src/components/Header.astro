@@ -1,11 +1,13 @@
 ---
 import { SITE_TITLE } from '../consts';
 import HeaderLink from './HeaderLink.astro';
+import ThemeSwitcher from './ThemeSwitcher.astro';
+import SiteSearch from './SiteSearch.astro';
 ---
 
 <header>
 	<nav>
-		<h2><a href="/">{SITE_TITLE}</a></h2>
+		<h2 class="site-logo"><a href="/">{SITE_TITLE}</a></h2>
 		<!-- Mobile menu toggle -->
 		<button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
 			<span class="hamburger" aria-hidden="true"></span>
@@ -16,115 +18,184 @@ import HeaderLink from './HeaderLink.astro';
 			<HeaderLink href="/photo">Album</HeaderLink>
 			<HeaderLink href="/about">About</HeaderLink>
 		</div>
-		<div class="social-links">
-			<a href="https://space.bilibili.com/4572890?spm_id_from=333.1007.0.0" target="_blank" rel="noopener noreferrer">
-    			<span class="sr-only">Follow me on Bilibili</span>
-    			<img 
-        			src="https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/light/bilibili.png" 
-        			width="32" 
-        			height="32" 
-        			aria-hidden="true" 
-        			alt="Bilibili icon"
-    			/>
-			</a>
-			<a href="https://www.instagram.com/denkyraymond/" target="_blank">
-    		<span class="sr-only">Follow me on Instagram</span>
-    		<img 
-        		src="https://www.svgrepo.com/show/83715/instagram-logo.svg" 
-        		width="32" 
-        		height="32" 
-        		aria-hidden="true" 
-        		alt="Instagram icon"
-    		/>
-		</a>
-		<a href="https://github.com/RaycornM" target="_blank">
-			<span class="sr-only">Go to my GitHub repo</span>
-			<svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32" astro-icon="social/github"
-				><path
-					fill="currentColor"
-					d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-				></path></svg
-			>
-		</a>
+		<div class="header-right">
+			<button id="site-search-trigger" class="search-trigger" aria-label="搜索" title="搜索 ( / )">
+				<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+					<circle cx="11" cy="11" r="7"></circle>
+					<line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+				</svg>
+				<span class="search-trigger-key">/</span>
+			</button>
+			<ThemeSwitcher />
+			<div class="social-links">
+				<a href="https://space.bilibili.com/4572890?spm_id_from=333.1007.0.0" target="_blank" rel="noopener noreferrer">
+					<span class="sr-only">Follow me on Bilibili</span>
+					<img
+						src="https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/light/bilibili.png"
+						width="32"
+						height="32"
+						aria-hidden="true"
+						alt="Bilibili icon"
+					/>
+				</a>
+				<a href="https://www.instagram.com/denkyraymond/" target="_blank">
+					<span class="sr-only">Follow me on Instagram</span>
+					<img
+						src="https://www.svgrepo.com/show/83715/instagram-logo.svg"
+						width="32"
+						height="32"
+						aria-hidden="true"
+						alt="Instagram icon"
+					/>
+				</a>
+				<a href="https://github.com/RaycornM" target="_blank">
+					<span class="sr-only">Go to my GitHub repo</span>
+					<svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32" astro-icon="social/github"
+						><path
+							fill="currentColor"
+							d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+						></path></svg
+					>
+				</a>
+			</div>
 		</div>
 	</nav>
 </header>
+<SiteSearch />
 <style>
 	header {
 		margin: 0;
-		padding: 0 1em;
-		background: var(--header-bg, rgba(255,255,255,0.95));
-		color: var(--header-text, var(--black));
-		box-shadow: var(--header-shadow, 0 2px 8px rgba(var(--black), 5%));
-		position: sticky; /* keep nav visible */
+		padding: 0 32px;
+		background: var(--header-bg, rgba(250, 250, 247, 0.88));
+		color: var(--header-text, var(--ink));
+		border-bottom: 1px solid var(--line-soft);
+		box-shadow: none;
+		position: sticky;
 		top: 0;
 		left: 0;
 		right: 0;
-		z-index: 60; /* sit above page content */
-		-webkit-backdrop-filter: var(--header-backdrop, none);
-		backdrop-filter: var(--header-backdrop, none);
-		transition: background 0.18s ease, color 0.12s ease, box-shadow 0.18s ease;
+		z-index: 200;
+		-webkit-backdrop-filter: var(--header-backdrop, blur(14px));
+		backdrop-filter: var(--header-backdrop, blur(14px));
+		transition: background 0.3s var(--ease-soft), color 0.3s var(--ease-soft), border-color 0.3s var(--ease-soft);
 	}
 
-	h2 {
- 		margin: 0;
- 		font-size: 1em;
- 	}
+	.site-logo {
+		margin: 0;
+		font-size: 1em;
+	}
 
-	h2 a,
-	h2 a.active {
+	.site-logo a {
+		font-family: var(--font-mono);
+		font-weight: 500;
+		font-size: 15px;
+		letter-spacing: 0.08em;
 		text-decoration: none;
-		color: var(--header-text, var(--black)); /* ensure site title link follows header text color */
+		color: var(--header-text, var(--ink)) !important;
 	}
-
-	/* Stronger rule for the site title to override other global styles */
-	header h2 a {
-		color: var(--header-text, var(--black)) !important;
+	.site-logo a::before {
+		content: "● ";
+		color: var(--pink);
 	}
 
 	nav {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		gap: 24px;
 	}
 
-	nav a {
-		padding: 1em 0.5em;
+	.internal-links {
+		display: flex;
+		align-items: center;
+		gap: 32px;
+		margin: 0 auto;
+		font-family: var(--font-deco);
+		font-style: italic;
+		font-size: 19px;
+	}
+
+	.internal-links :global(a) {
+		padding: 14px 0;
 		color: inherit;
-		border-bottom: 4px solid transparent;
+		border-bottom: 2px solid transparent;
 		text-decoration: none;
+		transition: border-color 0.4s var(--ease-soft), color 0.3s var(--ease-soft);
 	}
 
-	nav a.active {
-		text-decoration: none;
-		border-bottom-color: var(--accent);
+	.internal-links :global(a:hover) {
+		color: var(--pink);
+		border-bottom-color: var(--ink);
+	}
+
+	.internal-links :global(a.active) {
+		border-bottom-color: var(--pink);
+	}
+
+	.header-right {
+		display: flex;
+		align-items: center;
+		gap: 18px;
+	}
+
+	.search-trigger {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		border: 1px solid var(--line-soft);
+		background: transparent;
+		color: var(--ink-faint);
+		padding: 5px 10px;
+		font-family: var(--font-mono);
+		transition: color 0.3s var(--ease-soft), border-color 0.3s var(--ease-soft);
+	}
+	.search-trigger:hover {
+		color: var(--pink);
+		border-color: var(--pink);
+	}
+	.search-trigger-key {
+		font-size: 10px;
+		letter-spacing: 0.1em;
 	}
 
 	.social-links,
 	.social-links a {
 		display: flex;
+		align-items: center;
+	}
+	.social-links {
+		gap: 14px;
 	}
 
-	/* allow controlling raster social icons via CSS var */
-	.social-links img {
-		width: 32px;
-		height: 32px;
+	.social-links a {
+		color: var(--header-text, var(--ink));
+		transition: color 0.3s var(--ease-soft), transform 0.3s var(--ease-soft);
+	}
+	.social-links a:hover {
+		color: var(--pink);
+		transform: translateY(-2px);
+	}
+
+	.social-links img,
+	.social-links svg {
+		width: 22px;
+		height: 22px;
 		object-fit: contain;
 		filter: var(--social-icon-filter, none);
 		transition: filter 0.12s ease, opacity 0.12s ease;
 	}
 
-/* Mobile nav toggle */
-.nav-toggle {
-	display: none;
-	background: transparent;
-	border: none;
-	width: 44px;
-	height: 44px;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-}
+	/* Mobile nav toggle */
+	.nav-toggle {
+		display: none;
+		background: transparent;
+		border: none;
+		width: 44px;
+		height: 44px;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+	}
 	.nav-toggle .hamburger {
 		width: 22px;
 		height: 2px;
@@ -144,29 +215,36 @@ import HeaderLink from './HeaderLink.astro';
 	.nav-toggle .hamburger::before { top: -7px; }
 	.nav-toggle .hamburger::after { top: 7px; }
 
-@media (max-width: 720px) {
-	.nav-toggle { display: inline-flex; }
-	.internal-links { display: none; }
-	header nav.menu-open .internal-links {
-		display: flex;
-		position: absolute;
-		top: 100%;
-		left: 0;
-		right: 0;
-		background: var(--header-bg, rgba(255,255,255,0.98));
-		flex-direction: column;
-		gap: 0;
-		padding: 0.5rem 1rem 1rem 1rem;
-		box-shadow: 0 6px 24px rgba(0,0,0,0.08);
-		z-index: 70;
-	}
-	header nav.menu-open .internal-links a { padding: 0.75rem 0; }
-	.social-links { display: none; }
-}
-	@media (max-width: 720px) {
+	@media (max-width: 900px) {
 		.social-links {
 			display: none;
 		}
+	}
+
+	@media (max-width: 720px) {
+		header {
+			padding: 0 16px;
+		}
+		.nav-toggle { display: inline-flex; }
+		.internal-links { display: none; }
+		header nav.menu-open .internal-links {
+			display: flex;
+			position: absolute;
+			top: 100%;
+			left: 0;
+			right: 0;
+			background: var(--header-bg, rgba(250, 250, 247, 0.98));
+			-webkit-backdrop-filter: blur(14px);
+			backdrop-filter: blur(14px);
+			border-bottom: 1px solid var(--line-soft);
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0;
+			padding: 0.5rem 1rem 1rem 1rem;
+			z-index: 210;
+		}
+		header nav.menu-open .internal-links :global(a) { padding: 0.75rem 0; }
+		.search-trigger-key { display: none; }
 	}
 </style>
 <script is:inline>
@@ -206,7 +284,6 @@ import HeaderLink from './HeaderLink.astro';
 		function parseColorString(str) {
 			if (!str) return null;
 			str = str.trim();
-			// hex
 			if (str[0] === '#') {
 				const hex = str.slice(1);
 				if (hex.length === 3) {
@@ -222,7 +299,6 @@ import HeaderLink from './HeaderLink.astro';
 					return { r, g, b, a: 1 };
 				}
 			}
-			// rgb/rgba
 			const m = str.match(/rgba?\(([^)]+)\)/);
 			if (m) {
 				const parts = m[1].split(',').map(p => p.trim());
@@ -233,12 +309,11 @@ import HeaderLink from './HeaderLink.astro';
 
 		function luminance({ r, g, b }) {
 			const srgb = [r, g, b].map(v => v / 255).map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
-			return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+			return 0.2126 * srgb + 0.7152 * srgb + 0.0722 * srgb;
 		}
 
 		function updateHamburgerColor() {
 			const cs = getComputedStyle(header);
-			// prefer explicit header text variable
 			let headerTextVar = cs.getPropertyValue('--header-text').trim() || null;
 			let color = null;
 			if (headerTextVar) {
@@ -246,7 +321,6 @@ import HeaderLink from './HeaderLink.astro';
 				if (parsed) color = `rgb(${parsed.r}, ${parsed.g}, ${parsed.b})`;
 			}
 			if (!color) {
-				// fallback to computed color or background luminance
 				const compColor = cs.color || '';
 				const parsedColor = parseColorString(compColor);
 				if (parsedColor) {
@@ -268,6 +342,7 @@ import HeaderLink from './HeaderLink.astro';
 		updateHamburgerColor();
 		const obs = new MutationObserver(() => updateHamburgerColor());
 		obs.observe(document.documentElement || document.body, { attributes: true, attributeFilter: ['class', 'style'] });
+		obs.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] });
 		window.addEventListener('resize', updateHamburgerColor);
 
 	} catch (err) {

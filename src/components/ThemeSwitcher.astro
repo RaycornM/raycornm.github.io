@@ -1,0 +1,106 @@
+---
+// ThemeSwitcher.astro - 明暗切换（light / dark / auto）
+// 逻辑移植自 demo/features-demo.html：data-theme 方案 + photo 页反转 + 跟随系统
+// 注意：BaseHead.astro 内有一段同步的预渲染脚本防止主题闪烁，
+//       修改 STORAGE_KEY 或反转规则时两处都要改。
+---
+
+<div class="theme-switcher" role="group" aria-label="主题切换">
+	<button type="button" class="theme-btn" data-theme-value="light" aria-label="亮色主题">Light</button>
+	<button type="button" class="theme-btn" data-theme-value="dark" aria-label="暗色主题">Dark</button>
+	<button type="button" class="theme-btn" data-theme-value="auto" aria-label="跟随系统">Auto</button>
+</div>
+
+<style>
+	.theme-switcher {
+		display: inline-flex;
+		align-items: center;
+		border: 1px solid var(--hairline);
+		background: var(--paper);
+	}
+	.theme-btn {
+		appearance: none;
+		border: none;
+		background: transparent;
+		padding: 5px 10px;
+		font-family: var(--font-mono);
+		font-size: 10px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+		transition: color 0.3s var(--ease-soft), background 0.3s var(--ease-soft);
+	}
+	.theme-btn + .theme-btn {
+		border-left: 1px solid var(--line-soft);
+	}
+	.theme-btn:hover {
+		color: var(--ink);
+	}
+	.theme-btn.active {
+		background: var(--ink);
+		color: var(--paper);
+	}
+</style>
+
+<script is:inline>
+	(function () {
+		var STORAGE_KEY = "rimuchahui-theme";
+		var switchers = document.querySelectorAll(".theme-switcher");
+		if (!switchers.length) return;
+
+		function applyTheme(value) {
+			var finalValue = value;
+			if (value === "auto") {
+				finalValue = window.matchMedia("(prefers-color-scheme: dark)").matches
+					? "dark"
+					: "light";
+			}
+			// 注意：photo 页的明暗反转由 photo-theme.css 的
+			// html[data-theme="dark"] body.photo-page 规则负责，JS 不再反转
+			if (finalValue === "dark") {
+				document.documentElement.setAttribute("data-theme", "dark");
+			} else {
+				document.documentElement.removeAttribute("data-theme");
+			}
+		}
+
+		function setActiveButtons(value) {
+			switchers.forEach(function (sw) {
+				sw.querySelectorAll(".theme-btn").forEach(function (b) {
+					b.classList.toggle("active", b.getAttribute("data-theme-value") === value);
+				});
+			});
+		}
+
+		var saved = "light";
+		try {
+			saved = localStorage.getItem(STORAGE_KEY) || "light";
+		} catch (e) { /* localStorage 不可用时用默认 */ }
+		applyTheme(saved);
+		setActiveButtons(saved);
+
+		switchers.forEach(function (sw) {
+			sw.querySelectorAll(".theme-btn").forEach(function (btn) {
+				btn.addEventListener("click", function () {
+					var value = btn.getAttribute("data-theme-value") || "light";
+					try {
+						localStorage.setItem(STORAGE_KEY, value);
+					} catch (e) { /* noop */ }
+					applyTheme(value);
+					setActiveButtons(value);
+				});
+			});
+		});
+
+		// 跟随系统：仅在 auto 模式下响应系统变化
+		window
+			.matchMedia("(prefers-color-scheme: dark)")
+			.addEventListener("change", function () {
+				var current = "light";
+				try {
+					current = localStorage.getItem(STORAGE_KEY) || "light";
+				} catch (e) { /* noop */ }
+				if (current === "auto") applyTheme("auto");
+			});
+	})();
+</script>

@@ -1,0 +1,79 @@
+---
+// Spotlight.astro - 鼠标跟随光斑（demo: motion-demo-final / interior-demo）
+// 与 CursorShadow 自定义光标共存：光标 z-index 99999 最高，光斑 9990
+---
+
+<div class="spotlight" id="spotlight" aria-hidden="true"></div>
+
+<style is:global>
+	.spotlight {
+		position: fixed;
+		width: 600px;
+		height: 600px;
+		border-radius: 50%;
+		pointer-events: none;
+		background: radial-gradient(circle, rgba(255, 91, 155, 0.05) 0%, transparent 60%);
+		transform: translate(-50%, -50%);
+		left: 0;
+		top: 0;
+		z-index: 9990;
+		mix-blend-mode: multiply;
+		will-change: transform;
+	}
+	html[data-theme="dark"] .spotlight {
+		mix-blend-mode: screen;
+		background: radial-gradient(circle, rgba(255, 91, 155, 0.07) 0%, transparent 60%);
+	}
+	body.photo-page .spotlight {
+		mix-blend-mode: screen;
+	}
+	html[data-theme="dark"] body.photo-page .spotlight {
+		mix-blend-mode: multiply;
+	}
+	@media (pointer: coarse) {
+		.spotlight {
+			display: none;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.spotlight {
+			display: none;
+		}
+	}
+</style>
+
+<script is:inline>
+	(function () {
+		var spot = document.getElementById("spotlight");
+		if (!spot) return;
+		if (window.matchMedia("(pointer: coarse)").matches) return;
+		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+		var mx = -9999, my = -9999, cx = -9999, cy = -9999;
+		var raf = null;
+
+		document.addEventListener("mousemove", function (e) {
+			mx = e.clientX;
+			my = e.clientY;
+			if (cx === -9999) { cx = mx; cy = my; }
+			if (!raf) raf = requestAnimationFrame(loop);
+		}, { passive: true });
+
+		function loop() {
+			cx += (mx - cx) * 0.12;
+			cy += (my - cy) * 0.12;
+			spot.style.transform =
+				"translate(" + cx + "px, " + cy + "px) translate(-50%, -50%)";
+			raf = requestAnimationFrame(loop);
+		}
+
+		document.addEventListener("visibilitychange", function () {
+			if (document.hidden && raf) {
+				cancelAnimationFrame(raf);
+				raf = null;
+			} else if (!document.hidden && !raf) {
+				raf = requestAnimationFrame(loop);
+			}
+		});
+	})();
+</script>

@@ -5,12 +5,9 @@ const today = new Date();
 <footer>
     <canvas class="footer-canvas" aria-hidden="true"></canvas>
     <div class="footer-content">
-    <p class="welcome">
-                🍵欢迎来到日暮茶会...
-                <br />
-                要先来一杯红茶吗？
-            </p>
-    <p class="copyright">&copy; {today.getFullYear()} RaycornM. All rights reserved.</p>
+    <p class="footer-jp">🍵 欢迎来到日暮茶会</p>
+    <p class="footer-en">A cup of tea before we part.</p>
+    <p class="footer-meta">&copy; {today.getFullYear()} RaycornM · All rights reserved · Vol. 26</p>
 	<div class="social-links">
     <!-- Bilibili -->
     <a href="https://space.bilibili.com/4572890?spm_id_from=333.1007.0.0" target="_blank" rel="noopener noreferrer" class="bilibili-link">
@@ -18,11 +15,11 @@ const today = new Date();
         <svg class="bilibili-svg" viewBox="0 0 24 24" aria-hidden="true" width="32" height="32" astro-icon="social/bilibili">
             <path fill="currentColor" d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5zm2 0v12h14V5H5zm2 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm4 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
         </svg>
-        <img class="bilibili-img" 
-            src="https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/light/bilibili.png" 
-            width="32" 
+        <img class="bilibili-img"
+            src="https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/light/bilibili.png"
+            width="32"
             height="32"
-            aria-hidden="true" 
+            aria-hidden="true"
             alt="Bilibili icon"
         />
     </a>
@@ -32,15 +29,15 @@ const today = new Date();
         <svg class="instagram-svg" viewBox="0 0 24 24" aria-hidden="true" width="32" height="32" astro-icon="social/instagram">
             <path fill="currentColor" d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4c0 3.2-2.6 5.8-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8C2 4.6 4.6 2 7.8 2m-.6 2c-1.8 0-3.2 1.4-3.2 3.2v8.4c0 1.8 1.4 3.2 3.2 3.2h8.4c1.8 0 3.2-1.4 3.2-3.2V7.2c0-1.8-1.4-3.2-3.2-3.2H7.2m9.1 1.5c.6 0 1.1.5 1.1 1.1s-.5 1.1-1.1 1.1-1.1-.5-1.1-1.1.5-1.1 1.1-1.1M12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10m0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
         </svg>
-        <img class="instagram-img" 
-            src="https://www.svgrepo.com/show/83715/instagram-logo.svg" 
-            width="32" 
+        <img class="instagram-img"
+            src="https://www.svgrepo.com/show/83715/instagram-logo.svg"
+            width="32"
             height="32"
-            aria-hidden="true" 
+            aria-hidden="true"
             alt="Instagram icon"
         />
     </a>
-    <!-- GitHub（保持原样，颜色基准：#60739F） -->
+    <!-- GitHub -->
     <a href="https://github.com/RaycornM" target="_blank">
         <span class="sr-only">Go to my GitHub repo</span>
         <svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32" astro-icon="social/github">
@@ -53,11 +50,13 @@ const today = new Date();
 <style>
     footer {
         position: relative;
-        padding: 2em 1em 6em 1em;
-        color: #60739F;
+        padding: 80px 32px 60px;
         text-align: center;
         overflow: hidden;
-        background: linear-gradient(var(--gray-gradient)) no-repeat;
+        border-top: 1px solid var(--line-soft);
+        background: var(--paper);
+        color: var(--ink);
+        transition: background 0.4s var(--ease-soft), color 0.4s var(--ease-soft);
     }
     .footer-canvas {
         position: absolute;
@@ -71,30 +70,55 @@ const today = new Date();
         position: relative;
         z-index: 1;
     }
+    .footer-jp {
+        font-family: var(--font-serif-jp);
+        font-weight: 200;
+        font-size: 32px;
+        letter-spacing: 0.04em;
+        margin: 0 0 16px;
+        color: var(--ink);
+    }
+    .footer-en {
+        font-family: var(--font-deco);
+        font-style: italic;
+        font-size: 16px;
+        color: var(--ink-soft);
+        margin: 0 0 40px;
+    }
+    .footer-meta {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        margin: 0 0 24px;
+    }
     .social-links {
         display: flex;
         justify-content: center;
-        gap: 1em;
+        gap: 18px;
         margin-top: 1em;
-    }
-    .welcome {
-        text-align: center;
-        color: #60739F;
-    }
-    .copyright {
-        text-align: center;
-        color: #60739F;
-        margin-top: 0.5em;
     }
     .social-links a {
         text-decoration: none;
-        color: #60739F;
+        color: var(--ink-faint);
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        transition: color 0.3s var(--ease-soft), transform 0.3s var(--ease-soft);
     }
     .social-links a:hover {
-        color: #222939;
+        color: var(--pink);
+        transform: translateY(-2px);
+    }
+    .social-links svg,
+    .social-links img {
+        width: 22px;
+        height: 22px;
+    }
+    .social-links img {
+        object-fit: contain;
+        filter: var(--social-icon-filter, none);
     }
     .bilibili-svg,
     .instagram-svg {
@@ -125,7 +149,6 @@ const today = new Date();
     function resize() {
         const parent = canvas.parentElement;
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        // 使用 clientWidth/clientHeight（布局尺寸），而非 getBoundingClientRect（受祖先 transform 影响）
         w = parent.clientWidth;
         h = parent.clientHeight;
         if (w === 0 || h === 0) return;
@@ -134,21 +157,17 @@ const today = new Date();
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    // ── vaporwave palette: 废墟美学 × 冷淡文艺 ──
-    const GRID_C    = 'rgba(124,124,125,0.18)';   // #7c7c7d ≈ 框架色
-    const GLOW_TEAL = 'rgba(78,205,196,0.06)';   // 青绿底光
-    const GLOW_PINK = 'rgba(217,84,141,0.04)';   // 粉紫光
-    const SUN_LINE  = 'rgba(78,205,196,0.12)';   // 水平扫线
-    const DUST      = 'rgba(124,124,125,0.25)';  // 噪点粒子
+    // ── 纸墨色调：配合新设计 token（墨色网格 + 梅粉微光） ──
+    const GRID_C    = 'rgba(138,135,128,0.14)';  // --ink-faint
+    const GLOW_PINK = 'rgba(255,91,155,0.05)';   // --pink
+    const DUST      = 'rgba(138,135,128,0.22)';
 
-    const GRID_SPACING = 40;
-    const HORIZON_Y = 0.48;  // 地平线在 48%
+    const GRID_SPACING = 72;
+    const HORIZON_Y = 0.48;
 
     function drawGradient() {
-        // 从底部向上：粉紫光晕 → 青绿辉光 → 渐隐
         const grad = ctx.createLinearGradient(0, h, 0, h * 0.2);
-        grad.addColorStop(0, 'rgba(217,84,141,0.08)');
-        grad.addColorStop(0.5, 'rgba(78,205,196,0.04)');
+        grad.addColorStop(0, 'rgba(255,91,155,0.06)');
         grad.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, w, h);
@@ -161,24 +180,21 @@ const today = new Date();
         ctx.lineWidth = 0.8;
         ctx.beginPath();
 
-        // 垂直线：透视汇聚
         const vCount = Math.ceil(w / GRID_SPACING) + 2;
         const vanishX = w / 2;
         for (let i = -2; i < vCount + 2; i++) {
-            const x = i * GRID_SPACING + (tick * 0.08) % GRID_SPACING;
+            const x = i * GRID_SPACING + (tick * 0.05) % GRID_SPACING;
             const topW = (x - vanishX) * 0.02;
             ctx.moveTo(vanishX + topW, 0);
             ctx.lineTo(x, baseline);
-            // 延伸到下方（固定间距）
             ctx.moveTo(x, baseline);
             ctx.lineTo(x, h);
         }
 
-        // 水平线：越靠近地平线越密
         const hSteps = 28;
         for (let i = 0; i <= hSteps; i++) {
             const t = i / hSteps;
-            const easeT = 1 - Math.pow(1 - t, 3); // ease-out, 上方密下方疏
+            const easeT = 1 - Math.pow(1 - t, 3);
             let y;
             if (t < 0.5) {
                 y = baseline - baseline * easeT * 1.4;
@@ -191,40 +207,22 @@ const today = new Date();
         ctx.stroke();
     }
 
-    function drawSunStripes() {
-        // 水平扫线：模拟 CRT/蒸汽波的荧光残像
-        const stripes = 8;
-        const spacing = 56;
-        const phase = (tick * 0.3) % spacing;
+    function drawGlowLines() {
+        const stripes = 6;
+        const spacing = 72;
+        const phase = (tick * 0.2) % spacing;
         for (let i = -1; i < stripes + 1; i++) {
             const y = i * spacing - phase;
             if (y < -spacing || y > h + spacing) continue;
-            const alpha = 0.04 + 0.02 * Math.sin(i * 1.7 + tick * 0.01);
-            ctx.fillStyle = `rgba(78,205,196,${alpha})`;
-            ctx.fillRect(0, y, w, 2);
-        }
-    }
-
-    function drawGlitchBlocks() {
-        // 偶尔闪现的矩形色块——Win95 对话框遗骸
-        if (tick % 120 < 8 && Math.random() < 0.7) {
-            for (let b = 0; b < 2; b++) {
-                const bx = Math.random() * w * 0.8 + w * 0.1;
-                const by = Math.random() * h * 0.7;
-                const bw = 80 + Math.random() * 60;
-                const bh = 1 + Math.random() * 4;
-                ctx.fillStyle = Math.random() < 0.5
-                    ? `rgba(78,205,196,${0.08 + Math.random() * 0.06})`
-                    : `rgba(217,84,141,${0.06 + Math.random() * 0.05})`;
-                ctx.fillRect(bx, by, bw, bh);
-            }
+            const alpha = 0.03 + 0.015 * Math.sin(i * 1.7 + tick * 0.01);
+            ctx.fillStyle = `rgba(255,91,155,${alpha})`;
+            ctx.fillRect(0, y, w, 1);
         }
     }
 
     function drawDust() {
-        // 浮游噪点，废墟感
         ctx.fillStyle = DUST;
-        const count = Math.floor(w * h / 5000);
+        const count = Math.floor(w * h / 7000);
         const seed = tick * 37;
         for (let i = 0; i < count; i++) {
             const x = ((seed * (i + 1) * 7919) % 10000) / 10000 * w;
@@ -238,21 +236,18 @@ const today = new Date();
         ctx.clearRect(0, 0, w, h);
         drawGradient();
         drawGrid();
-        drawSunStripes();
-        drawGlitchBlocks();
+        drawGlowLines();
         drawDust();
         tick++;
         rafId = requestAnimationFrame(draw);
     }
 
-    // init
     resize();
     draw();
 
     window.addEventListener('resize', () => { resize(); });
     document.addEventListener('astro:page-load', () => { resize(); });
 
-    // 切出页面暂停
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             cancelAnimationFrame(rafId);

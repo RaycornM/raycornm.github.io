@@ -1,74 +1,77 @@
-/* ===== Photo Dark Theme =====
- * Unified photo-theme styles consolidated from:
- * - photo/index.astro
- * - layouts/BlogPost.astro
- * - components/Footer.astro
+/* ===== Photo 主题（data-theme 方案）=====
+ * photo 路由页面给 <body> 加 .photo-page：
+ * - 默认（无 data-theme）→ 暗色影集观感
+ * - <html data-theme="dark"> → 反转为纸张亮色（明暗切换的 photo 反转规则）
+ * ThemeSwitcher.astro 负责最终 data-theme 的计算。
  */
 
-body.photo-theme {
-  background: #0f1724;
-  color: #ffffff;
-  --header-bg: rgba(15,23,36,0.6);
-  --header-text: #ffffff;
+body.photo-page {
+  --paper:        var(--photo-bg);
+  --paper-deep:   #16202f;
+  --paper-shadow: var(--photo-shadow);
+  --ink:          var(--photo-paper);
+  --ink-soft:     rgba(245, 243, 238, 0.85);
+  --ink-faint:    rgba(245, 243, 238, 0.55);
+  --hairline:     rgba(245, 243, 238, 0.75);
+  --line-soft:    var(--photo-line);
+
+  --gray-light: 22, 32, 47;
+  --gray-dark: 200, 198, 190;
+  --gray-gradient: rgba(22, 32, 47, 50%), #0f1724;
+  --box-shadow: 6px 6px 0 #1a2438;
+
+  --header-bg: rgba(15, 23, 36, 0.6);
+  --header-text: #f5f3ee;
   --social-icon-filter: invert(1) brightness(2) saturate(0);
-  --header-backdrop: blur(8px);
+
+  background: var(--photo-bg);
+  color: var(--photo-paper);
 }
 
-html,
-body.photo-theme {
-  background: #0f1724;
+/* photo 反转：用户显式选了 dark 时，photo 页回到纸张亮色 */
+html[data-theme="dark"] body.photo-page {
+  --paper:        #fafaf7;
+  --paper-deep:   #f0ede5;
+  --paper-shadow: #e2ddd1;
+  --ink:          #1a1a1a;
+  --ink-soft:     #4a4a48;
+  --ink-faint:    #8a8780;
+  --hairline:     rgba(26, 26, 26, 0.85);
+  --line-soft:    rgba(26, 26, 26, 0.12);
+
+  --gray-light: 240, 237, 229;
+  --gray-dark: 74, 74, 72;
+  --gray-gradient: rgba(240, 237, 229, 50%), #fafaf7;
+  --box-shadow: 4px 4px 0 #e2ddd1;
+
+  --header-bg: rgba(250, 250, 247, 0.88);
+  --header-text: #1a1a1a;
+  --social-icon-filter: none;
+
+  background: #fafaf7;
+  color: #1a1a1a;
 }
 
-/* ---- Header / Nav ---- */
-body.photo-theme header {
-  background: rgba(15,23,36,0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+/* photo 页 header 细节 */
+body.photo-page header {
   box-shadow: none;
 }
-body.photo-theme nav a {
-  color: rgba(255,255,255,0.95);
-}
-body.photo-theme nav a.active {
-  border-bottom-color: rgba(255,255,255,0.12);
+html[data-theme="dark"] body.photo-page header {
+  box-shadow: var(--header-shadow, 0 2px 8px rgba(0, 0, 0, 0.05));
 }
 
-/* ---- Text / Prose ---- */
-body.photo-theme .title {
-  color: #ffffff;
-}
-body.photo-theme .date {
-  color: rgba(255,255,255,0.85);
-}
-body.photo-theme .title h1 {
-  color: #ffffff;
-}
-body.photo-theme .prose,
-body.photo-theme .title,
-body.photo-theme .date,
-body.photo-theme .last-updated-on,
-body.photo-theme p,
-body.photo-theme .article-content {
-  color: #ffffff;
-}
-body.photo-theme .back-button {
-  color: #ffffff;
+/* footer 在 photo 页跟随纸面色 */
+body.photo-page footer {
+  background: var(--paper);
+  color: var(--ink);
 }
 
-/* ---- Footer ---- */
-body.photo-theme footer {
-  color: #ffffff;
-  background: #0f1724;
+/* 栅格/噪点在暗色影集页改为叠加发光 */
+body.photo-page::before {
+  mix-blend-mode: screen;
+  opacity: 0.05;
 }
-body.photo-theme .social-links a {
-  color: #ffffff;
-}
-body.photo-theme .bilibili-img,
-body.photo-theme .instagram-img {
-  display: none;
-}
-body.photo-theme .bilibili-svg,
-body.photo-theme .instagram-svg {
-  display: block;
-  color: currentColor;
+html[data-theme="dark"] body.photo-page::before {
+  mix-blend-mode: multiply;
+  opacity: 0.04;
 }
