@@ -32,10 +32,16 @@ const attrTags = [
 		<main class="page-reveal about-main">
 			<!-- 角色立绘（可交互） -->
 			<div class="about-character" id="about-character" role="button" tabindex="0" aria-label="角色立绘">
-				<img src="/assets/hero-character.png" alt="Character" class="about-character-img" />
+				<img src="/assets/me-character.png" alt="Character" class="about-character-img" />
 				<span class="about-character-ripple"></span>
-				<div class="about-character-info">
+				<div class="about-character-info" data-about-info>
 					<p>…ようこそ。新日暮里の<ruby>世界へ<rt>マスカレード</rt></ruby></p>
+				</div>
+				<div class="about-character-info" data-about-info>
+					<p>打mai吗？</p>
+				</div>
+				<div class="about-character-info" data-about-info>
+					<p>来一杯红茶吗？</p>
 				</div>
 			</div>
 
@@ -131,15 +137,35 @@ const attrTags = [
 				if (!char) return;
 				var active = false;
 				var timer = null;
+				var infos = Array.prototype.slice.call(char.querySelectorAll('[data-about-info]'));
+				function showRandomInfo() {
+					if (!infos.length) return;
+					var index = Math.floor(Math.random() * infos.length);
+					infos.forEach(function (node, i) {
+						var shouldShow = i === index;
+						node.classList.toggle('is-visible', shouldShow);
+						node.setAttribute('aria-hidden', shouldShow ? 'false' : 'true');
+					});
+				}
+				function hideAllInfo() {
+					infos.forEach(function (node) {
+						node.classList.remove('is-visible');
+						node.setAttribute('aria-hidden', 'true');
+					});
+				}
 				function toggle() {
 					active = !active;
 					char.classList.toggle('active', active);
 					if (active) {
+						showRandomInfo();
 						if (timer) clearTimeout(timer);
 						timer = setTimeout(function () {
 							char.classList.remove('active');
+							hideAllInfo();
 							active = false;
 						}, 2400);
+					} else {
+						hideAllInfo();
 					}
 				}
 				char.addEventListener('click', toggle);
@@ -330,6 +356,8 @@ const attrTags = [
 		height: auto;
 		filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.15));
 		background: transparent;
+		transform: translateX(-25%) scale(2.3);
+		transform-origin: center center;
 	}
 	.about-character-ripple {
 		position: absolute;
@@ -364,9 +392,13 @@ const attrTags = [
 		color: var(--ink);
 		white-space: nowrap;
 		opacity: 0;
+		display: none;
 		pointer-events: none;
 		transition: opacity 0.3s var(--ease-soft), transform 0.3s var(--ease-soft);
 		margin-right: 16px;
+	}
+	.about-character-info.is-visible {
+		display: block;
 	}
 	.about-character-info::after {
 		content: "";
@@ -380,7 +412,7 @@ const attrTags = [
 		border-right: 1px solid var(--hairline);
 		border-top: 1px solid var(--hairline);
 	}
-	.about-character.active .about-character-info {
+	.about-character.active .about-character-info.is-visible {
 		opacity: 1;
 		transform: translateY(-50%) translateX(-4px);
 	}
