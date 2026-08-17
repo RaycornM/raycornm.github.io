@@ -6,7 +6,7 @@ tags: [笔记, 自托管, 工具, 教程, 图床]
 heroImage: 'https://gh-proxy.org/https://raw.githubusercontent.com/RaycornM/person-picture-bed/main/img/19afbda4-1e1a-408f-b6c0-f25cae65340c.png'
 ---
 
-> [!TIP] 💡 来源
+> 💡 来源
 > [PicGO官方文档](https://docs.picgo.app/zh/gui/guide/) https://docs.picgo.app/zh/gui/guide/
 
 ### 应用概述
