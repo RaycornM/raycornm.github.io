@@ -28,13 +28,9 @@ function fmtDate(d: Date): string {
 const ORD = ["st", "nd", "rd", "th", "th"];
 
 const marqueeItems = [
-  { num: "01", text: "RIMUCHAHUI" },
-  { num: "02", text: "新日暮里" },
-  { num: "03", text: "Masquerade" },
-  { num: "04", text: "Since MMXXIV" },
-  { num: "05", text: "茶会" },
-  { num: "06", text: "Photography & Code" },
-  { num: "07", text: "Quiet Hours" },
+  { text: "日暮茶会" },
+  { text: "…ようこそ。新日暮里の世界へ" },
+
 ];
 ---
 
@@ -281,6 +277,19 @@ const marqueeItems = [
           >
             <p class="widget-note">loaded · 日暮茶会</p>
           </DraggableWidget>
+         /*<DraggableWidget
+            id="widget-4"
+            title="CORN.log"
+            index={8}
+            initialX="calc(50% - 150px)"
+            initialY="52%"
+            initialWidth={180}
+            initialHeight={62}
+            magnifierScale={1}
+            noResize={true}
+          >
+            <p class="widget-note">system · signal locked</p>
+          </DraggableWidget>*/
 
           <!-- 角色立绘（居中右 + 同心圆） -->
           <div class="character">
