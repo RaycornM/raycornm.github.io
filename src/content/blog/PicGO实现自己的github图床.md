@@ -1,7 +1,7 @@
 ---
 title: 'PicGO实现自己的github图床'
 description: '无论你是写博客、做笔记还是编写开发文档，PicGo 都能帮你一键上传图片并自动复制链接，让你专注于内容创作本身，而不是繁琐的上传步骤。'
-pubDate: 'Jun 01 2025'
+pubDate: 'Aug 17 2026'
 tags: [笔记, 自托管, 工具, NAS]
 heroImage: 'https://gh-proxy.org/https://raw.githubusercontent.com/RaycornM/person-picture-bed/main/img/19afbda4-1e1a-408f-b6c0-f25cae65340c.png'
 ---
