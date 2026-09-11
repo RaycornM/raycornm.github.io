@@ -89,7 +89,7 @@ heroImage: 'https://gh-proxy.org/https://raw.githubusercontent.com/RaycornM/pers
   选哪种看你网络环境；本教程示例统一用 socks5 的 PROXY。**纯搜国内源、不碰 Telegram 频道的话，代理可以先不填，照样能跑。**
 
   > [!TIP]
-  > 可以配合工具[Mihomo](\Mihomo网络配置指南.md)来使用
+  > 可以配合工具[Mihomo](https://raycornm.github.io/blog/mihomo%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97/)来使用
   >
 
 **步骤 4：点「完成 / 创建」，等镜像拉取**点创建后，绿联会去 ghcr.io 拉镜像。首次拉取在国内可能慢，等状态变成"运行中"就成功了。
