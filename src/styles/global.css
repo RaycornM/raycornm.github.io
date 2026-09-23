@@ -117,8 +117,9 @@ body {
 	line-height: 1.7;
 	-webkit-font-smoothing: antialiased;
 	transition: background 0.4s var(--ease-soft), color 0.4s var(--ease-soft);
-	/* PNG 优先，带阴影滤镜 */
-	cursor: url('/cursors/Pointer.png'), url('/cursors/Pointer.cur'), auto;
+	/* 自定义光标由 CursorShadow.astro 的 JS 光标接管；
+	   这里只用语义关键词兜底，避免 JS 加载前闪现 128px 巨型 PNG 光标 */
+	cursor: auto;
 }
 
 /* 纸张噪点纹理（demo 同款 feTurbulence grain） */
@@ -138,83 +139,83 @@ html[data-theme="dark"] body::before {
 	opacity: 0.05;
 }
 
-/* 链接和可点击元素 - 使用 Link */
+/* 链接和可点击元素 */
 a, button, [role="button"], input[type="submit"], input[type="button"],
 a:hover, button:hover {
-	cursor: url('/cursors/Link.png'), url('/cursors/Link.cur'), pointer;
+	cursor: pointer;
 }
 
-/* 文本输入框 - 使用 Text */
+/* 文本输入框 */
 input[type="text"], input[type="email"], input[type="password"],
 input[type="search"], input[type="url"], textarea,
 input:focus, textarea:focus {
-	cursor: url('/cursors/Text.png'), url('/cursors/Text.cur'), text;
+	cursor: text;
 }
 
-/* 忙/加载状态 - 使用 Busy */
+/* 忙/加载状态 */
 body.loading, .cursor-busy {
-	cursor: url('/cursors/Busy.png'), url('/cursors/Busy.ani'), url('/cursors/Busy.cur'), wait;
+	cursor: wait;
 }
 
-/* 拖拽状态 - 使用 Move */
+/* 拖拽状态 */
 [draggable="true"], .cursor-move {
-	cursor: url('/cursors/Move.png'), url('/cursors/Move.cur'), move;
+	cursor: move;
 }
 
 /* 缩放状态 */
 .cursor-zoom-in {
-	cursor: url('/cursors/Zoom-in.png'), url('/cursors/Zoom-in.cur'), zoom-in;
+	cursor: zoom-in;
 }
 .cursor-zoom-out {
-	cursor: url('/cursors/Zoom-out.png'), url('/cursors/Zoom-out.cur'), zoom-out;
+	cursor: zoom-out;
 }
 
 /* 调整大小 */
 .cursor-resize-h {
-	cursor: url('/cursors/Horz.png'), url('/cursors/Horz.cur'), ew-resize;
+	cursor: ew-resize;
 }
 .cursor-resize-v {
-	cursor: url('/cursors/Vert.png'), url('/cursors/Vert.cur'), ns-resize;
+	cursor: ns-resize;
 }
 .cursor-resize-d1 {
-	cursor: url('/cursors/Dgn1.png'), url('/cursors/Dgn1.cur'), nwse-resize;
+	cursor: nwse-resize;
 }
 .cursor-resize-d2 {
-	cursor: url('/cursors/Dgn2.png'), url('/cursors/Dgn2.cur'), nesw-resize;
+	cursor: nesw-resize;
 }
 
 /* 不可用状态 */
 .disabled, [disabled],
 input:disabled, button:disabled, textarea:disabled {
-	cursor: url('/cursors/Unavailable.png'), url('/cursors/Unavailable.cur'), not-allowed;
+	cursor: not-allowed;
 }
 
 /* 帮助状态 */
 .cursor-help {
-	cursor: url('/cursors/Help.png'), url('/cursors/Help.cur'), help;
+	cursor: help;
 }
 
 /* 手写字体/编辑 */
 .cursor-handwriting {
-	cursor: url('/cursors/Handwriting.png'), url('/cursors/Handwriting.cur'), text;
+	cursor: text;
 }
 
 /* 抓取/拖拽 */
 .cursor-grabbing, .cursor-grabbing * {
-	cursor: url('/cursors/Grabbing.png'), url('/cursors/Grabbing.cur'), grabbing;
+	cursor: grabbing;
 }
 .cursor-grab {
-	cursor: url('/cursors/Pan.png'), url('/cursors/Pan.cur'), grab;
+	cursor: grab;
 }
 
 /* 精确选择（十字准星） */
 .cursor-crosshair {
-	cursor: url('/cursors/Cross.png'), url('/cursors/Cross.cur'), crosshair;
+	cursor: crosshair;
 }
 
-/* 备选指针（Alternate） */
+/* 备选指针 */
 .cursor-alternate {
-	cursor: url('/cursors/Alternate.png'), url('/cursors/Alternate.cur'), default;
+	cursor: default;
 }
 
 /* 确保光标优先级足够高，覆盖其他样式 */
