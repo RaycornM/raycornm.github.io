@@ -1048,7 +1048,10 @@ const marqueeItems = [
     .hero :global(.draggable-widget) { display: none; }
     .hero-meta-tl, .hero-meta-tr, .hero-meta-bl { font-size: 10px; }
     .photo-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: auto; }
-    .photo-card.p1 { grid-column: span 2; }
+    /* 卡片内容全部 absolute 脱离文档流，必须用 aspect-ratio 自己撑高度，
+       否则 grid-template-rows: auto 下卡片会塌缩成一条线 */
+    .photo-card { aspect-ratio: 4 / 3; }
+    .photo-card.p1 { grid-column: span 2; grid-row: auto; aspect-ratio: 16 / 10; }
     .photo-card.p2, .photo-card.p3, .photo-card.p4, .photo-card.p5 { grid-column: span 1; }
     .blog-item { grid-template-columns: 64px 1fr; }
     .blog-item-meta { display: none; }
@@ -1059,5 +1062,10 @@ const marqueeItems = [
     .meta-strip { padding: 12px 16px; }
     .meta-strip .barcode { display: none; }
     .blog-item { gap: 20px; padding: 28px 0; }
+  }
+  @media (max-width: 480px) {
+    /* 超窄屏：相册卡片单列展示，比例统一 */
+    .photo-grid { grid-template-columns: 1fr; }
+    .photo-card.p1 { grid-column: span 1; aspect-ratio: 4 / 3; }
   }
 </style>
