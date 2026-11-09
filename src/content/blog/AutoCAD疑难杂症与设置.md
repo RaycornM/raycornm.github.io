@@ -1,14 +1,14 @@
 ---
 title: 'AutoCAD疑难杂症与设置'
 description: '记录使用CAD遇到的问题和一些基础设置'
-pubDate: 'Nov 17 2025'
+pubDate: 'Nov 09 2026'
 tags: [AutoCAD, 教程]
 heroImage: 'https://damassets.autodesk.net/content/dam/autodesk/www/products/autocad/fy26/features/images/key-features-of-autocad-2026-thumb-1920x1080.jpg'
 ---
 
 > 记录使用CAD遇到的问题和一些基础设置
 
-- 更新时间2025.11.17
+- 更新时间2026.11.09
 
 ## 一、CAD保存、另存为时，不出现对话框，出现路径
 
@@ -176,16 +176,29 @@ AutoCAD将自动保存的图形存放到AUTO.SV\$或AUTO?.SV\$文件中，找到
 
 ## 十五、捕捉设置
 
-1.菜单栏找到工具——绘图设置——捕捉和栅格
+    1.菜单栏找到工具——绘图设置——捕捉和栅格
 
-启用栅格和启用捕捉全部取消勾选
+        启用栅格和启用捕捉全部取消勾选
 
 ![](https://gh-proxy.org/https://github.com/RaycornM/person-picture-bed/blob/main/img/20251117184510336.png)
 
 ![](https://gh-proxy.org/https://github.com/RaycornM/person-picture-bed/blob/main/img/20251117184616332.png)
 
-2.CAD右下角找到模型旁边两个图标：
+    2.CAD右下角找到模型旁边两个图标：
 
 ![](https://gh-proxy.org/https://github.com/RaycornM/person-picture-bed/blob/main/img/20251117184713428.png)
 
-开启捕捉和栅格的状态是蓝色的，点击关闭，全部关闭会变成如上图所示。
+        开启捕捉和栅格的状态是蓝色的，点击关闭，全部关闭会变成如上图所示。
+
+## 十六、打开文件时不弹文件选择对话框
+    故障现象：点击「打开」后不弹出文件选择对话框，命令行提示“输入要打开的图形文件名 <...>:”。
+    1. 原因
+        系统变量 FILEDIA 被设置为 0，关闭了文件对话框，改为通过命令行输入文件名。
+    2. 解决步骤
+        1.1 命令行输入 FILEDIA，回车；
+        1.2 输入 1，回车，恢复文件对话框。
+        若仍未恢复，继续检查以下变量，均建议设为 1：
+        · CMDDIA：控制部分命令（如插入块、外部参照）是否弹出对话框；
+        · ATTDIA：控制属性编辑是否弹出对话框。
+    3. 故障复发处理
+        若设置后重启 AutoCAD 又变回 0，通常是启动时自动加载的脚本（如 acad.lsp）修改了该变量。可在命令行输入 (setq filedia 1) 强制恢复，并检查启动组中的 Lisp 文件，删除其中修改 FILEDIA 的代码。
